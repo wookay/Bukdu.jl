@@ -5,6 +5,11 @@ function handler(req::Request, res::Response)
     conn = Routing.request(req.resource) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
+    for (key,value) in conn.resp_header
+       if "content-type" == key
+           res.headers["Content-Type"] = value
+       end
+    end
     res.status = conn.status
     res.data = conn.resp_body
     res

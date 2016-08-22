@@ -3,7 +3,8 @@
 module Naming
 
 function resource_name(alias, suffix = "")::String
-    underscore(unsuffix(string(Base.datatype_name(alias)), suffix))
+    # Base.datatype_name
+    underscore(unsuffix(string(alias.name.name), suffix))
 end
 
 function unsuffix(value::String, suffix::String)::String
