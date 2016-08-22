@@ -6,6 +6,7 @@ type Scope
 end
 
 
+# from phoenix/lib/phoenix/router/scope.ex
 module RouterScope
 
 import Bukdu: ApplicationController
@@ -14,11 +15,9 @@ import Bukdu: Scope
 import Bukdu: Keyword, Naming
 
 global stack = Vector{Scope}()
-global pipes = Dict()
 
 function init()
     global stack = Vector{Scope}()
-    global pipes = Dict()
 end
 
 function push_scope!(options::Dict)

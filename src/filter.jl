@@ -1,5 +1,3 @@
-export before, after
-
 function before
 end
 

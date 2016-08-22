@@ -1,24 +1,31 @@
-using Base.Test
-using Bukdu
-
-type Layout
-end
-Bukdu.layout(::Layout, body, params) = """<html><body>$body<body></html>"""
-
-@test "<div>hello</div>" == render(View, "page.tpl"; contents="hello")
-@test "<html><body><div>hello</div><body></html>" == render(View{Layout}, "page.tpl"; contents="hello")
-
+importall Bukdu
 
 type PageController <: ApplicationController
 end
 
-show(::PageController) = render(View, "page.tpl"; contents="hello")
+type Layout
+end
+layout(::Layout, body, params) = """<html><body>$body<body></html>"""
+
+
+show(c::PageController) = render(View{Layout}, "page.tpl"; contents="hello")
 
 Router() do
     get("/:page", PageController, show)
 end
 
+
+using Base.Test
+@test "<div>hello</div>" == render(View, "page.tpl"; contents="hello")
+@test "<html><body><div>hello</div><body></html>" == render(View{Layout}, "page.tpl"; contents="hello")
+
 conn = (Router)(show, "/1")
 @test 200 == conn.status
-@test "<div>hello</div>" == conn.resp_body
+@test "<html><body><div>hello</div><body></html>" == conn.resp_body
 @test "1" == conn.params["page"]
+
+logs = []
+Bukdu.before(::View) = push!(logs, :b)
+Bukdu.after(::View) = push!(logs, :a)
+conn = (Router)(show, "/1")
+@test [:b, :a] == logs

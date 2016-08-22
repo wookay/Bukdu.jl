@@ -11,27 +11,8 @@ type Resource{AC<:ApplicationController}
     singleton::Bool
 end
 
-function index
-end
 
-function edit
-end
-
-function new
-end
-
-function show
-end
-
-function create
-end
-
-function update
-end
-
-function delete
-end
-
+# from phoenix/lib/phoenix/router/resource.ex
 module RouterResource
 
 import Bukdu: ApplicationController

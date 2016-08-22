@@ -8,10 +8,13 @@ type Route{AC<:ApplicationController}
 end
 
 
+# from phoenix/lib/phoenix/router/route.ex
 module RouterRoute
 
 import Bukdu: ApplicationController
 import Bukdu: Route
+
+routes = Vector{Route}()
 
 function build{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String,
              host::String, controller::Type{AC}, action::Function)

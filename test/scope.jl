@@ -1,15 +1,9 @@
-using Base.Test
-using Bukdu
-import JSON: json
+importall Bukdu
 
 type UserController <: ApplicationController
 end
 
-index(::UserController) = json("hello")
-
-
-type Router <: ApplicationRouter
-end
+index(::UserController) = render(JSON, "hello")
 
 Router() do
     scope("/api") do
@@ -17,5 +11,9 @@ Router() do
     end
 end
 
+
+using Base.Test
 conn = (Router)(index, "/api/users")
-@test conn.status == 200
+@test 200 == conn.status
+@test "application/json" == conn.resp_header["content-type"]
+@test """\"hello\"""" == conn.resp_body
