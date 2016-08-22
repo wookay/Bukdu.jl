@@ -2,7 +2,7 @@ abstract ApplicationView{T}
 
 type View{T} <: ApplicationView{T}
     path::String
-    params::Dict
+    options::Dict
     data::String
 end
 
@@ -14,7 +14,7 @@ include("renderers/json.jl")
 
 # layout
 """
-layout(::Layout, body, params)
+layout(::Layout, body, options)
 """
 function layout
 end

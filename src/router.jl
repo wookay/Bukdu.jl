@@ -50,9 +50,16 @@ import Bukdu: index, edit, new, show, create, update, delete
 import Bukdu: get, post, delete, patch, put
 import Bukdu: before, after
 import URIParser: URI
+import HttpCommon: parsequerystring
 
 const SLASH = '/'
 const COLON = ':'
+
+type Branch
+    query_params::Dict{String,String}
+end
+
+task_storage = Dict{Task,Branch}()
 
 # route
 function match{AC<:ApplicationController}(verb::Function, path::String, controller::Type{AC}, action::Function, options::Dict)
@@ -121,14 +128,19 @@ function request(compare::Function, path::String)::Conn
                 end)
                 C = route.controller
                 controller = C()
+                query_params = Dict{String,String}(parsequerystring(uri.query))
+                branch = Branch(query_params)
+                task = current_task()
+                task_storage[task] = branch
                 if method_exists(before, (C,))
                     before(controller)
                 end
                 result = route.action(controller)
-                if method_exists(before, (C,))
+                if method_exists(after, (C,))
                     after(controller)
                 end
-                return isa(result, Conn) ? result : Conn(200, result, params)
+                pop!(task_storage, task)
+                return isa(result, Conn) ? result : Conn(200, result, params, query_params)
             end
         end
     end

@@ -1,25 +1,25 @@
 import Mustache
 
-function template(path::String, params::Dict)
+function template(path::String, options::Dict)
     contents = chomp(readstring(path))
-    Mustache.render(contents, params)
+    Mustache.render(contents, options)
 end
 
 function render{AV<:ApplicationView}(V::Type{AV}, path::String; kw...)
     LayoutT = first(V.parameters)
-    params = Dict(kw)
+    options = Dict(kw)
     if isa(LayoutT, TypeVar)
         LayoutT = Void
         V = V{LayoutT}
     end
-    view = V(path, params, "")
+    view = V(path, options, "")
     T = typeof(view)
     if method_exists(before, (T,))
         before(view)
     end
-    body = template(path, params)
+    body = template(path, options)
     if method_exists(layout, (LayoutT,String,Dict))
-        data = layout(LayoutT(), body, params)
+        data = layout(LayoutT(), body, options)
     else
         data = body
     end

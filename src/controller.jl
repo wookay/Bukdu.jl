@@ -3,11 +3,24 @@ abstract ApplicationController
 # verbs: get, post, delete, patch, put
 const HTTP_VERBS = [:get, :post, :delete, :patch, :put]
 
-import Base: get, show, edit
+import Base: get, show, edit, getindex
 
 for verb in HTTP_VERBS
     @eval $verb{AC<:ApplicationController}(path::String, controller::Type{AC}, action::Function; kw...) =
         Routing.match($verb, path, controller, action, Dict(kw))
+end
+
+function getindex{AC<:ApplicationController}(C::AC, sym::Symbol)
+    if :query_params == sym
+        task = current_task()
+        if haskey(Routing.task_storage, task)
+            branch = Routing.task_storage[task]
+            return branch.query_params
+        else
+            throw(ErrorException("no $task"))
+        end
+    end
+    throw(KeyError(sym))
 end
 
 # actions: index, edit, new, show, create, update, delete

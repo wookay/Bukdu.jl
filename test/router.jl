@@ -3,8 +3,8 @@ importall Bukdu
 type PageController <: ApplicationController
 end
 
-show(::PageController) = "hello"
-index(::PageController) = "hi hello"
+index(::PageController) = "index hello"
+show(::PageController) = "show hello"
 
 Router() do
     get("/pages", PageController, index)
@@ -15,11 +15,11 @@ end
 using Base.Test
 conn = (Router)(index, "/pages")
 @test conn.status == 200
-@test conn.resp_body == "hi hello"
+@test conn.resp_body == "index hello"
 
 conn = (Router)(show, "/pages/1")
 @test conn.status == 200
-@test conn.resp_body == "hello"
+@test conn.resp_body == "show hello"
 @test conn.params["page"] == "1"
 
 conn = (Router)(show, "/user/1")
