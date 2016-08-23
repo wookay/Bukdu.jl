@@ -19,9 +19,18 @@ Base.Test.@testset "view.jl" begin
 end
 
 workspace()
-Base.Test.@testset "renderers/" begin
+Base.Test.@testset "renderers/json.jl" begin
     include("renderers/json.jl")
+end
+
+workspace()
+Base.Test.@testset "renderers/mustache.jl" begin
     include("renderers/mustache.jl")
+end
+
+workspace()
+Base.Test.@testset "renderers/markdown.jl" begin
+    include("renderers/markdown.jl")
 end
 
 workspace()

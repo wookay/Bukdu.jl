@@ -10,6 +10,11 @@ end
 # renderers/
 include("renderers/mustache.jl")
 include("renderers/json.jl")
+include("renderers/markdown.jl")
+
+function render(modul::Module, obj::Any)
+    render(Val{Base.module_name(modul)}, obj)
+end
 
 
 # layout

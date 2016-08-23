@@ -136,7 +136,12 @@ function request(compare::Function, path::String)::Conn
                 if method_exists(before, (C,))
                     before(controller)
                 end
-                result = route.action(controller)
+                result = nothing
+                try
+                    result = route.action(controller)
+                catch e
+                    result = Conn(400, "bad request $e", params, query_params)
+                end
                 if method_exists(after, (C,))
                     after(controller)
                 end
