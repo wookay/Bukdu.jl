@@ -44,11 +44,11 @@ function build{AC<:ApplicationController}(path::String, controller::Type{AC}, op
     Resource(path, param, controller, actions, route, member, collection, singleton)
 end
 
-function extract_actions(opts::Dict, singleton::Bool)::Vector{Function}
-    if haskey(opts, :only)
-        opts[:only]
+function extract_actions(options::Dict, singleton::Bool)::Vector{Function}
+    if haskey(options, :only)
+        setdiff(controller_actions, setdiff(controller_actions, options[:only]))
     else
-        except = Keyword.get(opts, :except, [])
+        except = Keyword.get(options, :except, [])
         setdiff(default_actions(singleton), except)
     end
 end

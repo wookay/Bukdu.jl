@@ -29,12 +29,12 @@ function scope(context::Function, path::String)
     Routing.do_scope(context, Dict(:path=>path))
 end
 
-function resource{AC<:ApplicationController}(path::String, controller::Type{AC})
-    Routing.add_resource(()->nothing, path, controller, Dict())
+function resource{AC<:ApplicationController}(path::String, controller::Type{AC}; kw...)
+    Routing.add_resource(()->nothing, path, controller, Dict(kw))
 end
 
-function resource{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC})
-    Routing.add_resource(context, path, controller, Dict())
+function resource{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC}; kw...)
+    Routing.add_resource(context, path, controller, Dict(kw))
 end
 
 

@@ -8,6 +8,7 @@ end
 
 index(::PageController) = "index page"
 show(c::PageController) = parse(Int, c[:params]["id"])
+delete(::PageController) = nothing
 
 index(::UserController) = "index user"
 show(c::UserController) = c[:params]
@@ -41,15 +42,30 @@ conn = (Router)(show, "/pages/1/users/2")
 @test conn.params["page_id"] == "1"
 @test conn.params["id"] == "2"
 
+conn = (Router)(delete, "/pages/1")
+@test conn.status == 200
+
 conn = (Router)(show, "/unknown/1")
 @test conn.status == 404
 
 reset(Router)
+
 conn = (Router)(index, "/pages")
 @test conn.status == 404
 
 Router() do
-    get("/pages", PageController, index)
+    resource("/pages", PageController, except=[delete], singleton=true)
+    resource("/users", UserController, only=[index], singleton=true)
 end
+
 conn = (Router)(index, "/pages")
 @test conn.status == 200
+
+conn = (Router)(delete, "/pages/1")
+@test conn.status == 404
+
+conn = (Router)(index, "/users")
+@test conn.status == 200
+
+conn = (Router)(delete, "/users/1")
+@test conn.status == 404
