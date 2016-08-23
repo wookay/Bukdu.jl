@@ -1,7 +1,6 @@
 type Scope
     path::String
     host::String
-    Scope() = new("", "")
     Scope(path::String, host::String) = new(path, host)
 end
 
@@ -21,7 +20,7 @@ function init()
 end
 
 function push_scope!(options::Dict)
-    path = Keyword.get(options, :path, "")
+    path = Keyword.get(options, :path, "")::String
     path = validate_path(path)
     host = Keyword.get(options, :host, "")
     scope = Scope(path, host)
@@ -55,10 +54,6 @@ end
 
 function join_path(stack::Vector{Scope}, path::String)
     string(join(extract(stack, :path)), path)
-end
-
-function join_alias(stack::Vector{Scope}, alias::String)
-    string(join(extract(stack, :alias)), alias)
 end
 
 function extract(stack::Vector{Scope}, attr::Symbol)

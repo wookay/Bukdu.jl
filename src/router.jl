@@ -81,28 +81,40 @@ end
 
 # resource
 function add_resource{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC}, options::Dict)
-    scopeopts = Dict(:path=>path)
-    RouterScope.push_scope!(scopeopts)
-
-    context()
     resource = RouterResource.build(path, controller, options)
+    Routing.do_scope(context, resource.member)
     add_route(resource)
-
-    RouterScope.pop_scope!()
 end
 
 function add_route(resource::Resource)
-    param = resource.param
-    for (action,verb,path) in [(index,  get,    ""),
-                               (show,   get,    "/:$param"),
-                               (new,    get,    "/new"),
-                               (edit,   get,    "/:$param/edit"),
-                               (create, post,   ""),
-                               (delete, delete, "/:$param"),
-                               (update, patch,  "/:$param"),
-                               (update, put,    "/:$param")]
-        if action in RouterResource.controller_actions
-            match(verb, path, resource.controller, action, Dict())
+    path = resource.path
+    options = resource.route
+    if resource.singleton
+        for (action,verb,routepath) in [(index,  get,    ""),
+                                        (show,   get,    ""),
+                                        (new,    get,    "/new"),
+                                        (edit,   get,    "/edit"),
+                                        (create, post,   ""),
+                                        (delete, delete, ""),
+                                        (update, patch,  ""),
+                                        (update, put,    "")]
+            if action in RouterResource.controller_actions
+                match(verb, string(path,routepath), resource.controller, action, options)
+            end
+        end
+    else
+        param = resource.param
+        for (action,verb,routepath) in [(index,  get,    ""),
+                                        (show,   get,    "/:$param"),
+                                        (new,    get,    "/new"),
+                                        (edit,   get,    "/:$param/edit"),
+                                        (create, post,   ""),
+                                        (delete, delete, "/:$param"),
+                                        (update, patch,  "/:$param"),
+                                        (update, put,    "/:$param")]
+            if action in RouterResource.controller_actions
+                match(verb, string(path,routepath), resource.controller, action, options)
+            end
         end
     end
 end

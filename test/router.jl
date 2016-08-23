@@ -3,24 +3,43 @@ importall Bukdu
 type PageController <: ApplicationController
 end
 
-index(::PageController) = "index hello"
-show(c::PageController) = parse(Int, c[:params]["page"])
+type UserController <: ApplicationController
+end
+
+index(::PageController) = "index page"
+show(c::PageController) = parse(Int, c[:params]["id"])
+
+index(::UserController) = "index user"
+show(c::UserController) = c[:params]
 
 Router() do
-    get("/pages", PageController, index)
-    get("/pages/:page", PageController, show)
+    resource("/pages", PageController) do
+        resource("/users", UserController)
+    end
 end
 
 
 using Base.Test
 conn = (Router)(index, "/pages")
 @test conn.status == 200
-@test conn.resp_body == "index hello"
+@test conn.resp_body == "index page"
 
 conn = (Router)(show, "/pages/1")
 @test conn.status == 200
 @test conn.resp_body == 1
-@test conn.params["page"] == "1"
+@test conn.params["id"] == "1"
+
+conn = (Router)(index, "/pages/1/users")
+@test conn.status == 200
+@test conn.resp_body == "index user"
+@test conn.params["page_id"] == "1"
+@test !haskey(conn.params, "id")
+
+conn = (Router)(show, "/pages/1/users/2")
+@test conn.status == 200
+@test conn.resp_body == Dict("page_id"=>"1","id"=>"2")
+@test conn.params["page_id"] == "1"
+@test conn.params["id"] == "2"
 
 conn = (Router)(show, "/unknown/1")
 @test conn.status == 404
