@@ -11,11 +11,11 @@ for verb in HTTP_VERBS
 end
 
 function getindex{AC<:ApplicationController}(C::AC, sym::Symbol)
-    if :query_params == sym
+    if sym in [:query_params, :params]
         task = current_task()
         if haskey(Routing.task_storage, task)
             branch = Routing.task_storage[task]
-            return branch.query_params
+            return getfield(branch, sym)
         else
             throw(ErrorException("no $task"))
         end

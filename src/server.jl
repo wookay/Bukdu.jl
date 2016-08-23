@@ -6,12 +6,10 @@ function handler(req::Request, res::Response)
         Base.function_name(route.verb) == Base.function_name(verb)
     end
     for (key,value) in conn.resp_header
-       if "content-type" == key
-           res.headers["Content-Type"] = value
-       end
+       res.headers[key] = value
     end
     res.status = conn.status
-    res.data = conn.resp_body
+    res.data = isa(conn.resp_body, String) ? conn.resp_body : string(conn.resp_body)
     res
 end
 

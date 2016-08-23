@@ -4,20 +4,29 @@ type WelcomeController <: ApplicationController
 end
 
 index(::WelcomeController) = "hello world"
+show(::WelcomeController) = pi
 
 Router() do
     get("/", WelcomeController, index)
+    get("/pi", WelcomeController, show)
 end
 
 
 using Base.Test
 import HttpCommon: Request, Response
 req = Request()
+
 req.method = "GET"
 req.resource = "/"
 res = Bukdu.handler(req, Response())
 @test 200 == res.status
 @test "hello world" == String(res.data)
+
+req.method = "GET"
+req.resource = "/pi"
+res = Bukdu.handler(req, Response())
+@test 200 == res.status
+@test "π = 3.1415926535897..." == String(res.data)
 
 req.method = "POST"
 req.resource = "/"

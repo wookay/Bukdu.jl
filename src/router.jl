@@ -57,6 +57,7 @@ const COLON = ':'
 
 type Branch
     query_params::Dict{String,String}
+    params::Dict{String,String}
 end
 
 task_storage = Dict{Task,Branch}()
@@ -129,7 +130,7 @@ function request(compare::Function, path::String)::Conn
                 C = route.controller
                 controller = C()
                 query_params = Dict{String,String}(parsequerystring(uri.query))
-                branch = Branch(query_params)
+                branch = Branch(query_params, params)
                 task = current_task()
                 task_storage[task] = branch
                 if method_exists(before, (C,))

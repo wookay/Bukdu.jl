@@ -24,5 +24,8 @@ Bukdu.after(::View) = push!(logs, :a)
 conn = (Router)(index, "/")
 @test [:b, :a] == logs
 
+conn = (Router)(index, "/")
+@test [:b, :a, :b, :a] == logs
+
 @test "<div>hello</div>" == render(View, "page.tpl"; contents="hello")
 @test "<html><body><div>hello</div><body></html>" == render(View{Layout}, "page.tpl"; contents="hello")

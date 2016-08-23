@@ -4,7 +4,7 @@ type PageController <: ApplicationController
 end
 
 index(::PageController) = "index hello"
-show(::PageController) = "show hello"
+show(c::PageController) = parse(Int, c[:params]["page"])
 
 Router() do
     get("/pages", PageController, index)
@@ -19,10 +19,10 @@ conn = (Router)(index, "/pages")
 
 conn = (Router)(show, "/pages/1")
 @test conn.status == 200
-@test conn.resp_body == "show hello"
+@test conn.resp_body == 1
 @test conn.params["page"] == "1"
 
-conn = (Router)(show, "/user/1")
+conn = (Router)(show, "/unknown/1")
 @test conn.status == 404
 
 reset(Router)
