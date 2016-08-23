@@ -1,8 +1,9 @@
 # Bukdu 🌌
 
-  [![Build Status](https://api.travis-ci.org/wookay/Bukdu.jl.svg?branch=master)](https://travis-ci.org/wookay/Bukdu.jl)
-  [![AppVeyor Status](https://ci.appveyor.com/api/projects/status/v1af95637qm7j582?svg=true)](https://ci.appveyor.com/project/wookay/bukdu-jl)
-  [![Coverage Status](https://coveralls.io/repos/github/wookay/Bukdu.jl/badge.svg?branch=master)](https://coveralls.io/github/wookay/Bukdu.jl?branch=master)
+  [![Travis](https://api.travis-ci.org/wookay/Bukdu.jl.svg?branch=master)](https://travis-ci.org/wookay/Bukdu.jl)
+  [![Circle](https://circleci.com/gh/wookay/Bukdu.jl.svg?style=svg)](https://circleci.com/gh/wookay/Bukdu.jl)
+  [![AppVeyor](https://ci.appveyor.com/api/projects/status/v1af95637qm7j582?svg=true)](https://ci.appveyor.com/project/wookay/bukdu-jl)
+  [![Coverage](https://coveralls.io/repos/github/wookay/Bukdu.jl/badge.svg?branch=master)](https://coveralls.io/github/wookay/Bukdu.jl?branch=master)
 
 
 Bukdu is a web development framework for Julia (http://julialang.org).
