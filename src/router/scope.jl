@@ -1,3 +1,5 @@
+# parent module Bukdu
+
 type Scope
     path::String
     host::String
@@ -5,7 +7,6 @@ type Scope
 end
 
 
-# from phoenix/lib/phoenix/router/scope.ex
 module RouterScope
 
 import Bukdu: ApplicationController

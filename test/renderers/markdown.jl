@@ -1,4 +1,5 @@
 importall Bukdu
+import Base: show
 
 type MarkdownController <: ApplicationController
 end
@@ -13,12 +14,24 @@ $(eval(parse(code)))
 """)
 end
 
+layout(::Layout, body, options) = "<body>$body</body>"
+show(::MarkdownController) = render(Markdown/Layout, "`cool`")
+
 Router() do
-    resource("/:code", MarkdownController)
+    get("/mark/down", MarkdownController, show)
+    get("/:code", MarkdownController, index)
 end
 
 
 using Base.Test
+conn = (Router)(show, "/mark/down")
+@test 200 == conn.status
+@test "<body><p><code>cool</code></p></body>" == conn.resp_body
+
+conn = (Router)(index, "/1+2")
+@test 200 == conn.status
+@test """<pre><code>julia&gt; 1&#43;2\n3</code></pre>""" == conn.resp_body
+
 conn = (Router)(index, "/1+2")
 @test 200 == conn.status
 @test """<pre><code>julia&gt; 1&#43;2\n3</code></pre>""" == conn.resp_body

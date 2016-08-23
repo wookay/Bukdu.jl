@@ -4,9 +4,11 @@ type WelcomeController <: ApplicationController
 end
 
 index(::WelcomeController) = "hello world"
+foo(::WelcomeController) = "bar"
 
 Router() do
     get("/", WelcomeController, index)
+    get("/foobar", WelcomeController, foo)
 end
 
 
@@ -17,9 +19,9 @@ after(::WelcomeController) = push!(logs, :a)
 conn = (Router)(index, "/")
 @test [:b, :a] == logs
 
-conn = (Router)(index, "/")
+conn = (Router)(foo, "/foobar")
 @test 200 == conn.status
-@test "hello world" == conn.resp_body
+@test "bar" == conn.resp_body
 @test [:b, :a, :b, :a] == logs
 
 c = WelcomeController()

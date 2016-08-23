@@ -1,3 +1,5 @@
+# parent module Bukdu
+
 import Mustache
 
 function template(path::String, options::Dict)
@@ -5,27 +7,13 @@ function template(path::String, options::Dict)
     Mustache.render(contents, options)
 end
 
-function render{AV<:ApplicationView}(V::Type{AV}, path::String; kw...)
-    LayoutT = first(V.parameters)
+function render{AV<:ApplicationView}(V::Type{AV}; kw...)
+    render(V, VoidLayout; kw...)
+end
+
+function render{AL<:ApplicationLayout,AV<:ApplicationView}(V::Type{AV}, L::Type{AL}; kw...)
     options = Dict(kw)
-    if isa(LayoutT, TypeVar)
-        LayoutT = Void
-        V = V{LayoutT}
-    end
-    view = V(path, options, "")
-    T = typeof(view)
-    if method_exists(before, (T,))
-        before(view)
-    end
+    path = options[:path]
     body = template(path, options)
-    if method_exists(layout, (LayoutT,String,Dict))
-        data = layout(LayoutT(), body, options)
-    else
-        data = body
-    end
-    view.data = data
-    if method_exists(after, (T,))
-        after(view)
-    end
-    data
+    method_exists(layout, (L,String,Dict)) ? layout(L(), body, options) : body
 end

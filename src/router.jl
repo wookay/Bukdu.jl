@@ -1,3 +1,5 @@
+# parent module Bukdu
+
 abstract ApplicationRouter
 
 immutable Router <: ApplicationRouter
@@ -38,7 +40,6 @@ function resource{AC<:ApplicationController}(context::Function, path::String, co
 end
 
 
-# from phoenix/lib/phoenix/router.ex
 module Routing
 
 import Bukdu: ApplicationController

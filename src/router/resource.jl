@@ -1,3 +1,5 @@
+# parent module Bukdu
+
 import Bukdu: ApplicationController
 
 type Resource{AC<:ApplicationController}
@@ -12,7 +14,6 @@ type Resource{AC<:ApplicationController}
 end
 
 
-# from phoenix/lib/phoenix/router/resource.ex
 module RouterResource
 
 import Bukdu: ApplicationController

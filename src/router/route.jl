@@ -1,3 +1,5 @@
+# parent module Bukdu
+
 type Route{AC<:ApplicationController}
     verb::Function # get
     kind::Symbol # :match, :forward
@@ -8,7 +10,6 @@ type Route{AC<:ApplicationController}
 end
 
 
-# from phoenix/lib/phoenix/router/route.ex
 module RouterRoute
 
 import Bukdu: ApplicationController

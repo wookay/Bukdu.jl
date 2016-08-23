@@ -1,3 +1,5 @@
+# parent module Bukdu
+
 abstract ApplicationController
 
 # verbs: get, post, delete, patch, put

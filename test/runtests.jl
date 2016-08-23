@@ -34,6 +34,16 @@ Base.Test.@testset "renderers/markdown.jl" begin
 end
 
 workspace()
+Base.Test.@testset "plug/static.jl" begin
+    include("plug/static.jl")
+end
+
+workspace()
+Base.Test.@testset "endpoint.jl" begin
+    include("endpoint.jl")
+end
+
+workspace()
 Base.Test.@testset "server.jl" begin
     include("server.jl")
 end

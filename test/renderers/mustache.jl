@@ -3,7 +3,7 @@ importall Bukdu
 type PageController <: ApplicationController
 end
 
-show(c::PageController) = render(View, "page.tpl"; contents="hello")
+show(c::PageController) = render(View; path="page.tpl", contents="hello")
 
 Router() do
     get("/:page", PageController, show)
@@ -17,11 +17,9 @@ conn = (Router)(show, "/1")
 @test "1" == conn.params["page"]
 
 
-type Layout
-end
 layout(::Layout, body, options) = """<html><body>$body<body></html>"""
 
-index(c::PageController) = render(View{Layout}, "page.tpl"; contents="hello")
+index(c::PageController) = render(View/Layout; path="page.tpl", contents="hello")
 
 Router() do
     get("/", PageController, index)

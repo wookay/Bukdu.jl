@@ -1,4 +1,4 @@
-# from phoenix/lib/phoenix/naming.ex
+# parent module Bukdu
 
 module Naming
 
