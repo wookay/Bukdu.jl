@@ -14,6 +14,7 @@ end
 
 using Base.Test
 import HttpCommon: Request, Response
+
 req = Request()
 
 req.method = "GET"
@@ -39,15 +40,26 @@ res = Bukdu.handler(req, Response())
 @test 404 == res.status
 
 import Requests: get, statuscode, text
+
 Bukdu.start([8082, 8083])
+
 resp1 = Requests.get("http://localhost:8082/")
 resp2 = Requests.get("http://localhost:8083/")
 @test 200 == statuscode(resp1)
 @test 200 == statuscode(resp2)
 @test "hello world" == text(resp1)
 @test "hello world" == text(resp2)
+
+req.method = "GET"
+req.resource = "/"
+
+(server,task) = first(Bukdu.Farm.servers)
+@test :runnable == task.state
+@test "hello world" == text(server.http.handle(req, Response()))
+
 sleep(0.1)
 Bukdu.stop()
+
 
 Bukdu.start(8082)
 resp1 = Requests.get("http://localhost:8082/")

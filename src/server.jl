@@ -16,7 +16,7 @@ end
 
 module Farm
 import HttpServer: Server
-servers = Vector{Server}()
+servers = Vector{Tuple{Server,Task}}()
 end # module Farm
 
 import HttpServer: Server, run
@@ -28,13 +28,13 @@ end
 function start(ports::Vector{Int}; host=getaddrinfo("localhost"))
     for port in ports
         server = Server(handler)
-        push!(Farm.servers, server)
-        @async run(server, host=host, port=port)
+        task = @async run(server, host=host, port=port)
+        push!(Farm.servers, (server,task))
     end
 end
 
 function stop()
-    for server in Farm.servers
+    for (server,task) in Farm.servers
         try
             close(server.http)
         catch e
