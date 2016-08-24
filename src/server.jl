@@ -3,6 +3,9 @@
 import HttpCommon: Request, Response
 
 function handler(req::Request, res::Response)
+    if method_exists(before, (Request,Response))
+        before(req, res)
+    end
     verb = getfield(Bukdu, Symbol(lowercase(req.method)))
     conn = Routing.request(req.resource) do route
         Base.function_name(route.verb) == Base.function_name(verb)
@@ -12,6 +15,9 @@ function handler(req::Request, res::Response)
     end
     res.status = conn.status
     res.data = isa(conn.resp_body, String) ? conn.resp_body : string(conn.resp_body)
+    if method_exists(after, (Request,Response))
+        after(req, res)
+    end
     res
 end
 

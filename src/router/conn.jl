@@ -2,7 +2,7 @@
 
 type Conn
     status::Int
-	resp_header::Dict{String,String}
+    resp_header::Dict{String,String}
     resp_body::Any
     params::Dict{String,String}
     query_params::Dict{String,String}

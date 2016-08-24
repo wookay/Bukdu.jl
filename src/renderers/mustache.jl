@@ -8,12 +8,9 @@ function template(path::String, options::Dict)
 end
 
 function render{AV<:ApplicationView}(V::Type{AV}; kw...)
-    render(V, VoidLayout; kw...)
-end
-
-function render{AL<:ApplicationLayout,AV<:ApplicationView}(V::Type{AV}, L::Type{AL}; kw...)
-    options = Dict(kw)
-    path = options[:path]
-    body = template(path, options)
-    method_exists(layout, (L,String,Dict)) ? layout(L(), body, options) : body
+    filtering(render, V; kw...) do
+        options = Dict(kw)
+        path = options[:path]
+        template(path, options)
+    end
 end

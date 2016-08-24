@@ -29,3 +29,13 @@ conn = (Router)(index, "/")
 @test 200 == conn.status
 @test "<html><body><div>hello</div><body></html>" == conn.resp_body
 @test !haskey(conn.params, "page")
+
+logs = []
+before(render, View) do path, contents
+    push!(logs, "before $path $contents")
+end
+after(render, View) do path, contents
+    push!(logs, "after $path $contents")
+end
+conn = (Router)(index, "/")
+@test ["before page.tpl hello", "after page.tpl hello"] == logs

@@ -26,3 +26,32 @@ res = Bukdu.handler(req, Response())
 @test 200 == res.status
 @test "application/json" == res.headers["Content-Type"]
 @test """\"hello\"""" == String(res.data)
+
+logs = []
+before(render, JSON) do t
+    push!(logs, "b $t")
+end
+after(render, JSON) do t
+    push!(logs, "a $t")
+end
+
+conn = (Router)(index, "/api/users")
+@test ["b hello", "a hello"] == logs
+
+layout(::Layout, body, options) = """[$body]"""
+show(::UserController) = render(JSON/Layout, "hello")
+before(render, JSON/Layout) do t
+    push!(logs, "bl $t")
+end
+after(render, JSON/Layout) do t
+    push!(logs, "al $t")
+end
+
+empty!(logs)
+req.method = "GET"
+req.resource = "/api/users/1"
+res = Bukdu.handler(req, Response())
+@test 200 == res.status
+@test "application/json" == res.headers["Content-Type"]
+@test "[\"hello\"]" == String(res.data)
+@test ["bl hello","b hello","a hello","al hello"] == logs

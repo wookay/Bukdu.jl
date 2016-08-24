@@ -3,7 +3,8 @@ importall Bukdu
 type WelcomeController <: ApplicationController
 end
 
-index(::WelcomeController) = "hello world"
+layout(::Layout, body, options) = body
+index(::WelcomeController) = render(Text/Layout, "hello world")
 show(::WelcomeController) = pi
 
 Router() do
@@ -60,11 +61,35 @@ req.resource = "/"
 sleep(0.1)
 Bukdu.stop()
 
+logs = []
+
+before(::Request, ::Response) = push!(logs, :br)
+before(::WelcomeController) = push!(logs, :bc)
+after(::WelcomeController) = push!(logs, :ac)
+after(::Request, ::Response) = push!(logs, :ar)
+
+conn = (Router)(index, "/")
+@test [:bc, :ac] == logs
+empty!(logs)
+
+before(render, Text/Layout) do text
+    push!(logs, :bvl)
+end
+before(render, Text) do text
+    push!(logs, :bv)
+end
+after(render, Text) do text
+    push!(logs, :av)
+end
+after(render, Text/Layout) do text
+    push!(logs, :avl)
+end
 
 Bukdu.start(8082)
 resp1 = Requests.get("http://localhost:8082/")
 @test_throws Base.UVError Requests.get("http://localhost:8083/")
 @test 200 == statuscode(resp1)
 @test "hello world" == text(resp1)
+@test [:br,:bc,:bvl,:bv,:av,:avl,:ac,:ar] == logs
 sleep(0.1)
 Bukdu.stop()

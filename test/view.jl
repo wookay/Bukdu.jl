@@ -17,13 +17,23 @@ conn = (Router)(index, "/")
 @test "<html><body><div>hello</div><body></html>" == conn.resp_body
 
 logs = []
-Bukdu.before(::Type{View}) = push!(logs, :b)
-Bukdu.after(::Type{View}) = push!(logs, :a)
+before(render, View/Layout) do path, contents
+    push!(logs, :bvl)
+end
+before(render, View) do path, contents
+    push!(logs, :bv)
+end
+after(render, View) do path, contents
+    push!(logs, :av)
+end
+after(render, View/Layout) do path, contents
+    push!(logs, :avl)
+end
 conn = (Router)(index, "/")
-@test [:b, :a] == logs
+@test [:bvl,:bv,:av,:avl] == logs
 
 conn = (Router)(index, "/")
-@test [:b, :a, :b, :a] == logs
+@test [:bvl,:bv,:av,:avl, :bvl,:bv,:av,:avl] == logs
 
 @test "<div>hello</div>" == render(View; path="page.tpl", contents="hello")
 @test "<html><body><div>hello</div><body></html>" == render(View/Layout; path="page.tpl", contents="hello")
