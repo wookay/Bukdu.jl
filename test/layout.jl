@@ -1,26 +1,28 @@
-# parent module Bukdu
-
 importall Bukdu
 
-type ViewController <: ApplicationController
+type HelloController <: ApplicationController
 end
 
-layout(::Layout, body, options) = "<html><body>$body<body></html>"
+layout(::Layout, body, options) = "default $body"
 
-show(::ViewController) = render(View; path="page.tpl", contents="hello")
-index(::ViewController) = render(View/Layout; path="page.tpl", contents="hello")
+type CustomLayout <: ApplicationLayout
+end
+layout(::CustomLayout, body, options) = "custom $body"
+
+custom(::HelloController) = render(Text/CustomLayout, "hello")
+index(::HelloController) = render(Text/Layout, "hello")
 
 Router() do
-    get("/", ViewController, show)
-    get("/", ViewController, index)
+    get("/", HelloController, index)
+    get("/hey", HelloController, custom)
 end
 
 
 using Base.Test
 conn = (Router)(index, "/")
 @test 200 == conn.status
-@test "<html><body><div>hello</div><body></html>" == conn.resp_body
+@test "default hello" == conn.resp_body
 
-conn = (Router)(show, "/")
+conn = (Router)(custom, "/hey")
 @test 200 == conn.status
-@test "<div>hello</div>" == conn.resp_body
+@test "custom hello" == conn.resp_body

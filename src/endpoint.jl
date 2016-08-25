@@ -1,23 +1,19 @@
 # parent module Bukdu
 
-function set(;kw...)
-    Dict(kw)
+function config(; kw...)
+    merge!(Configure.env, Dict(map(kw) do kv
+        (k,v) = kv
+        (k,Dict(v))
+    end))
 end
 
-function config(env::Dict)
-   merge!(Endpoint.env, env)
-end
-
-
-module Endpoint
-
+module Configure
 env = Dict()
+end # module Configure
 
-function config(sym::Symbol)
-    env[sym]
+type Endpoint
 end
 
-url() = getfield(env, :url)
-static_url() = getfield(env, :static_url)
-
-end # module Endpoint
+function getindex(::Type{Endpoint}, sym::Symbol)
+    Configure.env[sym]
+end

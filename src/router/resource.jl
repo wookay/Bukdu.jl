@@ -1,7 +1,5 @@
 # parent module Bukdu
 
-import Bukdu: ApplicationController
-
 type Resource{AC<:ApplicationController}
     path::String
     param::String
@@ -16,11 +14,11 @@ end
 
 module RouterResource
 
-import Bukdu: ApplicationController
-import Bukdu: Keyword, Naming
-import Bukdu: RouterScope
-import Bukdu: Resource
-import Bukdu: index, edit, new, show, create, update, delete
+import ..Bukdu: ApplicationController
+import ..Bukdu: Keyword, Naming
+import ..Bukdu: RouterScope
+import ..Bukdu: Resource
+import ..Bukdu: index, edit, new, show, create, update, delete
 
 const default_param_key = "id"
 const controller_actions = [index, edit, new, show, create, update, delete]

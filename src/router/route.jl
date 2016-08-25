@@ -12,8 +12,8 @@ end
 
 module RouterRoute
 
-import Bukdu: ApplicationController
-import Bukdu: Route
+import ..Bukdu: ApplicationController
+import ..Bukdu: Route
 
 routes = Vector{Route}()
 

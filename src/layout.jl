@@ -4,12 +4,12 @@ import Base: /
 
 abstract ApplicationLayout
 
+type Layout <: ApplicationLayout
+end
+
 type LayoutDivision{AL<:ApplicationLayout}
     dividend::Union{Module,Type}
     divisor::Type{AL}
-end
-
-type Layout <: ApplicationLayout
 end
 
 function /{AL<:ApplicationLayout}(dividend::Union{Module,Type}, ::Type{AL})

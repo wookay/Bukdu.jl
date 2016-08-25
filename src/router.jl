@@ -17,7 +17,7 @@ function reset{AR<:ApplicationRouter}(::Type{AR})
 end
 
 function (R::Type{AR}){AR<:ApplicationRouter}(context::Function)
-    RouterScope.init()
+    empty!(RouterScope.stack)
     context()
 end
 
@@ -42,14 +42,14 @@ end
 
 module Routing
 
-import Bukdu: ApplicationController
-import Bukdu: RouterRoute
-import Bukdu: RouterScope
-import Bukdu: RouterResource, Resource
-import Bukdu: Conn, CONN_NOT_FOUND
-import Bukdu: index, edit, new, show, create, update, delete
-import Bukdu: get, post, delete, patch, put
-import Bukdu: before, after
+import ..Bukdu: ApplicationController
+import ..Bukdu: RouterRoute
+import ..Bukdu: RouterScope
+import ..Bukdu: RouterResource, Resource
+import ..Bukdu: Conn, CONN_NOT_FOUND
+import ..Bukdu: index, edit, new, show, create, update, delete
+import ..Bukdu: get, post, delete, patch, put
+import ..Bukdu: before, after
 import URIParser: URI
 import HttpCommon: parsequerystring
 

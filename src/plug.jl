@@ -6,7 +6,7 @@ end
 
 module Plug
 
-import Bukdu: ApplicationRouter, plug
+import ..Bukdu: ApplicationRouter, plug
 
 include("plug/static.jl")
 

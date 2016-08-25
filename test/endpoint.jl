@@ -1,13 +1,12 @@
-import Bukdu: set, Endpoint
+import Bukdu: Endpoint
 
 Bukdu.config(
-    set(
-        url = set(host="example.com", path="/api"),
-        static_url = set(host="static.example.com"),
-        http = set(port=80),
-        https = set(port=443)))
+        url= (:host => "example.com", :path => "/api"),
+        static_url= (:host => "static.example.com"),
+        http= (:port => 80),
+        https= (:port => 443))
 
 
 using Base.Test
-@test Endpoint.config(:url) == Dict(:host=>"example.com", :path=>"/api")
-@test Endpoint.config(:static_url) == Dict(:host=>"static.example.com")
+@test Endpoint[:url] == Dict(:host=>"example.com", :path=>"/api")
+@test Endpoint[:static_url] == Dict(:host=>"static.example.com")

@@ -9,16 +9,12 @@ end
 
 module RouterScope
 
-import Bukdu: ApplicationController
-import Bukdu: Route, RouterRoute
-import Bukdu: Scope
-import Bukdu: Keyword, Naming
+import ..Bukdu: ApplicationController
+import ..Bukdu: Route, RouterRoute
+import ..Bukdu: Scope
+import ..Bukdu: Keyword, Naming
 
-global stack = Vector{Scope}()
-
-function init()
-    global stack = Vector{Scope}()
-end
+stack = Vector{Scope}()
 
 function push_scope!(options::Dict)
     path = Keyword.get(options, :path, "")::String
