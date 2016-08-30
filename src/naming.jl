@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 module Naming
 
@@ -16,4 +16,4 @@ function underscore(value::String)::String
     lowercase(value)
 end
 
-end # module Naming
+end # module Bukdu.Naming

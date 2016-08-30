@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 type Scope
     path::String
@@ -38,11 +38,11 @@ end
 function route{AC<:ApplicationController}(kind::Symbol, verb::Function,
              path::String, controller::Type{AC}, action::Function, options::Dict)::Route
     path    = validate_path(path)
-    private = Keyword.get(options, :private, Dict())
-    assigns = Keyword.get(options, :assigns, Dict())
+    private = Keyword.get(options, :private, Dict{Symbol,Any}())
+    assigns = Keyword.get(options, :assigns, Dict{Symbol,Any}())
 
     stack = get_stack()
-    RouterRoute.build(kind, verb, join_path(stack, path), find_host(stack), controller, action)
+    RouterRoute.build(kind, verb, join_path(stack, path), find_host(stack), controller, action, private, assigns)
 end
 
 function validate_path(path)::String
@@ -61,4 +61,4 @@ function get_stack()
     getfield(RouterScope, :stack)
 end
 
-end # module RouterScope
+end # module Bukdu.RouterScope

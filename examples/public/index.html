@@ -1,0 +1,24 @@
+<html>
+
+<head>
+  <title>Hello Vue.js</title>
+  <script type="text/javascript" src="/js/vue.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+
+<body>
+  <div id="app">
+    {{ message }}
+  </div>
+
+  <script type="text/javascript">
+  new Vue({
+     el: '#app',
+     data: {
+         message: 'Hello Vue.js!'
+     }
+  })
+  </script>
+</body>
+
+</html>

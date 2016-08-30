@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 import HttpCommon: Request, Response
 
@@ -14,7 +14,11 @@ function handler(req::Request, res::Response)
        res.headers[key] = value
     end
     res.status = conn.status
-    res.data = isa(conn.resp_body, String) ? conn.resp_body : string(conn.resp_body)
+    if isa(conn.resp_body, Vector{UInt8}) || isa(conn.resp_body, String)
+       res.data = conn.resp_body
+    else
+       res.data = string(conn.resp_body)
+    end
     if method_exists(after, (Request,Response))
         after(req, res)
     end
@@ -27,7 +31,7 @@ module Farm
 import HttpServer: Server
 servers = Vector{Tuple{Server,Task}}()
 
-end # module Farm
+end # module Bukdu.Farm
 
 
 import HttpServer: Server, run

@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 abstract ApplicationController
 
@@ -13,7 +13,7 @@ for verb in HTTP_VERBS
 end
 
 function getindex{AC<:ApplicationController}(C::AC, sym::Symbol)
-    if sym in [:query_params, :params]
+    if sym in [:query_params, :params, :action, :private, :assigns]
         task = current_task()
         if haskey(Routing.task_storage, task)
             branch = Routing.task_storage[task]
@@ -23,6 +23,11 @@ function getindex{AC<:ApplicationController}(C::AC, sym::Symbol)
         end
     end
     throw(KeyError(sym))
+end
+
+# plug
+function plug{AC<:ApplicationController}(func::Function, controller::AC)
+    func(controller)
 end
 
 # actions: index, edit, new, show, create, update, delete

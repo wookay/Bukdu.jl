@@ -10,9 +10,10 @@ include("controller.jl")
 include("layout.jl")
 include("view.jl")
 include("renderers.jl")
-include("router.jl")
-include("server.jl")
-include("plug.jl")
 include("endpoint.jl")
+include("config.jl")
+include("router.jl")
+include("plug.jl")
+include("server.jl")
 
 end # module Bukdu

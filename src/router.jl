@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 abstract ApplicationRouter
 
@@ -49,7 +49,7 @@ import ..Bukdu: RouterResource, Resource
 import ..Bukdu: Conn, CONN_NOT_FOUND
 import ..Bukdu: index, edit, new, show, create, update, delete
 import ..Bukdu: get, post, delete, patch, put
-import ..Bukdu: before, after
+import ..Bukdu: plugins, before, after
 import URIParser: URI
 import HttpCommon: parsequerystring
 
@@ -59,6 +59,9 @@ const COLON = ':'
 type Branch
     query_params::Dict{String,String}
     params::Dict{String,String}
+    action::Function
+    private::Dict{Symbol,Any}
+    assigns::Dict{Symbol,Any}
 end
 
 task_storage = Dict{Task,Branch}()
@@ -71,6 +74,7 @@ end
 function add_route{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String, controller::Type{AC}, action::Function, options::Dict)
     route = RouterScope.route(kind, verb, path, controller, action, options)
     push!(RouterRoute.routes, route)
+    route
 end
 
 # scope
@@ -143,9 +147,12 @@ function request(compare::Function, path::String)::Conn
                 C = route.controller
                 controller = C()
                 query_params = Dict{String,String}(parsequerystring(uri.query))
-                branch = Branch(query_params, params)
+                branch = Branch(query_params, params, route.action, route.private, route.assigns)
                 task = current_task()
                 task_storage[task] = branch
+                if method_exists(plugins, (C,))
+                    plugins(controller)
+                end
                 if method_exists(before, (C,))
                     before(controller)
                 end
@@ -166,4 +173,4 @@ function request(compare::Function, path::String)::Conn
     CONN_NOT_FOUND
 end
 
-end # module Routing
+end # module Bukdu.Routing

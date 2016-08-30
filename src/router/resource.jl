@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 type Resource{AC<:ApplicationController}
     path::String
@@ -29,8 +29,8 @@ function build{AC<:ApplicationController}(path::String, controller::Type{AC}, op
     param = Keyword.get(options, :param, default_param_key)
     name = Keyword.get(options, :name, Naming.resource_name(controller, "Controller"))
     as      = Keyword.get(options, :as, name)
-    private = Keyword.get(options, :private, Dict())
-    assigns = Keyword.get(options, :assigns, Dict)
+    private = Keyword.get(options, :private, Dict{Symbol,Any}())
+    assigns = Keyword.get(options, :assigns, Dict{Symbol,Any}())
 
     singleton = Keyword.get(options, :singleton, false)
     actions   = extract_actions(options, singleton)
@@ -56,4 +56,4 @@ function default_actions(singleton::Bool)::Vector{Function}
     singleton ? setdiff(controller_actions, [index]) : controller_actions
 end
 
-end # module RouterResource
+end # module Bukdu.RouterResource

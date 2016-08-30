@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 import Mustache
 

@@ -1,27 +1,31 @@
-# parent module Bukdu
+# module Bukdu
+
+# in filter.jl
+export plugins, before, after
 
 # in controller.jl
 export ApplicationController
 export get, post, delete, patch, put # verbs
 export index, edit, new, show, create, update, delete # actions
 
+# in layout.jl
+export ApplicationLayout, Layout, layout, /
+
+# in view.jl
+export ApplicationView, View
+
+# in renderers.jl
+export render
+
+# in endpoint.jl
+export ApplicationEndpoint, Endpoint
+
 # in router.jl
 export ApplicationRouter, Router, reset
 export scope, resource
 
-# in view.jl
-export ApplicationView, View
-export ApplicationLayout, Layout, layout, / # layout
-export render # renderers
-
-# in filter.jl
-export before, after
-
-# in server.jl
-export start, stop
-
 # in plug.jl
 export Plug, plug
 
-# in endpoint.jl
-export Endpoint
+# in server.jl
+export start, stop

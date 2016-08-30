@@ -1,13 +1,13 @@
-# parent module Bukdu
+# module Bukdu
 
-include("renderers/mustache.jl")
-include("renderers/json.jl")
 include("renderers/text.jl")
+include("renderers/json.jl")
 include("renderers/markdown.jl")
+include("renderers/mustache.jl")
 
 module ViewFilter
 filters = Dict()
-end
+end # module Bukdu.ViewFilter
 
 function before{AL<:ApplicationLayout}(block::Function, func::Function, D::LayoutDivision{AL})
     before(block, func, typeof(D))

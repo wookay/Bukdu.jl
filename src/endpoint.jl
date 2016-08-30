@@ -1,19 +1,20 @@
-# parent module Bukdu
+# module Bukdu
 
-function config(; kw...)
-    merge!(Configure.env, Dict(map(kw) do kv
-        (k,v) = kv
-        (k,Dict(v))
-    end))
+abstract ApplicationEndpoint
+
+immutable Endpoint <: ApplicationEndpoint
 end
 
-module Configure
-env = Dict()
-end # module Configure
 
-type Endpoint
+function (E::Type{AE}){AE<:ApplicationEndpoint}(context::Function)
+    routes = copy(RouterRoute.routes)
+    empty!(RouterRoute.routes)
+    context()
+    append!(RouterRoute.routes, routes)
 end
 
-function getindex(::Type{Endpoint}, sym::Symbol)
-    Configure.env[sym]
+function (E::Type{AE}){AE<:ApplicationEndpoint}(path::String)
+    Routing.request(path) do route
+        true
+    end
 end

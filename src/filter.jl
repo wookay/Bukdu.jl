@@ -1,4 +1,7 @@
-# parent module Bukdu
+# module Bukdu
+
+function plugins
+end
 
 function before
 end

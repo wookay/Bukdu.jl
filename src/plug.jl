@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 function plug
 end
@@ -6,8 +6,9 @@ end
 
 module Plug
 
-import ..Bukdu: ApplicationRouter, plug
+import ..plug
 
+include("plug/router.jl")
 include("plug/static.jl")
 
-end # module Plug
+end # module Bukdu.Plug

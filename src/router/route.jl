@@ -1,4 +1,4 @@
-# parent module Bukdu
+# module Bukdu
 
 type Route{AC<:ApplicationController}
     verb::Function # get
@@ -7,6 +7,8 @@ type Route{AC<:ApplicationController}
     host::String
     controller::Type{AC}
     action::Function
+    private::Dict{Symbol,Any}
+    assigns::Dict{Symbol,Any}
 end
 
 
@@ -18,8 +20,8 @@ import ..Bukdu: Route
 routes = Vector{Route}()
 
 function build{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String,
-             host::String, controller::Type{AC}, action::Function)
-    Route(verb, kind, path, host, controller, action)
+             host::String, controller::Type{AC}, action::Function, private::Dict{Symbol,Any}, assigns::Dict{Symbol,Any})
+    Route(verb, kind, path, host, controller, action, private, assigns)
 end
 
-end # module RouterRoute
+end # module Bukdu.RouterRoute
