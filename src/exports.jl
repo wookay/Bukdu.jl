@@ -20,6 +20,9 @@ export render
 # in endpoint.jl
 export ApplicationEndpoint, Endpoint
 
+# in logger.jl
+export Logger
+
 # in router.jl
 export ApplicationRouter, Router, reset
 export scope, resource

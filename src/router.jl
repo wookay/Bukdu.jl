@@ -12,17 +12,20 @@ include("router/conn.jl")
 
 import Base: reset
 
-function reset{AR<:ApplicationRouter}(::Type{AR})
-    empty!(RouterRoute.routes)
+function reset{AR<:ApplicationRouter}(R::Type{AR})
+    delete!(Routing.routing_map, R)
 end
 
 function (R::Type{AR}){AR<:ApplicationRouter}(context::Function)
-    empty!(RouterScope.stack)
+    empty!(RouterRoute.routes)
     context()
+    Routing.routing_map[R] = copy(RouterRoute.routes)
+    empty!(RouterScope.stack)
 end
 
 function (R::Type{AR}){AR<:ApplicationRouter}(action::Function, path::String)
-    Routing.request(path) do route
+    routes = haskey(Routing.routing_map, R) ? Routing.routing_map[R] : Vector{Route}()
+    Routing.request(routes, |, path) do route
         Base.function_name(route.action) == Base.function_name(action)
     end
 end
@@ -43,9 +46,11 @@ end
 module Routing
 
 import ..Bukdu: ApplicationController
-import ..Bukdu: RouterRoute
+import ..Bukdu: RouterRoute, Route
 import ..Bukdu: RouterScope
 import ..Bukdu: RouterResource, Resource
+import ..Bukdu: ApplicationEndpoint
+import ..Bukdu: Logger
 import ..Bukdu: Conn, CONN_NOT_FOUND
 import ..Bukdu: index, edit, new, show, create, update, delete
 import ..Bukdu: get, post, delete, patch, put
@@ -65,6 +70,8 @@ type Branch
 end
 
 task_storage = Dict{Task,Branch}()
+routing_map = Dict{Type,Vector{Route}}()
+endpoint_map = Dict{Type,Vector{Route}}()
 
 # route
 function match{AC<:ApplicationController}(verb::Function, path::String, controller::Type{AC}, action::Function, options::Dict)
@@ -124,11 +131,11 @@ function add_route(resource::Resource)
     end
 end
 
-function request(compare::Function, path::String)::Conn
+function request(compare::Function, routes::Vector{Route}, verb::Function, path::String)::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
-    for route in RouterRoute.routes
+    for route in routes
         rousegs = split(route.path, SLASH)
         if compare(route) && length_reqsegs==length(rousegs)
             matched = all(enumerate(rousegs)) do idx_rouseg
@@ -158,8 +165,14 @@ function request(compare::Function, path::String)::Conn
                 end
                 result = nothing
                 try
+                    Logger.info() do
+                        uppercase(string(Base.function_name(route.verb))), path, string(typeof(controller), '.', Base.function_name(route.action))
+                    end
                     result = route.action(controller)
                 catch e
+                    Logger.warn() do
+                        e,'\n',join(stacktrace(),'\n')
+                    end
                     result = Conn(400, "bad request $e", params, query_params)
                 end
                 if method_exists(after, (C,))
@@ -169,6 +182,9 @@ function request(compare::Function, path::String)::Conn
                 return isa(result, Conn) ? result : Conn(200, result, params, query_params)
             end
         end
+    end
+    Logger.info() do
+        uppercase(string(Base.function_name(verb))), path
     end
     CONN_NOT_FOUND
 end

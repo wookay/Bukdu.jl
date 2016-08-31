@@ -7,7 +7,7 @@ function handler(req::Request, res::Response)
         before(req, res)
     end
     verb = getfield(Bukdu, Symbol(lowercase(req.method)))
-    conn = Routing.request(req.resource) do route
+    conn = Routing.request(RouterRoute.routes, verb, req.resource) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
     for (key,value) in conn.resp_header

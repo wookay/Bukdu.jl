@@ -25,11 +25,6 @@ function getindex{AC<:ApplicationController}(C::AC, sym::Symbol)
     throw(KeyError(sym))
 end
 
-# plug
-function plug{AC<:ApplicationController}(func::Function, controller::AC)
-    func(controller)
-end
-
 # actions: index, edit, new, show, create, update, delete
 function index
 end

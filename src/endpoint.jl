@@ -7,14 +7,14 @@ end
 
 
 function (E::Type{AE}){AE<:ApplicationEndpoint}(context::Function)
-    routes = copy(RouterRoute.routes)
     empty!(RouterRoute.routes)
     context()
-    append!(RouterRoute.routes, routes)
+    Routing.endpoint_map[E] = copy(RouterRoute.routes)
 end
 
 function (E::Type{AE}){AE<:ApplicationEndpoint}(path::String)
-    Routing.request(path) do route
+    routes = haskey(Routing.endpoint_map,E) ? Routing.endpoint_map[E] : Vector{Route}()
+    Routing.request(routes, |, path) do route
         true
     end
 end

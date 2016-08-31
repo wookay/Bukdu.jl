@@ -11,6 +11,7 @@ end
 
 Endpoint() do
     plug(Plug.Static, at= "/", from= "public")
+    plug(Plug.Logger)
     plug(Router)
 end
 

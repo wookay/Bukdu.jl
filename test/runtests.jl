@@ -34,13 +34,23 @@ Base.Test.@testset "renderers/mustache.jl" begin
 end
 
 workspace()
-Base.Test.@testset "router.jl" begin
-    include("router.jl")
+Base.Test.@testset "endpoint.jl" begin
+    include("endpoint.jl")
 end
 
 workspace()
 Base.Test.@testset "config.jl" begin
     include("config.jl")
+end
+
+workspace()
+Base.Test.@testset "logger.jl" begin
+    include("logger.jl")
+end
+
+workspace()
+Base.Test.@testset "router.jl" begin
+    include("router.jl")
 end
 
 workspace()
@@ -51,6 +61,11 @@ end
 workspace()
 Base.Test.@testset "plug/static.jl" begin
     include("plug/static.jl")
+end
+
+workspace()
+Base.Test.@testset "plug/logger.jl" begin
+    include("plug/logger.jl")
 end
 
 workspace()

@@ -12,6 +12,11 @@ Router() do
     get("/pi", WelcomeController, show)
 end
 
+Endpoint() do
+    plug(Plug.Logger, level=false)
+    plug(Router)
+end
+
 
 using Base.Test
 import HttpCommon: Request, Response
