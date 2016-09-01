@@ -22,20 +22,20 @@ end
 
 Router() do
     get("/", WelcomeController, show)
-    get("/", WelcomeController, create)
-    get("/", WelcomeController, secret)
+    post("/", WelcomeController, create)
+    patch("/", WelcomeController, secret)
 end
 
 
 using Base.Test
-conn = (Router)(show, "/")
+conn = (Router)(get, "/")
 @test 200 == conn.status
 @test [(:p,show),(:b,show)] == conn.resp_body
 
-conn = (Router)(create, "/")
+conn = (Router)(post, "/")
 @test 200 == conn.status
 @test [(:p,create),(:b,create)] == conn.resp_body
 
-conn = (Router)(secret, "/")
+conn = (Router)(patch, "/")
 @test 200 == conn.status
 @test [(:p,secret),(:b,secret)] == conn.resp_body

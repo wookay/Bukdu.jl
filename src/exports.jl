@@ -17,15 +17,15 @@ export ApplicationView, View
 # in renderers.jl
 export render
 
-# in endpoint.jl
-export ApplicationEndpoint, Endpoint
-
 # in logger.jl
 export Logger
 
 # in router.jl
-export ApplicationRouter, Router, reset
-export scope, resource
+export ApplicationRouter, Router, NoRouteError, reset
+export scope, resources
+
+# in endpoint.jl
+export ApplicationEndpoint, Endpoint, reload
 
 # in plug.jl
 export Plug, plug

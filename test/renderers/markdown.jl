@@ -18,28 +18,39 @@ layout(::Layout, body, options) = "<body>$body</body>"
 show(::MarkdownController) = render(Markdown/Layout, "`cool`")
 
 Router() do
-    get("/mark/down", MarkdownController, show)
     get("/:code", MarkdownController, index)
+    get("/mark/down", MarkdownController, show)
 end
 
 
 using Base.Test
-conn = (Router)(show, "/mark/down")
+conn = (Router)(get, "/mark/down")
 @test 200 == conn.status
 @test "<body><p><code>cool</code></p></body>" == conn.resp_body
 
-conn = (Router)(index, "/1+2")
+conn = (Router)(get, "/1+2")
 @test 200 == conn.status
 @test """<pre><code>julia&gt; 1&#43;2\n3</code></pre>""" == conn.resp_body
 
-conn = (Router)(index, "/1+2")
+conn = (Router)(get, "/1+2")
 @test 200 == conn.status
 @test """<pre><code>julia&gt; 1&#43;2\n3</code></pre>""" == conn.resp_body
 
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test 200 == conn.status
 @test """<pre><code>julia&gt; \nnothing</code></pre>""" == conn.resp_body
 
-conn = (Router)(index, "/undefined_variable")
+Logger.have_color(false)
+let oldout = STDERR
+   rdout, wrout = redirect_stdout()
+
+conn = (Router)(get, "/undefined_variable")
 @test 400 == conn.status
 @test "bad request UndefVarError(:undefined_variable)" == conn.resp_body
+
+   reader = @async readstring(rdout)
+   redirect_stdout(oldout)
+   close(wrout)
+
+@test startswith(wait(reader), "ERROR")
+end

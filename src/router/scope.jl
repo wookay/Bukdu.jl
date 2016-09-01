@@ -1,9 +1,10 @@
 # module Bukdu
 
-type Scope
+immutable Scope
     path::String
     host::String
-    Scope(path::String, host::String) = new(path, host)
+    private::Dict{Symbol,String}
+    assigns::Dict{Symbol,String}
 end
 
 
@@ -19,8 +20,10 @@ stack = Vector{Scope}()
 function push_scope!(options::Dict)
     path = Keyword.get(options, :path, "")::String
     path = validate_path(path)
-    host = Keyword.get(options, :host, "")
-    scope = Scope(path, host)
+    host = Keyword.get(options, :host, "")::String
+    private = Dict{Symbol,String}(Keyword.get(options, :private, Dict()))
+    assigns = Dict{Symbol,String}(Keyword.get(options, :assigns, Dict()))
+    scope = Scope(path, host, private, assigns)
     push!(RouterScope.stack, scope)
 end
 
@@ -38,10 +41,9 @@ end
 function route{AC<:ApplicationController}(kind::Symbol, verb::Function,
              path::String, controller::Type{AC}, action::Function, options::Dict)::Route
     path    = validate_path(path)
-    private = Keyword.get(options, :private, Dict{Symbol,Any}())
-    assigns = Keyword.get(options, :assigns, Dict{Symbol,Any}())
-
     stack = get_stack()
+    private = Dict{Symbol,String}(reduce(merge, vcat(extract(stack, :private), Keyword.get(options, :private, Dict()))))
+    assigns = Dict{Symbol,String}(reduce(merge, vcat(extract(stack, :assigns), Keyword.get(options, :assigns, Dict()))))
     RouterRoute.build(kind, verb, join_path(stack, path), find_host(stack), controller, action, private, assigns)
 end
 

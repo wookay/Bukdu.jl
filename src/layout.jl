@@ -4,10 +4,10 @@ import Base: /
 
 abstract ApplicationLayout
 
-type Layout <: ApplicationLayout
+immutable Layout <: ApplicationLayout
 end
 
-type LayoutDivision{AL<:ApplicationLayout}
+immutable LayoutDivision{AL<:ApplicationLayout}
     dividend::Union{Module,Type}
     divisor::Type{AL}
 end

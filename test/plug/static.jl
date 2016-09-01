@@ -9,8 +9,11 @@ Router() do
     get("/", WelcomeController, index)
 end
 
+track = []
 Endpoint() do
+    push!(track, :blah)
     plug(Plug.Static, at= "/", from= "../examples/public")
+    plug(Plug.Logger, level=:error)
     plug(Router)
 end
 
@@ -30,6 +33,8 @@ conn = (Endpoint)("/js/vue.min.js")
 @test "application/javascript" == conn.resp_header["Content-Type"]
 @test 76807 == sizeof(conn.resp_body)
 
-conn = (Endpoint)("/js/not_found")
-@test 404 == conn.status
-@test "not found" == conn.resp_body
+@test_throws NoRouteError (Endpoint)("/js/not_found")
+
+@test [:blah] == track
+reload(Endpoint)
+@test [:blah, :blah] == track

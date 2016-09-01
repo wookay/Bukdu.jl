@@ -13,7 +13,7 @@ for verb in HTTP_VERBS
 end
 
 function getindex{AC<:ApplicationController}(C::AC, sym::Symbol)
-    if sym in [:query_params, :params, :action, :private, :assigns]
+    if sym in [:query_params, :params, :host, :action, :private, :assigns]
         task = current_task()
         if haskey(Routing.task_storage, task)
             branch = Routing.task_storage[task]

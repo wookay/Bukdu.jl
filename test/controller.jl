@@ -16,10 +16,10 @@ using Base.Test
 logs = []
 before(::WelcomeController) = push!(logs, :b)
 after(::WelcomeController) = push!(logs, :a)
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test [:b, :a] == logs
 
-conn = (Router)(foo, "/foobar")
+conn = (Router)(get, "/foobar")
 @test 200 == conn.status
 @test "bar" == conn.resp_body
 @test [:b, :a, :b, :a] == logs

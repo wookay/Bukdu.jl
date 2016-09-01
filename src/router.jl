@@ -5,6 +5,10 @@ abstract ApplicationRouter
 immutable Router <: ApplicationRouter
 end
 
+immutable NoRouteError
+    message
+end
+
 include("router/route.jl")
 include("router/scope.jl")
 include("router/resource.jl")
@@ -21,35 +25,41 @@ function (R::Type{AR}){AR<:ApplicationRouter}(context::Function)
     context()
     Routing.routing_map[R] = copy(RouterRoute.routes)
     empty!(RouterScope.stack)
+    nothing
 end
 
-function (R::Type{AR}){AR<:ApplicationRouter}(action::Function, path::String)
+function (R::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String)
     routes = haskey(Routing.routing_map, R) ? Routing.routing_map[R] : Vector{Route}()
-    Routing.request(routes, |, path) do route
-        Base.function_name(route.action) == Base.function_name(action)
+    Routing.request(routes, verb, path) do route
+        Base.function_name(route.verb) == Base.function_name(verb)
     end
 end
 
-function scope(context::Function, path::String)
-    Routing.do_scope(context, Dict(:path=>path))
+function scope(context::Function, path::String; kw...)
+    Routing.do_scope(context, merge(Dict(:path=>path), Dict(kw)))
 end
 
-function resource{AC<:ApplicationController}(path::String, controller::Type{AC}; kw...)
-    Routing.add_resource(()->nothing, path, controller, Dict(kw))
+function scope(context::Function, path::String, modul::Module; kw...)
+    Routing.do_scope(context, merge(Dict(:path=>path), Dict(kw)))
 end
 
-function resource{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC}; kw...)
-    Routing.add_resource(context, path, controller, Dict(kw))
+function scope(context::Function; kw...)
+    Routing.do_scope(context, Dict(kw))
+end
+
+function resources{AC<:ApplicationController}(path::String, controller::Type{AC}; kw...)
+    Routing.add_resources(()->nothing, path, controller, Dict(kw))
+end
+
+function resources{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC}; kw...)
+    Routing.add_resources(context, path, controller, Dict(kw))
 end
 
 
 module Routing
 
 import ..Bukdu: ApplicationController
-import ..Bukdu: RouterRoute, Route
-import ..Bukdu: RouterScope
-import ..Bukdu: RouterResource, Resource
-import ..Bukdu: ApplicationEndpoint
+import ..Bukdu: RouterRoute, Route, RouterScope, RouterResource, Resource, NoRouteError
 import ..Bukdu: Logger
 import ..Bukdu: Conn, CONN_NOT_FOUND
 import ..Bukdu: index, edit, new, show, create, update, delete
@@ -61,17 +71,16 @@ import HttpCommon: parsequerystring
 const SLASH = '/'
 const COLON = ':'
 
-type Branch
+immutable Branch
     query_params::Dict{String,String}
     params::Dict{String,String}
     action::Function
-    private::Dict{Symbol,Any}
+    host::String
     assigns::Dict{Symbol,Any}
 end
 
 task_storage = Dict{Task,Branch}()
 routing_map = Dict{Type,Vector{Route}}()
-endpoint_map = Dict{Type,Vector{Route}}()
 
 # route
 function match{AC<:ApplicationController}(verb::Function, path::String, controller::Type{AC}, action::Function, options::Dict)
@@ -91,8 +100,8 @@ function do_scope(context::Function, options::Dict)
     RouterScope.pop_scope!()
 end
 
-# resource
-function add_resource{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC}, options::Dict)
+# resources
+function add_resources{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC}, options::Dict)
     resource = RouterResource.build(path, controller, options)
     Routing.do_scope(context, resource.member)
     add_route(resource)
@@ -138,6 +147,13 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
     for route in routes
         rousegs = split(route.path, SLASH)
         if compare(route) && length_reqsegs==length(rousegs)
+            if !isempty(route.host)
+                if endswith(route.host, ".")
+                    !startswith(uri.host, route.host) && continue
+                else
+                    !endswith(uri.host, route.host) && continue
+                end
+            end
             matched = all(enumerate(rousegs)) do idx_rouseg
                 (idx,rouseg) = idx_rouseg
                 startswith(rouseg, COLON) ? true : reqsegs[idx]==rouseg
@@ -154,7 +170,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 C = route.controller
                 controller = C()
                 query_params = Dict{String,String}(parsequerystring(uri.query))
-                branch = Branch(query_params, params, route.action, route.private, route.assigns)
+                branch = Branch(query_params, params, route.action, uri.host, route.assigns)
                 task = current_task()
                 task_storage[task] = branch
                 if method_exists(plugins, (C,))
@@ -164,29 +180,31 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     before(controller)
                 end
                 result = nothing
+                resp_headers = Dict{String,String}()
                 try
-                    Logger.info() do
-                        uppercase(string(Base.function_name(route.verb))), path, string(typeof(controller), '.', Base.function_name(route.action))
+                    Logger.debug() do
+                        padding = length(path) > 4 ? "\t" : "\t\t"
+                        uppercase(string(Base.function_name(route.verb))), path, padding, string(typeof(controller), '.', Base.function_name(route.action))
                     end
                     result = route.action(controller)
-                catch e
-                    Logger.warn() do
-                        e,'\n',join(stacktrace(),'\n')
+                catch ex
+                    Logger.error() do
+                        verb, path, '\n', ex, '\n', route, stacktrace()
                     end
-                    result = Conn(400, "bad request $e", params, query_params)
+                    result = Conn(400, resp_headers, "bad request $ex", params, query_params, route.private, route.assigns)
                 end
                 if method_exists(after, (C,))
                     after(controller)
                 end
                 pop!(task_storage, task)
-                return isa(result, Conn) ? result : Conn(200, result, params, query_params)
+                return isa(result, Conn) ? result : Conn(200, resp_headers, result, params, query_params, route.private, route.assigns)
             end
         end
     end
-    Logger.info() do
+    Logger.warn() do
         uppercase(string(Base.function_name(verb))), path
     end
-    CONN_NOT_FOUND
+    throw(NoRouteError(""))
 end
 
 end # module Bukdu.Routing

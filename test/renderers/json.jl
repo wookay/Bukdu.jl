@@ -7,13 +7,13 @@ index(::UserController) = render(JSON, "hello")
 
 Router() do
     scope("/api") do
-        resource("/users", UserController)
+        resources("/users", UserController)
     end
 end
 
 
 using Base.Test
-conn = (Router)(index, "/api/users")
+conn = (Router)(get, "/api/users")
 @test 200 == conn.status
 @test "application/json" == conn.resp_header["Content-Type"]
 @test """\"hello\"""" == conn.resp_body
@@ -35,7 +35,7 @@ after(render, JSON) do t
     push!(logs, "a $t")
 end
 
-conn = (Router)(index, "/api/users")
+conn = (Router)(get, "/api/users")
 @test ["b hello", "a hello"] == logs
 
 layout(::Layout, body, options) = """[$body]"""

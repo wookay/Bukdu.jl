@@ -2,5 +2,5 @@
 
 abstract ApplicationView
 
-type View <: ApplicationView
+immutable View <: ApplicationView
 end

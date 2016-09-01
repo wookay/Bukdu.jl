@@ -1,6 +1,6 @@
 # module Bukdu.Plug
 
-type Static
+immutable Static
 end
 
 import HttpServer: Response, mimetypes
@@ -19,15 +19,17 @@ end
 
 import ..ApplicationController, ..Routing, ..Conn
 
-type StaticController <: ApplicationController
+immutable StaticController <: ApplicationController
 end
 
 function read(c::StaticController)
-    path = c[:private][:path]
-    resp = FileResponse(path)
+    filepath = c[:assigns][:filepath]
+    resp = FileResponse(filepath)
     params = Dict{String,String}()
     query_params = Dict{String,String}()
-    Conn(resp.status, Dict{String,String}(resp.headers), resp.data, params, query_params)
+    private = Dict{Symbol,String}()
+    assigns = Dict{Symbol,String}()
+    Conn(resp.status, Dict{String,String}(resp.headers), resp.data, params, query_params, private, assigns)
 end
 
 function plug(::Type{Plug.Static}; kw...)
@@ -43,15 +45,15 @@ function plug(::Type{Plug.Static}; kw...)
     end
     for (root, dirs, files) in walkdir(from)
         for file in files
-            path = joinpath(root, file)
-            opts = Dict(:private => Dict{Symbol,Any}(:path=>path))
+            filepath = joinpath(root, file)
+            opts = Dict(:assigns => Dict{Symbol,String}(:filepath=>filepath))
             if "index.html" == file
                 Routing.match(get, "/", StaticController, read, opts)
             end
             if has_only
-                !any(x->startswith(path, x), only) && continue
+                !any(x->startswith(filepath, x), only) && continue
             end
-            reqpath = path[length(from)+1:end]
+            reqpath = filepath[length(from)+1:end]
             Routing.match(get, reqpath, StaticController, read, opts)
         end
     end

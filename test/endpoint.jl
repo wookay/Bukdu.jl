@@ -7,11 +7,12 @@ first(::WelcomeController) = 1
 second(::WelcomeController) = 2
 
 
+Logger.set_level(false)
+
 using Base.Test
 @test isempty(Bukdu.RouterRoute.routes)
 
-conn = (Endpoint)("/")
-@test 404 == conn.status
+@test_throws NoRouteError (Endpoint)("/")
 
 Router() do
     get("/", WelcomeController, first)
@@ -19,8 +20,10 @@ end
 
 @test !isempty(Bukdu.RouterRoute.routes)
 
-conn = (Endpoint)("/")
-@test 404 == conn.status
+conn = (Router)(get, "/")
+@test 200 == conn.status
+
+@test_throws NoRouteError (Endpoint)("/")
 
 
 type SecondRouter <: ApplicationRouter
@@ -42,24 +45,14 @@ Endpoint() do
     plug(SecondRouter)
 end
 
-conn = (Router)(first, "/")
+conn = (Router)(get, "/")
 @test 200 == conn.status
 
-conn = (Router)(second, "/")
-@test 404 == conn.status
-
-conn = (SecondRouter)(first, "/")
-@test 404 == conn.status
-
-conn = (SecondRouter)(second, "/")
+conn = (SecondRouter)(get, "/")
 @test 200 == conn.status
 
 conn = (Endpoint)("/")
 @test 1 == conn.resp_body
-
-conn = (Endpoint)("/")
-@test 1 == conn.resp_body
-
 
 type SecondEndpoint <: ApplicationEndpoint
 end
@@ -88,18 +81,15 @@ end
 NothingEndpoint() do
 end
 
-conn = (NothingRouter)(first, "/")
-@test 404 == conn.status
+@test_throws NoRouteError (NothingRouter)(get, "/")
 
-conn = (NothingEndpoint)("/")
-@test 404 == conn.status
+@test_throws NoRouteError (NothingEndpoint)("/")
 
 NothingEndpoint() do
     plug(NothingRouter)
 end
 
-conn = (NothingEndpoint)("/")
-@test 404 == conn.status
+@test_throws NoRouteError (NothingEndpoint)("/")
 
 conn = (Endpoint)("/")
 @test 200 == conn.status

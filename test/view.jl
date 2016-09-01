@@ -16,7 +16,6 @@ Router() do
 end
 
 Endpoint() do
-    plug(Plug.Logger, level=false)
     plug(Router)
 end
 
@@ -38,15 +37,15 @@ end
 
 
 using Base.Test
-conn = (Router)(show, "/hey")
+conn = (Router)(get, "/hey")
 @test 200 == conn.status
 @test "<div>hello</div>" == conn.resp_body
 
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test 200 == conn.status
 @test "<html><body><div>hello</div><body></html>" == conn.resp_body
 
-conn = (Router)(mark, "/mark")
+conn = (Router)(get, "/mark")
 @test 200 == conn.status
 @test "<html><body><h1>hello</h1><body></html>" == conn.resp_body
 
@@ -63,54 +62,56 @@ end
 after(render, View/Layout) do path, contents
     push!(logs, :avl)
 end
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test [:bvl,:bv,:av,:avl] == logs
 
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test [:bvl,:bv,:av,:avl, :bvl,:bv,:av,:avl] == logs
 
 @test "<div>hello</div>" == render(View; path="page.tpl", contents="hello")
 @test "<html><body><div>hello</div><body></html>" == render(View/Layout; path="page.tpl", contents="hello")
 
 
-before(render, Markdown) do text
-    Logger.debug("mark")
-end
+Logger.have_color(false)
 
 before(render, Markdown/Layout) do text
-    Logger.debug("mark")
+    Logger.info("mark")
+end
+
+before(render, Markdown) do text
+    Logger.info("down")
 end
 
 let oldout = STDERR
    rdout, wrout = redirect_stdout()
 
-conn = (Router)(mark, "/mark")
+conn = (Router)(get, "/mark")
 
    reader = @async readstring(rdout)
    redirect_stdout(oldout)
    close(wrout)
 
-@test "\e[1m\e[33mDEBUG\e[0m Markdown/Layout mark\n\e[1m\e[33mDEBUG\e[0m Markdown mark\n" == wait(reader)
+@test "INFO Markdown/Layout mark\nINFO Markdown down\n" == wait(reader)
 end
 
 
 before(render, View/Layout) do path, contents
-    Logger.debug("view")
+    Logger.info("view layout")
 end
 
 before(render, View) do path, contents
-    Logger.debug("view")
+    Logger.info("view")
 end
 
 
 let oldout = STDERR
    rdout, wrout = redirect_stdout()
 
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 
    reader = @async readstring(rdout)
    redirect_stdout(oldout)
    close(wrout)
 
-@test "\e[1m\e[33mDEBUG\e[0m View/Layout view\n\e[1m\e[33mDEBUG\e[0m View view\n" == wait(reader)
+@test "INFO View/Layout view layout\nINFO View view\n" == wait(reader)
 end

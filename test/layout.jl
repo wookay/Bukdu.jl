@@ -19,10 +19,10 @@ end
 
 
 using Base.Test
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test 200 == conn.status
 @test "default hello" == conn.resp_body
 
-conn = (Router)(custom, "/hey")
+conn = (Router)(get, "/hey")
 @test 200 == conn.status
 @test "custom hello" == conn.resp_body

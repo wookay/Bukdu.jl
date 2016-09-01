@@ -8,7 +8,7 @@ function plugins(c::WelcomeController)
 end
 
 function index(::WelcomeController)
-    Logger.debug("hi")
+    Logger.info("hi")
     "hello"
 end
 
@@ -17,21 +17,24 @@ Router() do
 end
 
 Endpoint() do
-    plug(Plug.Logger)
+    plug(Plug.Logger, level=:debug)
     plug(Router)
 end
 
 
 using Base.Test
 
+Logger.have_color(false)
 let oldout = STDERR
    rdout, wrout = redirect_stdout()
 
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 
    reader = @async readstring(rdout)
    redirect_stdout(oldout)
    close(wrout)
 
-@test "\e[1m\e[32mINFO\e[0m GET / WelcomeController.index\n\e[1m\e[33mDEBUG\e[0m WelcomeController.index hi\n" == wait(reader)
+   lines = split(wait(reader), '\n')
+@test startswith(lines[1], "DEBUG GET /")
+@test lines[2] == "INFO WelcomeController.index hi"
 end

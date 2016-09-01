@@ -11,7 +11,7 @@ end
 
 
 using Base.Test
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test 200 == conn.status
 @test "text/plain" == conn.resp_header["Content-Type"]
 @test "hello" == conn.resp_body
@@ -24,7 +24,7 @@ after(render, Text) do t
     push!(logs, "a $t")
 end
 
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test ["b hello", "a hello"] == logs
 
 layout(::Layout, body, options) = """say $body"""
@@ -42,7 +42,7 @@ end
 
 empty!(logs)
 
-conn = (Router)(show, "/say")
+conn = (Router)(get, "/say")
 @test 200 == conn.status
 @test "text/plain" == conn.resp_header["Content-Type"]
 @test "say hello" == conn.resp_body

@@ -13,7 +13,7 @@ Router() do
 end
 
 Endpoint() do
-    plug(Plug.Logger, level=false)
+    plug(Plug.Logger, level=:error)
     plug(Router)
 end
 
@@ -73,7 +73,7 @@ before(::WelcomeController) = push!(logs, :bc)
 after(::WelcomeController) = push!(logs, :ac)
 after(::Request, ::Response) = push!(logs, :ar)
 
-conn = (Router)(index, "/")
+conn = (Router)(get, "/")
 @test [:bc, :ac] == logs
 empty!(logs)
 

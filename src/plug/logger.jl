@@ -2,7 +2,7 @@
 
 import ..Bukdu
 
-type Logger
+immutable Logger
 end
 
 function plug(::Type{Plug.Logger}; kw...)
