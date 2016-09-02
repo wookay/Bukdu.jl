@@ -24,25 +24,28 @@ warn(block::Function)  = settings[:level] >= level_warn && warn(block()...)
 info(block::Function)  = settings[:level] >= level_info && info(block()...)
 debug(block::Function) = settings[:level] >= level_debug && debug(block()...)
 
-fatal(args...) = settings[:level] >= level_fatal && print_log(:red, "FATAL", args...)
+fatal(args...) = settings[:level] >= level_fatal && print_log(:magenta, "FATAL", args...)
 error(args...) = settings[:level] >= level_error && print_log(:red, "ERROR", args...)
-warn(args...)  = settings[:level] >= level_warn && print_log(:cyan, "WARN ", args...)
+warn(args...)  = settings[:level] >= level_warn && print_log(:yellow, "WARN ", args...)
 info(args...)  = settings[:level] >= level_info && print_info(args...)
-debug(args...) = settings[:level] >= level_debug && print_log(:yellow, "DEBUG", args...)
+debug(args...) = settings[:level] >= level_debug && print_log(:green, "DEBUG", args...)
 
 function print_info(args...)
     prefix = settings[:info_prefix]
     sub = string(settings[:info_sub])
-    print_log(:green, prefix, sub, args...)
+    print_log(:blue, prefix, sub, args...)
+end
+
+function with_color(color::Symbol, text)::String
+    if settings[:have_color]
+        string(Base.text_colors[color], text, Base.color_normal)
+    else
+        string(text)
+    end
 end
 
 function print_log(color::Symbol, prefix::String, args...)
-    if settings[:have_color]
-        print(Base.text_colors[color], prefix, Base.color_normal)
-    else
-        print(prefix)
-    end
-    print(' ')
+    print(with_color(color, prefix), ' ')
     println(join(map(el->isa(el, StackFrame) ? "\n$el" :
                          isa(el, Vector{StackFrame}) ? "\n" * join(el, '\n') :
                              el, args), ' '))

@@ -3,7 +3,7 @@ importall Bukdu
 type VueController <: ApplicationController
 end
 
-index(::VueController) = "hello bukdu"
+index(::VueController) = "Hello Bukdu"
 
 Router() do
     get("/", VueController, index)

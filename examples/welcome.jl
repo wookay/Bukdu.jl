@@ -3,7 +3,7 @@ importall Bukdu
 type WelcomeController <: ApplicationController
 end
 
-index(::WelcomeController) = "hello bukdu"
+index(::WelcomeController) = "Hello Bukdu"
 
 Router() do
     get("/", WelcomeController, index)

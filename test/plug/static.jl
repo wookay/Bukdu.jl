@@ -9,9 +9,9 @@ Router() do
     get("/", WelcomeController, index)
 end
 
-track = []
+loaded = []
 Endpoint() do
-    push!(track, :blah)
+    push!(loaded, 1)
     plug(Plug.Static, at= "/", from= "../examples/public")
     plug(Plug.Logger, level=:error)
     plug(Router)
@@ -22,11 +22,11 @@ using Base.Test
 conn = (Endpoint)("/index.html")
 @test 200 == conn.status
 @test "text/html" == conn.resp_header["Content-Type"]
-@test startswith(String(conn.resp_body), "<html>")
+@test startswith(String(conn.resp_body), "<!DOCTYPE html>")
 
 conn = (Endpoint)("/")
 @test 200 == conn.status
-@test startswith(String(conn.resp_body), "<html>")
+@test startswith(String(conn.resp_body), "<!DOCTYPE html>")
 
 conn = (Endpoint)("/js/vue.min.js")
 @test 200 == conn.status
@@ -35,6 +35,8 @@ conn = (Endpoint)("/js/vue.min.js")
 
 @test_throws NoRouteError (Endpoint)("/js/not_found")
 
-@test [:blah] == track
+@test [1] == loaded
+
 reload(Endpoint)
-@test [:blah, :blah] == track
+
+@test [1, 1] == loaded

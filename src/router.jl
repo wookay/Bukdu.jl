@@ -184,12 +184,12 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 try
                     Logger.debug() do
                         padding = length(path) > 4 ? "\t" : "\t\t"
-                        uppercase(string(Base.function_name(route.verb))), path, padding, string(typeof(controller), '.', Base.function_name(route.action))
+                        uppercase(string(Base.function_name(route.verb))), Logger.with_color(:bold, path), padding, string(typeof(controller), '.', Base.function_name(route.action))
                     end
                     result = route.action(controller)
                 catch ex
                     Logger.error() do
-                        verb, path, '\n', ex, '\n', route, stacktrace()
+                        verb, Logger.with_color(:bold, path), '\n', ex, '\n', route, stacktrace()
                     end
                     result = Conn(400, resp_headers, "bad request $ex", params, query_params, route.private, route.assigns)
                 end
@@ -202,7 +202,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
         end
     end
     Logger.warn() do
-        uppercase(string(Base.function_name(verb))), path
+        uppercase(string(Base.function_name(verb))), Logger.with_color(:bold, path)
     end
     throw(NoRouteError(""))
 end

@@ -16,7 +16,7 @@ end
 
 
 using Base.Test
-@test Bukdu.Logger.level_info == Bukdu.Logger.settings[:level]
+@test Bukdu.Logger.level_debug == Bukdu.Logger.settings[:level]
 
 Logger.have_color(false)
 
@@ -31,5 +31,5 @@ conn = (Router)(get, "/")
    redirect_stdout(oldout)
    close(wrout)
 
-@test "WARN  GET /strange\nWARN  | /strange\n" == wait(reader)
+@test "DEBUG GET / \t\t WelcomeController.index\nWARN  GET /strange\nWARN  | /strange\n" == wait(reader)
 end
