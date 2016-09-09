@@ -11,6 +11,11 @@ end
 
 Bukdu.start(8080)
 
+Endpoint() do
+    plug(Plug.Logger)
+    plug(Router)
+end
+
 wait()
 
 # Bukdu.stop()

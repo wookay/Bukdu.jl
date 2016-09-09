@@ -24,6 +24,36 @@ Router() do
 end
 
 Bukdu.start(8080)
-
-# Bukdu.stop()
 ```
+
+
+### Endpoint
+
+* Plug.Logger
+```
+Endpoint() do
+    plug(Plug.Logger)
+    plug(Router)
+end
+```
+
+* Plug.Static
+```
+Endpoint() do
+    plug(Plug.Static, at= "/", from= "public")
+    plug(Plug.Logger)
+    plug(Router)
+end
+```
+
+
+### Logger
+
+* Logger level
+```
+Logger.set_level(false)
+```
+
+
+### Jupyter notebook
+* [Bukdu.ipynb](https://github.com/wookay/Bukdu.jl/blob/master/examples/jupyter/Bukdu.ipynb)
