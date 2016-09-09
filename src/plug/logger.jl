@@ -2,6 +2,8 @@
 
 import ..Bukdu
 
+export Logger
+
 immutable Logger
 end
 
