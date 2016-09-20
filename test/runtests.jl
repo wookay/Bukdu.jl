@@ -15,12 +15,17 @@ end
 
 workspace()
 Base.Test.@testset "renderers/text.jl" begin
-    include("renderers/mustache.jl")
+    include("renderers/text.jl")
 end
 
 workspace()
 Base.Test.@testset "renderers/json.jl" begin
     include("renderers/json.jl")
+end
+
+workspace()
+Base.Test.@testset "renderers/html.jl" begin
+    include("renderers/html.jl")
 end
 
 workspace()

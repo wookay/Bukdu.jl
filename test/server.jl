@@ -3,7 +3,7 @@ importall Bukdu
 type WelcomeController <: ApplicationController
 end
 
-layout(::Layout, body, options) = body
+layout(::Layout, body) = body
 index(::WelcomeController) = render(Text/Layout, "hello world")
 show(::WelcomeController) = pi
 
@@ -45,7 +45,7 @@ req.resource = "/test"
 res = Bukdu.handler(req, Response())
 @test 404 == res.status
 
-import Requests: get, statuscode, text
+import Requests: statuscode, text
 
 Bukdu.start([8082, 8083])
 

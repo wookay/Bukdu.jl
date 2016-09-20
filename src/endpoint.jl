@@ -4,6 +4,19 @@ import Base: reload
 
 abstract ApplicationEndpoint
 
+"""
+    Endpoint
+
+Use `Endpoint` to define the plug pipelines.
+
+```julia
+Endpoint() do
+    plug(Plug.Static, at= "/", from= "public")
+    plug(Plug.Logger)
+    plug(Router)
+end
+```
+"""
 immutable Endpoint <: ApplicationEndpoint
 end
 
@@ -14,25 +27,25 @@ endpoint_contexts = Dict{Type,Function}()
 end # module Bukdu.EndpointManagement
 
 
-function reload{AE<:ApplicationEndpoint}(E::Type{AE})
-    context = EndpointManagement.endpoint_contexts[E]
+function reload{AE<:ApplicationEndpoint}(::Type{AE})
+    context = EndpointManagement.endpoint_contexts[AE]
     empty!(RouterRoute.routes)
     context()
-    EndpointManagement.endpoint_routes[E] = copy(RouterRoute.routes)
+    EndpointManagement.endpoint_routes[AE] = copy(RouterRoute.routes)
     nothing
 end
 
-function (E::Type{AE}){AE<:ApplicationEndpoint}(context::Function)
+function (::Type{AE}){AE<:ApplicationEndpoint}(context::Function)
     empty!(RouterRoute.routes)
     context()
-    EndpointManagement.endpoint_routes[E] = copy(RouterRoute.routes)
-    EndpointManagement.endpoint_contexts[E] = context
+    EndpointManagement.endpoint_routes[AE] = copy(RouterRoute.routes)
+    EndpointManagement.endpoint_contexts[AE] = context
     nothing
 end
 
-function (E::Type{AE}){AE<:ApplicationEndpoint}(path::String)
-    routes = haskey(EndpointManagement.endpoint_routes,E) ? EndpointManagement.endpoint_routes[E] : Vector{Route}()
-    Routing.request(routes, |, path) do route
+function (::Type{AE}){AE<:ApplicationEndpoint}(path::String)
+    routes = haskey(EndpointManagement.endpoint_routes,AE) ? EndpointManagement.endpoint_routes[AE] : Vector{Route}()
+    Routing.request(routes, |, path, Vector{UInt8}()) do route
         true
     end
 end

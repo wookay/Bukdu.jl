@@ -2,6 +2,21 @@
 
 abstract ApplicationRouter
 
+"""
+    Router
+
+Use to route for the incoming path into the controller and action.
+
+Verbs are `get`, `post`, `delete`, `patch`, `put`.
+
+`scope` and `resources` are used to namespace something.
+
+```julia
+Router() do
+    get("/", WelcomeController, index)
+end
+```
+"""
 immutable Router <: ApplicationRouter
 end
 
@@ -15,26 +30,45 @@ include("router/resource.jl")
 include("router/conn.jl")
 
 import Base: reset
+import URIParser: escape
 
-function reset{AR<:ApplicationRouter}(R::Type{AR})
-    delete!(Routing.routing_map, R)
+function reset{AR<:ApplicationRouter}(::Type{AR})
+    delete!(Routing.routing_map, AR)
 end
 
-function (R::Type{AR}){AR<:ApplicationRouter}(context::Function)
+function (::Type{AR}){AR<:ApplicationRouter}(context::Function)
     empty!(RouterRoute.routes)
     context()
-    Routing.routing_map[R] = copy(RouterRoute.routes)
+    Routing.routing_map[AR] = copy(RouterRoute.routes)
     empty!(RouterScope.stack)
     nothing
 end
 
-function (R::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String)
-    routes = haskey(Routing.routing_map, R) ? Routing.routing_map[R] : Vector{Route}()
-    Routing.request(routes, verb, path) do route
+function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String; kw...)
+    routes = haskey(Routing.routing_map, AR) ? Routing.routing_map[AR] : Vector{Route}()
+    data = Vector{UInt8}()
+    if !isempty(kw)
+        data = Vector{UInt8}(join(map(kw) do kv
+            (k,v) = kv
+            string(k, '=', escape(v))
+        end, '&'))
+    end
+    Routing.request(routes, verb, path, data) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
 end
 
+"""
+    scope
+
+Scoping around the routes.
+
+```julia
+scope("/admin") do
+    get("/users/:id", UserController, index)
+end
+```
+"""
 function scope(context::Function, path::String; kw...)
     Routing.do_scope(context, merge(Dict(:path=>path), Dict(kw)))
 end
@@ -47,12 +81,21 @@ function scope(context::Function; kw...)
     Routing.do_scope(context, Dict(kw))
 end
 
-function resources{AC<:ApplicationController}(path::String, controller::Type{AC}; kw...)
-    Routing.add_resources(()->nothing, path, controller, Dict(kw))
+"""
+    resources
+
+Generating RESTful routes.
+
+```julia
+resources("/users", UserController, only= [index])
+```
+"""
+function resources{AC<:ApplicationController}(path::String, ::Type{AC}; kw...)
+    Routing.add_resources(()->nothing, path, AC, Dict(kw))
 end
 
-function resources{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC}; kw...)
-    Routing.add_resources(context, path, controller, Dict(kw))
+function resources{AC<:ApplicationController}(context::Function, path::String, ::Type{AC}; kw...)
+    Routing.add_resources(context, path, AC, Dict(kw))
 end
 
 
@@ -83,12 +126,12 @@ task_storage = Dict{Task,Branch}()
 routing_map = Dict{Type,Vector{Route}}()
 
 # route
-function match{AC<:ApplicationController}(verb::Function, path::String, controller::Type{AC}, action::Function, options::Dict)
-    add_route(:match, verb, path, controller, action, options)
+function match{AC<:ApplicationController}(verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
+    add_route(:match, verb, path, AC, action, options)
 end
 
-function add_route{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String, controller::Type{AC}, action::Function, options::Dict)
-    route = RouterScope.route(kind, verb, path, controller, action, options)
+function add_route{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
+    route = RouterScope.route(kind, verb, path, AC, action, options)
     push!(RouterRoute.routes, route)
     route
 end
@@ -101,8 +144,8 @@ function do_scope(context::Function, options::Dict)
 end
 
 # resources
-function add_resources{AC<:ApplicationController}(context::Function, path::String, controller::Type{AC}, options::Dict)
-    resource = RouterResource.build(path, controller, options)
+function add_resources{AC<:ApplicationController}(context::Function, path::String, ::Type{AC}, options::Dict)
+    resource = RouterResource.build(path, AC, options)
     Routing.do_scope(context, resource.member)
     add_route(resource)
 end
@@ -140,7 +183,7 @@ function add_route(resource::Resource)
     end
 end
 
-function request(compare::Function, routes::Vector{Route}, verb::Function, path::String)::Conn
+function request(compare::Function, routes::Vector{Route}, verb::Function, path::String, data::Vector{UInt8})::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
@@ -170,6 +213,9 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 C = route.controller
                 controller = C()
                 query_params = Dict{String,String}(parsequerystring(uri.query))
+                if verb == post && !isempty(data)
+                    merge!(query_params, parsequerystring(String(data)))
+                end
                 branch = Branch(query_params, params, route.action, uri.host, route.assigns)
                 task = current_task()
                 task_storage[task] = branch

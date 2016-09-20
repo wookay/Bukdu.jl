@@ -39,12 +39,12 @@ function find_host(stack::Vector{Scope})
 end
 
 function route{AC<:ApplicationController}(kind::Symbol, verb::Function,
-             path::String, controller::Type{AC}, action::Function, options::Dict)::Route
+             path::String, ::Type{AC}, action::Function, options::Dict)::Route
     path    = validate_path(path)
     stack = get_stack()
     private = Dict{Symbol,String}(reduce(merge, vcat(extract(stack, :private), Keyword.get(options, :private, Dict()))))
     assigns = Dict{Symbol,String}(reduce(merge, vcat(extract(stack, :assigns), Keyword.get(options, :assigns, Dict()))))
-    RouterRoute.build(kind, verb, join_path(stack, path), find_host(stack), controller, action, private, assigns)
+    RouterRoute.build(kind, verb, join_path(stack, path), find_host(stack), AC, action, private, assigns)
 end
 
 function validate_path(path)::String

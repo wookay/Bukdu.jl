@@ -1,6 +1,6 @@
 # module Bukdu
 
-function config{AE<:ApplicationEndpoint}(app::Symbol, endpoint::Type{AE}; kw...)
+function config{AE<:ApplicationEndpoint}(app::Symbol, ::Type{AE}; kw...)
     # app, endpoint
     merge!(Configuration.env, Dict(map(kw) do kv
         (k,v) = kv

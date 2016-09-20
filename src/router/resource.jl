@@ -23,11 +23,11 @@ import ..Bukdu: index, edit, new, show, create, update, delete
 const default_param_key = "id"
 const controller_actions = [index, edit, new, show, create, update, delete]
 
-function build{AC<:ApplicationController}(path::String, controller::Type{AC}, options::Dict)
+function build{AC<:ApplicationController}(path::String, ::Type{AC}, options::Dict)
     path = RouterScope.validate_path(path)
     alias = Keyword.get(options, :alias, "")
     param = Keyword.get(options, :param, default_param_key)
-    name = Keyword.get(options, :name, Naming.resource_name(controller, "Controller"))
+    name = Keyword.get(options, :name, Naming.resource_name(AC, "Controller"))
     as      = Keyword.get(options, :as, name)
     private = Keyword.get(options, :private, Dict{Symbol,Any}())
     assigns = Keyword.get(options, :assigns, Dict{Symbol,Any}())
@@ -40,7 +40,7 @@ function build{AC<:ApplicationController}(path::String, controller::Type{AC}, op
     member_path = singleton ? path : string(path, "/:", name, "_", param)
     member      = Dict(:path => member_path, :as => as, :alias => alias, :private => private, :assigns => assigns)
 
-    Resource(path, param, controller, actions, route, member, collection, singleton)
+    Resource(path, param, AC, actions, route, member, collection, singleton)
 end
 
 function extract_actions(options::Dict, singleton::Bool)::Vector{Function}

@@ -20,8 +20,8 @@ import ..Bukdu: Route
 routes = Vector{Route}()
 
 function build{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String,
-             host::String, controller::Type{AC}, action::Function, private::Dict{Symbol,String}, assigns::Dict{Symbol,String})
-    Route(verb, kind, path, host, controller, action, private, assigns)
+             host::String, ::Type{AC}, action::Function, private::Dict{Symbol,String}, assigns::Dict{Symbol,String})
+    Route(verb, kind, path, host, AC, action, private, assigns)
 end
 
 end # module Bukdu.RouterRoute
