@@ -14,7 +14,7 @@ $(eval(parse(code)))
 """)
 end
 
-layout(::Layout, body, options) = "<body>$body</body>"
+layout(::Layout, body) = "<body>$body</body>"
 show(::MarkdownController) = render(Markdown/Layout, "`cool`")
 
 Router() do

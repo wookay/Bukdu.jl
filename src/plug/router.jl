@@ -2,8 +2,17 @@
 
 import ..ApplicationRouter, ..Routing, ..RouterRoute
 
-function plug{AR<:ApplicationRouter}(R::Type{AR})
-    if haskey(Routing.routing_map, R)
-        append!(RouterRoute.routes, Routing.routing_map[R])
+"""
+plug `Router` to give the routes into the Endpoint.
+
+```julia
+Endpoint() do
+    plug(Router)
+end
+```
+"""
+function plug{AR<:ApplicationRouter}(::Type{AR})
+    if haskey(Routing.routing_map, AR)
+        append!(RouterRoute.routes, Routing.routing_map[AR])
     end
 end

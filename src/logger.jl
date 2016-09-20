@@ -11,6 +11,22 @@ const level_warn  = 300
 const level_info  = 400
 const level_debug = 500
 
+"""
+    Logger.level::Union{Bool,Symbol}
+
+Get the current Logger level.
+"""
+level = :info::Union{Bool,Symbol}
+
+const levels = Dict{Union{Bool,Symbol},Int}(
+    false  => level_false,
+    :fatal => level_fatal,
+    :error => level_error,
+    :warn  => level_warn,
+    :info  => level_info,
+    :debug => level_debug
+)
+
 settings = Dict(
     :level => level_info,
     :have_color => Base.have_color,
@@ -28,12 +44,45 @@ fatal(args...) = settings[:level] >= level_fatal && print_log(:magenta, "FATAL",
 error(args...) = settings[:level] >= level_error && print_log(:red, "ERROR", args...)
 warn(args...)  = settings[:level] >= level_warn && print_log(:yellow, "WARN ", args...)
 info(args...)  = settings[:level] >= level_info && print_info(args...)
-debug(args...) = settings[:level] >= level_debug && print_log(:green, "DEBUG", args...)
+debug(args...) = settings[:level] >= level_debug && print_log(:cyan, "DEBUG", args...)
+
+"""
+    Logger.set_level(lvl::Union{Symbol,Bool})
+
+Set the log level.
+Options: `:debug`, `:info`, `:error`, `:warn`, `:fatal`, `false`
+
+```julia
+julia> Logger.set_level(false)
+false
+```
+"""
+function set_level(lvl::Union{Symbol,Bool})
+    if haskey(levels, lvl)
+        global level
+        settings[:level] = levels[lvl]
+        level = lvl
+    else
+        valids = join(map(repr, keys(levels)), ", ")
+        throw(ArgumentError("invalid argument for level"))
+    end
+end
 
 function print_info(args...)
     prefix = settings[:info_prefix]
     sub = string(settings[:info_sub])
-    print_log(:blue, prefix, sub, args...)
+    print_log(:green, prefix, sub, args...)
+end
+
+function print_log(color::Symbol, prefix::String, args...)
+    print(with_color(color, prefix), ' ')
+    println(join(map(el->isa(el, StackFrame) ? "\n$el" :
+                         isa(el, Vector{StackFrame}) ? "\n" * join(el, '\n') :
+                             el, args), ' '))
+end
+
+function have_color(enabled::Bool)
+    settings[:have_color] = enabled
 end
 
 function with_color(color::Symbol, text)::String
@@ -44,23 +93,6 @@ function with_color(color::Symbol, text)::String
     end
 end
 
-function print_log(color::Symbol, prefix::String, args...)
-    print(with_color(color, prefix), ' ')
-    println(join(map(el->isa(el, StackFrame) ? "\n$el" :
-                         isa(el, Vector{StackFrame}) ? "\n" * join(el, '\n') :
-                             el, args), ' '))
-end
-
-function set_level(level::Union{Symbol,Bool})
-    opts = Dict(false=>level_false, :fatal=>level_fatal, :error=>level_error, :warn=>level_warn, :info=>level_info, :debug=>level_debug)
-    if haskey(opts, level)
-        settings[:level] = opts[level]
-    end
-end
-
-function have_color(color::Bool)
-    settings[:have_color] = color
-end
 
 ## log_message
 function log_message(prefix::String)
@@ -71,8 +103,8 @@ function log_message{AL<:ApplicationLayout}(D::LayoutDivision{AL})
     settings[:info_sub] = D
 end
 
-function log_message{AV<:ApplicationView}(V::Type{AV})
-    settings[:info_sub] = V.name.name
+function log_message{AV<:ApplicationView}(::Type{AV})
+    settings[:info_sub] = AV.name.name
 end
 
 function log_message(modul::Module)

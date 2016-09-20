@@ -38,7 +38,7 @@ end
 conn = (Router)(get, "/api/users")
 @test ["b hello", "a hello"] == logs
 
-layout(::Layout, body, options) = """[$body]"""
+layout(::Layout, body) = """[$body]"""
 show(::UserController) = render(JSON/Layout, "hello")
 before(render, JSON/Layout) do t
     push!(logs, "bl $t")

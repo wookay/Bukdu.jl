@@ -12,32 +12,28 @@ immutable LayoutDivision{AL<:ApplicationLayout}
     divisor::Type{AL}
 end
 
-function layout_symbol{AL<:ApplicationLayout}(D::LayoutDivision{AL})
-    view = isa(D.dividend, Type) ? D.dividend.name.name : Base.module_name(D.dividend)
-    lay = D.divisor.name.name
-    Symbol(view, '/', lay)
+function viewlayout_symbol{AL<:ApplicationLayout}(D::LayoutDivision{AL})
+    view_name = isa(D.dividend, Type) ? D.dividend.name.name : Base.module_name(D.dividend)
+    layout_name = D.divisor.name.name
+    Symbol(view_name, '/', layout_name)
 end
 
 function show{AL<:ApplicationLayout}(io::IO, D::LayoutDivision{AL})
-    write(io, layout_symbol(D))
+    write(io, viewlayout_symbol(D))
 end
 
 function /{AL<:ApplicationLayout}(dividend::Union{Module,Type}, ::Type{AL})
     LayoutDivision{AL}(dividend, AL)
 end
 
-function draw_layout{AL<:ApplicationLayout}(L::Type{AL}, body, options)
-    if isa(body, Conn)
-        data = layout(L(), body.resp_body, options)
-        body.resp_body = data
-        body
-    else
-        layout(L(), body, options)
-    end
-end
-
 """
-layout(::Layout, body, options)
+    layout(::Layout, body)
+
+Set the outer content for the `Layout`.
+
+```julia
+julia> layout(::Layout, body) = "<html><body>\$body</body></html>"
+```
 """
 function layout
 end

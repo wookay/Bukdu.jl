@@ -23,7 +23,7 @@ function handler(req::Request, res::Response)
     verb = getfield(Bukdu, Symbol(lowercase(req.method)))
     local conn::Conn
     try
-        conn = Routing.request(RouterRoute.routes, verb, req.resource) do route
+        conn = Routing.request(RouterRoute.routes, verb, req.resource, req.data) do route
             Base.function_name(route.verb) == Base.function_name(verb)
         end
     catch ex
@@ -57,10 +57,30 @@ end # module Bukdu.Farm
 
 import HttpServer
 
+"""
+    Bukdu.start(port::Int; host=getaddrinfo("localhost"))
+
+Start Bukdu server with port.
+
+```jula
+julia> Bukdu.start(8080)
+Listening on 127.0.0.1:8080...
+```
+"""
 function start(port::Int; host=getaddrinfo("localhost"))
     start([port]; host=host)
 end
 
+"""
+    Bukdu.start(ports::Vector{Int}; host=getaddrinfo("localhost"))
+
+Start Bukdu server with multiple ports.
+
+```jula
+julia> Bukdu.start([8080, 8081])
+Listening on 127.0.0.1:8080...
+```
+"""
 function start(ports::Vector{Int}; host=getaddrinfo("localhost"))
     for port in ports
         server = HttpServer.Server(handler)
@@ -69,6 +89,11 @@ function start(ports::Vector{Int}; host=getaddrinfo("localhost"))
     end
 end
 
+"""
+    Bukdu.stop()
+
+Stop the Bukdu server.
+"""
 function stop()
     for (server,task) in Farm.servers
         try

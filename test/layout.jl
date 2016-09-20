@@ -3,11 +3,11 @@ importall Bukdu
 type HelloController <: ApplicationController
 end
 
-layout(::Layout, body, options) = "default $body"
+layout(::Layout, body) = "default $body"
 
 type CustomLayout <: ApplicationLayout
 end
-layout(::CustomLayout, body, options) = "custom $body"
+layout(::CustomLayout, body) = "custom $body"
 
 custom(::HelloController) = render(Text/CustomLayout, "hello")
 index(::HelloController) = render(Text/Layout, "hello")

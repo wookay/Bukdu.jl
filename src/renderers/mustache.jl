@@ -7,8 +7,8 @@ function template(path::String, options::Dict)
     Mustache.render(contents, options)
 end
 
-function render{AV<:ApplicationView}(V::Type{AV}; kw...)
-    filtering(render, V; kw...) do
+function render{AV<:ApplicationView}(::Type{AV}, args...; kw...)
+    filtering(render, AV, args...) do
         options = Dict(kw)
         path = options[:path]
         template(path, options)

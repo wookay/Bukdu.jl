@@ -32,6 +32,15 @@ function read(c::StaticController)
     Conn(resp.status, Dict{String,String}(resp.headers), resp.data, params, query_params, private, assigns)
 end
 
+"""
+plug `Plug.Static` to serve the static files.
+
+```julia
+Endpoint() do
+    plug(Plug.Static, at= "/", from= "public")
+end
+```
+"""
 function plug(::Type{Plug.Static}; kw...)
     # at::String, from::String, only::Vector{String})
     opts = Dict(kw)

@@ -3,7 +3,7 @@ importall Bukdu
 type ViewController <: ApplicationController
 end
 
-layout(::Layout, body, options) = "<html><body>$body<body></html>"
+layout(::Layout, body) = "<html><body>$body<body></html>"
 
 show(::ViewController) = render(View; path="page.tpl", contents="hello")
 index(::ViewController) = render(View/Layout; path="page.tpl", contents="hello")
@@ -19,19 +19,19 @@ Endpoint() do
     plug(Router)
 end
 
-plugins(render, View/Layout) do path, contents
+plugins(render, View/Layout) do
     plug(Logger.log_message, View/Layout)
 end
 
-plugins(render, View) do path, contents
+plugins(render, View) do
     plug(Logger.log_message, View)
 end
 
-plugins(render, Markdown/Layout) do text
+plugins(render, Markdown/Layout) do md
     plug(Logger.log_message, Markdown/Layout)
 end
 
-plugins(render, Markdown) do text
+plugins(render, Markdown) do md
     plug(Logger.log_message, Markdown)
 end
 
@@ -50,18 +50,23 @@ conn = (Router)(get, "/mark")
 @test "<html><body><h1>hello</h1><body></html>" == conn.resp_body
 
 logs = []
-before(render, View/Layout) do path, contents
+
+before(render, View/Layout) do
     push!(logs, :bvl)
 end
-before(render, View) do path, contents
+
+before(render, View) do
     push!(logs, :bv)
 end
-after(render, View) do path, contents
-    push!(logs, :av)
-end
-after(render, View/Layout) do path, contents
+
+after(render, View/Layout) do
     push!(logs, :avl)
 end
+
+after(render, View) do
+    push!(logs, :av)
+end
+
 conn = (Router)(get, "/")
 @test [:bvl,:bv,:av,:avl] == logs
 
@@ -74,44 +79,44 @@ conn = (Router)(get, "/")
 
 Logger.have_color(false)
 
-before(render, Markdown/Layout) do text
-    Logger.info("mark")
+before(render, Markdown/Layout) do md
+    Logger.info("mark layout")
 end
 
-before(render, Markdown) do text
-    Logger.info("down")
+before(render, Markdown) do md
+    Logger.info("mark")
 end
 
 let oldout = STDERR
    rdout, wrout = redirect_stdout()
 
-conn = (Router)(get, "/mark")
+   conn = (Router)(get, "/mark")
 
    reader = @async readstring(rdout)
    redirect_stdout(oldout)
    close(wrout)
 
-@test "INFO Markdown/Layout mark\nINFO Markdown down\n" == wait(reader)
+   @test "INFO Markdown/Layout mark layout\nINFO Markdown mark\n" == wait(reader)
 end
 
 
-before(render, View/Layout) do path, contents
+before(render, View/Layout) do
     Logger.info("view layout")
 end
 
-before(render, View) do path, contents
+before(render, View) do
     Logger.info("view")
 end
 
 
 let oldout = STDERR
-   rdout, wrout = redirect_stdout()
+    rdout, wrout = redirect_stdout()
 
-conn = (Router)(get, "/")
+    conn = (Router)(get, "/")
 
-   reader = @async readstring(rdout)
-   redirect_stdout(oldout)
-   close(wrout)
+    reader = @async readstring(rdout)
+    redirect_stdout(oldout)
+    close(wrout)
 
-@test "INFO View/Layout view layout\nINFO View view\n" == wait(reader)
+    @test "INFO View/Layout view layout\nINFO View view\n" == wait(reader)
 end
