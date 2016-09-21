@@ -75,7 +75,8 @@ function render{AL<:ApplicationLayout}(D::LayoutDivision{AL}, args...; kw...)
     if isempty(kw)
         bodies = tuple(body_conn, args[2:end]...)
     else
-        if method_exists(layout, tuple(L, Any, typeof.(args)..., Dict))
+        argstuple = isempty(args) ? tuple() : map(typeof, args)
+        if method_exists(layout, tuple(L, Any, argstuple..., Dict))
             bodies = tuple(body_conn, args..., Dict(kw))
         else
             bodies = tuple(body_conn, args...)
