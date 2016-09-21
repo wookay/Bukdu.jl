@@ -2,6 +2,8 @@ module Bukdu
 
 __precompile__(true)
 
+include("ecto.jl")
+
 include("exports.jl")
 include("keyword.jl")
 include("naming.jl")
