@@ -8,12 +8,14 @@ immutable Layout <: ApplicationLayout
 end
 
 immutable LayoutDivision{AL<:ApplicationLayout}
-    dividend::Union{Module,Type}
+    dividend::Union{LayoutDivision,Module,Type}
     divisor::Type{AL}
 end
 
 function viewlayout_symbol{AL<:ApplicationLayout}(D::LayoutDivision{AL})
-    view_name = isa(D.dividend, Type) ? D.dividend.name.name : Base.module_name(D.dividend)
+    view_name = isa(D.dividend, LayoutDivision) ? viewlayout_symbol(D.dividend) :
+                isa(D.dividend, Type) ? D.dividend.name.name :
+                Base.module_name(D.dividend)
     layout_name = D.divisor.name.name
     Symbol(view_name, '/', layout_name)
 end
@@ -25,6 +27,11 @@ end
 function /{AL<:ApplicationLayout}(dividend::Union{Module,Type}, ::Type{AL})
     LayoutDivision{AL}(dividend, AL)
 end
+
+function /{AL<:ApplicationLayout}(division::LayoutDivision, ::Type{AL})
+    LayoutDivision{AL}(division, AL)
+end
+
 
 """
     layout(::Layout, body)
