@@ -3,7 +3,7 @@ importall Bukdu
 type PageController <: ApplicationController
 end
 
-show(::PageController) = render(View; path="page.tpl", contents="hello")
+show(::PageController) = render(View; path="renderers/page.tpl", contents="hello")
 
 Router() do
     get("/:page", PageController, show)
@@ -16,10 +16,8 @@ conn = (Router)(get, "/1")
 @test "<div>hello</div>" == conn.resp_body
 @test "1" == conn.params["page"]
 
-
 layout(::Layout, body) = """<html><body>$body<body></html>"""
-
-index(c::PageController) = render(View/Layout; path="page.tpl", contents="hello")
+index(c::PageController) = render(View/Layout; path="renderers/page.tpl", contents="hello")
 
 Router() do
     get("/", PageController, index)
@@ -34,6 +32,7 @@ logs = []
 before(render, View) do
     push!(logs, "before")
 end
+
 after(render, View) do
     push!(logs, "after")
 end
@@ -42,9 +41,9 @@ conn = (Router)(get, "/")
 empty!(logs)
 
 
-layout(::Layout, body::String, c::PageController) = """layout2 - $body, $c"""
-index2(c::PageController) = render(View, c; path="page.tpl", contents="hello")
-index_with_layout2(c::PageController) = render(View/Layout, c; path="page.tpl", contents="hello")
+layout(::Layout, body, c::PageController, kwd) = """layout2 - $body, $c, $(kwd[:path])"""
+index2(c::PageController) = render(View, c; path="renderers/page.tpl", contents="hello")
+index_with_layout2(c::PageController) = render(View/Layout, c; path="renderers/page.tpl", contents="hello")
 
 Router() do
     get("/index2", PageController, index2)
@@ -70,7 +69,7 @@ conn = (Router)(get, "/index2")
 empty!(logs)
 
 conn = (Router)(get, "/index_with_layout2")
-@test "layout2 - <div>hello</div>, PageController()" == conn.resp_body
+@test "layout2 - <div>hello</div>, PageController(), renderers/page.tpl" == conn.resp_body
 @test ["before PageController()","after PageController()"] == logs
 empty!(logs)
 
@@ -83,6 +82,6 @@ after(render, View/Layout) do c
 end
 
 conn = (Router)(get, "/index_with_layout2")
-@test "layout2 - <div>hello</div>, PageController()" == conn.resp_body
+@test "layout2 - <div>hello</div>, PageController(), renderers/page.tpl" == conn.resp_body
 @test ["bl", "before PageController()","after PageController()", "al"] == logs
 empty!(logs)

@@ -5,8 +5,8 @@ end
 
 layout(::Layout, body) = "<html><body>$body<body></html>"
 
-show(::ViewController) = render(View; path="page.tpl", contents="hello")
-index(::ViewController) = render(View/Layout; path="page.tpl", contents="hello")
+show(::ViewController) = render(View; path="renderers/page.tpl", contents="hello")
+index(::ViewController) = render(View/Layout; path="renderers/page.tpl", contents="hello")
 mark(::ViewController) = render(Markdown/Layout, "# hello")
 
 Router() do
@@ -73,8 +73,8 @@ conn = (Router)(get, "/")
 conn = (Router)(get, "/")
 @test [:bvl,:bv,:av,:avl, :bvl,:bv,:av,:avl] == logs
 
-@test "<div>hello</div>" == render(View; path="page.tpl", contents="hello")
-@test "<html><body><div>hello</div><body></html>" == render(View/Layout; path="page.tpl", contents="hello")
+@test "<div>hello</div>" == render(View; path="renderers/page.tpl", contents="hello")
+@test "<html><body><div>hello</div><body></html>" == render(View/Layout; path="renderers/page.tpl", contents="hello")
 
 
 Logger.have_color(false)
