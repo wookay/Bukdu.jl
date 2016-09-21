@@ -71,8 +71,16 @@ function render{AL<:ApplicationLayout}(D::LayoutDivision{AL}, args...; kw...)
         ViewFilter.filters[(before,key)](args...)
     end
     body = render(V, args...; kw...)
-    ind = isempty(kw) ? 2 : 1
-    bodies = tuple(isa(body, Conn) ? body.resp_body : body, args[ind:end]...)
+    body_conn = isa(body, Conn) ? body.resp_body : body
+    if isempty(kw)
+        bodies = tuple(body_conn, args[2:end]...)
+    else
+        if method_exists(layout, tuple(L, Any, typeof.(args)..., Dict))
+            bodies = tuple(body_conn, args..., Dict(kw))
+        else
+            bodies = tuple(body_conn, args...)
+        end
+    end
     if isa(body, Conn)
         body.resp_body = layout(L(), bodies...)
         data = body
