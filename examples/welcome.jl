@@ -16,6 +16,6 @@ Endpoint() do
     plug(Router)
 end
 
-wait()
+# wait()
 
 # Bukdu.stop()

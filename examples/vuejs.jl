@@ -17,6 +17,6 @@ end
 
 Bukdu.start(8080)
 
-wait()
+# wait()
 
 # Bukdu.stop()
