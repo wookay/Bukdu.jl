@@ -84,8 +84,13 @@ Listening on 127.0.0.1:8080...
 function start(ports::Vector{Int}; host=getaddrinfo("localhost"))
     for port in ports
         server = HttpServer.Server(handler)
-        task = @async HttpServer.run(server, host=host, port=port)
-        push!(Farm.servers, (server,task))
+        server.http.events["listen"] = (port) -> Logger.info("Listening on $port..."; LF=false)
+        task = @async begin
+            HttpServer.run(server, host=host, port=port)
+        end
+        if :queued == task.state
+            push!(Farm.servers, (server,task))
+        end
     end
 end
 
@@ -95,13 +100,19 @@ end
 Stop the Bukdu server.
 """
 function stop()
+    stopped = 0
     for (server,task) in Farm.servers
         try
-            close(server.http)
+            if Base.StatusActive == server.http.sock.status
+                stopped += 1
+            end
+            close(server)
         catch e
         end
-        close(server)
     end
-    empty!(Farm.servers)
+    if stopped >= 1
+        Logger.info("Stopped.")
+        empty!(Farm.servers)
+    end
     nothing
 end

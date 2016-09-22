@@ -68,7 +68,7 @@ conn = (Router)(get, "/")
 @test "<div>$form1</div>" == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_name="jack")
-@test Dict("user_namee" => "jack") == conn.resp_body
+@test Dict("user_name" => "jack") == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="20")
 @test Dict("user_age" => "20") == conn.resp_body

@@ -1,7 +1,7 @@
 importall Bukdu
 
 import Bukdu.Octo: default, change
-import Bukdu.Tag: form_for, text_input, select, submit
+import Tag: form_for, text_input, select, submit
 
 type CafeController <: ApplicationController
 end

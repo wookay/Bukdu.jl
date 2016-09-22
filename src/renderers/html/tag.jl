@@ -3,7 +3,6 @@
 module Tag
 
 import ....Bukdu
-import Base: select
 
 function tag_id(f, field)
     string(lowercase(string(typeof(f))), '_', field)
@@ -58,8 +57,9 @@ function text_input(f, field::Symbol, value="")
 end
 
 function select_option(options)
+    # broadcast #
+    # string(join(string.("    <option value=\"", options, "\">", options, "</option>"), '\n'), '\n')
     string(join(map(x-> string("    <option value=\"", x, "\">", x, "</option>"), options), '\n'), '\n')
-    #string(join(string.("    <option value=\"", options, "\">", options, "</option>"), '\n'), '\n')
 end
 
 function select(f, field::Symbol, options)

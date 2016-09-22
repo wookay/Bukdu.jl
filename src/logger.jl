@@ -34,17 +34,17 @@ settings = Dict(
     :info_sub => ""
 )
 
-fatal(block::Function) = settings[:level] >= level_fatal && fatal(block()...)
-error(block::Function) = settings[:level] >= level_error && error(block()...)
-warn(block::Function)  = settings[:level] >= level_warn && warn(block()...)
-info(block::Function)  = settings[:level] >= level_info && info(block()...)
-debug(block::Function) = settings[:level] >= level_debug && debug(block()...)
+fatal(block::Function) = settings[:level] >= level_fatal && fatal(block())
+error(block::Function) = settings[:level] >= level_error && error(block())
+warn(block::Function)  = settings[:level] >= level_warn && warn(block())
+info(block::Function)  = settings[:level] >= level_info && info(block())
+debug(block::Function) = settings[:level] >= level_debug && debug(block())
 
-fatal(args...) = settings[:level] >= level_fatal && print_log(:magenta, "FATAL", args...)
-error(args...) = settings[:level] >= level_error && print_log(:red, "ERROR", args...)
-warn(args...)  = settings[:level] >= level_warn && print_log(:yellow, "WARN ", args...)
-info(args...)  = settings[:level] >= level_info && print_info(args...)
-debug(args...) = settings[:level] >= level_debug && print_log(:cyan, "DEBUG", args...)
+fatal(args...; kw...) = settings[:level] >= level_fatal && print_log(:magenta, "FATAL", "", args...; kw...)
+error(args...; kw...) = settings[:level] >= level_error && print_log(:red, "ERROR", "", args...; kw...)
+warn(args...; kw...)  = settings[:level] >= level_warn && print_log(:yellow, "WARN ", "", args...; kw...)
+info(args...; kw...)  = settings[:level] >= level_info && print_info(args...; kw...)
+debug(args...; kw...) = settings[:level] >= level_debug && print_log(:cyan, "DEBUG", "", args...; kw...)
 
 """
     Logger.set_level(lvl::Union{Symbol,Bool})
@@ -68,17 +68,29 @@ function set_level(lvl::Union{Symbol,Bool})
     end
 end
 
-function print_info(args...)
+function print_info(args...; kw...)
     prefix = settings[:info_prefix]
     sub = string(settings[:info_sub])
-    print_log(:green, prefix, sub, args...)
+    print_log(:green, prefix, sub, args...; kw...)
 end
 
-function print_log(color::Symbol, prefix::String, args...)
-    print(with_color(color, prefix), ' ')
-    println(join(map(el->isa(el, StackFrame) ? "\n$el" :
-                         isa(el, Vector{StackFrame}) ? "\n" * join(el, '\n') :
-                             el, args), ' '))
+function print_log(color::Symbol, prefix::String, sub::String, args...; LF=true)
+    isarray = false
+    contents = args
+    if 1 == length(args)
+        arg = first(args)
+        if any(x->isa(arg, x), [Array, Tuple])
+            isarray = true
+        end
+    elseif length(args) > 1
+        isarray = true
+    end
+    if isarray
+        contents = join(map(el->isa(el, StackFrame) ? "\n$el" :
+                       isa(el, Vector{StackFrame}) ? "\n" * join(el, '\n') :
+                           el, args...), ' ')
+    end
+    print(string(with_color(color, prefix), ' ', isempty(sub) ? "" : string(sub, ' '), contents..., (LF ? "\n" : "")))
 end
 
 function have_color(enabled::Bool)
