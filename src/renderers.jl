@@ -36,7 +36,7 @@ for func in [plugins, before, after]
 end
 
 
-function filtering(render_block::Function, render_func::Function, T::Type, args...)
+function filtering(render_block::Function, render_func::Function, T::Type, args...)::Conn
     typ_name = (:Val == T.name.name) ? T : T.name.name
     params = map(x->Any, args)
     key = (render_func,typ_name,params)
@@ -47,19 +47,19 @@ function filtering(render_block::Function, render_func::Function, T::Type, args.
         f = ViewFilter.filters[(before,key)]
         ViewFilter.filters[(before,key)](args...)
     end
-    data = render_block()
+    conn = render_block()
     if haskey(ViewFilter.filters, (after,key))
         ViewFilter.filters[(after,key)](args...)
     end
-    data
+    conn
 end
 
-function render(modul::Module, args...; kw...)
+function render(modul::Module, args...; kw...)::Conn
     V = Val{Base.module_name(modul)}
     render(V, args...; kw...)
 end
 
-function render{AL<:ApplicationLayout}(D::LayoutDivision{AL}, args...; kw...)
+function render{AL<:ApplicationLayout}(D::LayoutDivision{AL}, args...; kw...)::Conn
     V = isa(D.dividend, Module) ? Val{Base.module_name(D.dividend)} : D.dividend
     L = D.divisor
     params = map(x->Any,args)
@@ -70,26 +70,21 @@ function render{AL<:ApplicationLayout}(D::LayoutDivision{AL}, args...; kw...)
     if haskey(ViewFilter.filters, (before,key))
         ViewFilter.filters[(before,key)](args...)
     end
-    body = render(V, args...; kw...)
-    body_conn = isa(body, Conn) ? body.resp_body : body
+    conn::Conn = render(V, args...; kw...)
+    conn_body = conn.resp_body
     if isempty(kw)
-        bodies = tuple(body_conn, args[2:end]...)
+        bodies = tuple(conn_body, args[2:end]...)
     else
         argstuple = isempty(args) ? tuple() : map(typeof, args)
         if method_exists(layout, tuple(L, Any, argstuple..., Dict))
-            bodies = tuple(body_conn, args..., Dict(kw))
+            bodies = tuple(conn_body, args..., Dict(kw))
         else
-            bodies = tuple(body_conn, args...)
+            bodies = tuple(conn_body, args...)
         end
     end
-    if isa(body, Conn)
-        body.resp_body = layout(L(), bodies...)
-        data = body
-    else
-        data = layout(L(), bodies...)
-    end
+    conn.resp_body = layout(L(), bodies...)
     if haskey(ViewFilter.filters, (after,key))
         ViewFilter.filters[(after,key)](args...)
     end
-    data
+    conn
 end

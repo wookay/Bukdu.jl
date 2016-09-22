@@ -73,8 +73,8 @@ conn = (Router)(get, "/")
 conn = (Router)(get, "/")
 @test [:bvl,:bv,:av,:avl, :bvl,:bv,:av,:avl] == logs
 
-@test "<div>hello</div>" == render(View; path="renderers/page.tpl", contents="hello")
-@test "<html><body><div>hello</div><body></html>" == render(View/Layout; path="renderers/page.tpl", contents="hello")
+@test "<div>hello</div>" == render(View; path="renderers/page.tpl", contents="hello").resp_body
+@test "<html><body><div>hello</div><body></html>" == render(View/Layout; path="renderers/page.tpl", contents="hello").resp_body
 
 
 Logger.have_color(false)
