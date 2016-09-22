@@ -104,7 +104,7 @@ module Routing
 import ..Bukdu: ApplicationController
 import ..Bukdu: RouterRoute, Route, RouterScope, RouterResource, Resource, NoRouteError
 import ..Bukdu: Logger
-import ..Bukdu: Conn, CONN_NOT_FOUND
+import ..Bukdu: Conn
 import ..Bukdu: index, edit, new, show, create, update, delete
 import ..Bukdu: get, post, delete, patch, put
 import ..Bukdu: plugins, before, after
@@ -226,7 +226,6 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     before(controller)
                 end
                 result = nothing
-                resp_headers = Dict{String,String}()
                 try
                     Logger.debug() do
                         padding = length(path) > 4 ? "\t" : "\t\t"
@@ -237,13 +236,17 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     Logger.error() do
                         verb, Logger.with_color(:bold, path), '\n', ex, '\n', route, stacktrace()
                     end
-                    result = Conn(400, resp_headers, "bad request $ex", params, query_params, route.private, route.assigns)
+                    result = Conn(400, Dict{String,String}(), "bad request $ex", params, query_params, route.private, route.assigns)
                 end
                 if method_exists(after, (C,))
                     after(controller)
                 end
                 pop!(task_storage, task)
-                return isa(result, Conn) ? result : Conn(200, resp_headers, result, params, query_params, route.private, route.assigns)
+                if isa(result, Conn)
+                    return Conn(result.status, result.resp_header, result.resp_body, params, query_params, route.private, route.assigns)
+                else
+                    return Conn(200, Dict{String,String}(), result, params, query_params, route.private, route.assigns)
+                end
             end
         end
     end

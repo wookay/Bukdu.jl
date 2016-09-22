@@ -29,6 +29,16 @@ Base.Test.@testset "renderers/html.jl" begin
 end
 
 workspace()
+Base.Test.@testset "renderers/html/tag.jl" begin
+    include("renderers/html.jl")
+end
+
+workspace()
+Base.Test.@testset "renderers/html/form.jl" begin
+    include("renderers/html.jl")
+end
+
+workspace()
 Base.Test.@testset "renderers/markdown.jl" begin
     include("renderers/markdown.jl")
 end

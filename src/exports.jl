@@ -16,6 +16,7 @@ export ApplicationView, View
 
 # in renderers.jl
 export render
+export Tag # html
 
 # in logger.jl
 export Logger
