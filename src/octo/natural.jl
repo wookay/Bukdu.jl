@@ -1,4 +1,4 @@
-# module Bukdu.Ecto
+# module Bukdu.Octo
 
 function singularize(s::String)::String
     word = lowercase(s)

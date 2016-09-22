@@ -1,4 +1,4 @@
-import Bukdu.Ecto: default, change
+import Bukdu.Octo: default, change
 import Bukdu.Tag: label
 
 type User
