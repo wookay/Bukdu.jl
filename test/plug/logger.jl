@@ -31,5 +31,6 @@ conn = (Router)(get, "/")
    redirect_stdout(oldout)
    close(wrout)
 
-@test "DEBUG GET / \t\t WelcomeController.index\nWARN  GET /strange\nWARN  | /strange\n" == wait(reader)
+str = wait(reader)
+@test "DEBUG GET / \t\t WelcomeController.index\nWARN  GET /strange\nWARN  | /strange\n" == str
 end

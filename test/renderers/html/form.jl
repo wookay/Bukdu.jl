@@ -1,6 +1,6 @@
 importall Bukdu
-import Bukdu.Octo: default, change
-import Bukdu.Tag: form_for, text_input, select, submit
+importall Bukdu.Octo
+importall Bukdu.Tag
 
 type UserController <: ApplicationController
 end
@@ -31,8 +31,8 @@ end
 
 layout(::Layout, body) = "<div>$body</div>"
 function index(::UserController)
-    form1 = test_form()
-    render(HTML/Layout, form1)
+    contents = test_form()
+    render(HTML/Layout, contents)
 end
 
 
@@ -61,14 +61,26 @@ using Base.Test
 <input type="submit" value="Submit" />
 </form>""" == test_form()
 
-form1 = test_form()
+contents = test_form()
 
 using Base.Test
 conn = (Router)(get, "/")
-@test "<div>$form1</div>" == conn.resp_body
+@test "<div>$contents</div>" == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_name="jack")
 @test Dict("user_name" => "jack") == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="20")
 @test Dict("user_age" => "20") == conn.resp_body
+
+form = change(default(User), name="jack")
+@test_throws NoRouteError form_for(()->"", form, action=post_result)
+@test """
+<form method="post" action="/post_result">
+</form>""" == form_for((f)->"", form, method=post, action=post_result)
+@test """
+<form id="ex" method="post" action="/post_result">
+</form>""" == form_for((f)->"", form, id="ex", method=post, action=post_result)
+@test """
+<form class="ex" method="post" action="/test">
+</form>""" == form_for((f)->"", form, class="ex", method=post, action="/test")

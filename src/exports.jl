@@ -11,6 +11,9 @@ export index, edit, new, show, create, update, delete # actions
 # in layout.jl
 export ApplicationLayout, Layout, layout, /
 
+# in octo.jl
+export validates
+
 # in view.jl
 export ApplicationView, View
 

@@ -74,23 +74,30 @@ function print_info(args...; kw...)
     print_log(:green, prefix, sub, args...; kw...)
 end
 
-function print_log(color::Symbol, prefix::String, sub::String, args...; LF=true)
-    isarray = false
-    contents = args
+function inner_contents(args...)
     if 1 == length(args)
         arg = first(args)
-        if any(x->isa(arg, x), [Array, Tuple])
-            isarray = true
+        if any(x->isa(arg,x), [Array, Tuple])
+            if isa(arg, Vector{StackFrame})
+                string('\n', join(arg, '\n'))
+            else
+                join(arg, ' ')
+            end
+        else
+            arg
         end
-    elseif length(args) > 1
-        isarray = true
+    else
+        join(map(inner_contents, args), ' ')
     end
-    if isarray
-        contents = join(map(el->isa(el, StackFrame) ? "\n$el" :
-                       isa(el, Vector{StackFrame}) ? "\n" * join(el, '\n') :
-                           el, args...), ' ')
-    end
-    print(string(with_color(color, prefix), ' ', isempty(sub) ? "" : string(sub, ' '), contents..., (LF ? "\n" : "")))
+end
+
+function print_log(color::Symbol, prefix::String, sub::String, args...; LF=true)
+    print(string(
+        with_color(color, prefix),
+        ' ',
+        isempty(sub) ? "" : string(sub, ' '),
+        inner_contents(args...),
+        (LF ? "\n" : "")))
 end
 
 function have_color(enabled::Bool)

@@ -1,6 +1,6 @@
 importall Bukdu
-
-import Bukdu.Octo: default, change
+importall Bukdu.Octo
+importall Bukdu.Tag
 
 type User
     name::String
@@ -10,4 +10,4 @@ end
 form = change(default(User), name="jack")
 
 using Base.Test
-@test """<label for="user_name">Name</label>""" == Tag.label(form, :name, "Name")
+@test """<label for="user_name">Name</label>""" == label(form, :name, "Name")

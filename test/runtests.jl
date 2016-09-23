@@ -9,6 +9,11 @@ Base.Test.@testset "params.jl" begin
 end
 
 workspace()
+Base.Test.@testset "octo.jl" begin
+    include("octo.jl")
+end
+
+workspace()
 Base.Test.@testset "view.jl" begin
     include("view.jl")
 end
