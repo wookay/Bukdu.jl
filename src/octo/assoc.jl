@@ -38,6 +38,9 @@ Base.start(assoc::Assoc) = start(assoc.vector)
 Base.next(assoc::Assoc, i::Int) = next(assoc.vector, i)
 Base.done(assoc::Assoc, i::Int) = done(assoc.vector, i)
 
+Base.isempty(assoc::Assoc) = isempty(assoc.vector)
+Base.empty!(assoc::Assoc) = empty!(assoc.vector)
+
 function Base.setindex!(assoc::Assoc, value::Any, key::Symbol)
     if haskey(assoc, key)
         assoc.vector = map((k,v)->k==key ? value : v, assoc.vector)

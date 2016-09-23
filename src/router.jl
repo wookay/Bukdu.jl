@@ -109,7 +109,7 @@ import ..Bukdu: index, edit, new, show, create, update, delete
 import ..Bukdu: get, post, delete, patch, put
 import ..Bukdu: plugins, before, after
 import ..Bukdu: Assoc
-import URIParser: URI
+import URIParser: URI, unescape_form
 import HttpCommon: parsequerystring
 
 const SLASH = '/'
@@ -215,7 +215,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 controller = C()
                 query_params = Assoc(parsequerystring(uri.query))
                 if verb == post && !isempty(data)
-                    merge!(query_params, Assoc(parsequerystring(String(data))))
+                    merge!(query_params, Assoc(parsequerystring(unescape_form(String(data)))))
                 end
                 branch = Branch(query_params, params, route.action, uri.host, route.assigns)
                 task = current_task()
@@ -227,17 +227,21 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     before(controller)
                 end
                 result = nothing
-                try
-                    Logger.debug() do
-                        padding = length(path) > 4 ? "\t" : "\t\t"
-                        uppercase(string(Base.function_name(route.verb))), Logger.with_color(:bold, path), padding, string(typeof(controller), '.', Base.function_name(route.action))
+                if ==(1,1)
+                    try
+                        Logger.debug() do
+                            padding = length(path) > 4 ? "\t" : "\t\t"
+                            uppercase(string(Base.function_name(route.verb))), Logger.with_color(:bold, path), padding, string(typeof(controller), '.', Base.function_name(route.action))
+                        end
+                        result = route.action(controller)
+                    catch ex
+                        Logger.error() do
+                            verb, Logger.with_color(:bold, path), '\n', Logger.with_color(:red, ex), '\n', route, stacktrace()
+                        end
+                        result = Conn(400, Dict{String,String}(), "bad request $ex", params, query_params, route.private, route.assigns)
                     end
+                else
                     result = route.action(controller)
-                catch ex
-                    Logger.error() do
-                        verb, Logger.with_color(:bold, path), '\n', Logger.with_color(:red, ex), '\n', route, stacktrace()
-                    end
-                    result = Conn(400, Dict{String,String}(), "bad request $ex", params, query_params, route.private, route.assigns)
                 end
                 if method_exists(after, (C,))
                     after(controller)

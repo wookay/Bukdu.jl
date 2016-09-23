@@ -33,42 +33,50 @@ function build(tag::String, changeset::Union{Void,Changeset}, field::Symbol, opt
     string(result, isa(body, Void) ? " />" : ">$linefeed$body</$tag>")
 end
 
-function form_for(block::Function, changeset::Changeset; kw...)
-    kwd = Dict(kw)
-    action = kwd[:action]
-    verb = haskey(kwd, :method) ? kwd[:method] : get
-    method = string(Base.function_name(verb))
-    function form_for_args(action, method; kw...)
-        args = Vector()
-        for (k,v) in kw
+function form_for(block::Function, changeset::Changeset, args...; kw...)
+    list = Vector{Tuple{Symbol,Union{Function,String}}}(vcat(args..., kw...))
+    opts = Dict(list)
+    if haskey(opts, :method)
+        verb = opts[:method]
+    else
+        verb = get
+        push!(list, (:method, get))
+    end
+    sym_accept_charset = Symbol("accept-charset")
+    if !haskey(opts, sym_accept_charset)
+        push!(list, (sym_accept_charset, "utf-8"))
+    end
+
+    function form_for_args(action, list::Vector)
+        vec = Vector()
+        for (k,v) in list
             if :action == k
-                push!(args, k=>action)
+                push!(vec, k=>action)
             elseif :method == k
-                push!(args, k=>method)
+                method = string(Base.function_name(v))
+                push!(vec, k=>method)
             else
-                push!(args, k=>v)
+                push!(vec, k=>v)
             end
         end
-        tuple(args...)
+        vec
     end
+
+    build_form = (action) -> build("form", changeset, :form, form_for_args(action, list); body=block(changeset), LF=true)
+
+    action = opts[:action]
     if isa(action, Function)
         for route in Bukdu.RouterRoute.routes
             if route.action == action && route.verb == verb
-                return build("form", changeset, :form, form_for_args(route.path, method; kw...); body=block(changeset), LF=true)
+                return build_form(route.path)
             end
         end
         action_name = Base.function_name(action)
+        method = string(Base.function_name(verb))
         throw(Bukdu.NoRouteError("not found a route for $action_name $method"))
     else
-        return build("form", changeset, :form, form_for_args(action, method; kw...); body=block(changeset), LF=true)
+        return build_form(action)
     end
-end
-
-function label(changeset::Changeset, field::Symbol, body=nothing)
-    if isa(body,Void) && haskey(changeset.changes, field)
-        body = changeset.changes[field]
-    end
-    build("label", changeset, field, (:for=>tag_id,); body=body)
 end
 
 function value_from_changeset(changeset::Changeset, field::Symbol, value=nothing)
@@ -80,6 +88,10 @@ function value_from_changeset(changeset::Changeset, field::Symbol, value=nothing
         end
     end
     return nothing
+end
+
+function label(changeset::Changeset, field::Symbol, body=nothing)
+    build("label", changeset, field, (:for=>tag_id,); body=body)
 end
 
 function text_input(changeset::Changeset, field::Symbol, value=nothing)

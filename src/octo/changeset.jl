@@ -46,36 +46,36 @@ function typed_assoc(T::Type, changes::Assoc)::Assoc
     typ_fieldnames = fieldnames(T)
     Assoc(
         map(filter(kv -> first(kv) in typ_fieldnames, changes)) do kv
-        (name,v) = kv
-        if name in typ_fieldnames
-            fieldT = fieldtype(T, name)
-            if isa(v, fieldT)
-                (name, v)
-            else
-                (name, parse(fieldT, v))
+            (name,v) = kv
+            if name in typ_fieldnames
+                fieldT = fieldtype(T, name)
+                if isa(v, fieldT)
+                    (name, v)
+                else
+                    (name, parse(fieldT, v))
+                end
             end
-        end
-    end)
+        end)
 end
 
 function cutout_brackets(typ::Type, param::Tuple{Symbol,Any})::Tuple{Symbol,Any}
     t = lowercase(string(typ))
     (key,value) = param
     k = string(key)
-    if startswith(k, "$(t)_")
-        key = Symbol(k[length("$(t)_")+1:end])
-    elseif startswith(k, "$t[") && endswith(k, "]")
+    if startswith(k, "$t[") && endswith(k, "]")
         key = Symbol(last(split(k,"["))[1:end-1])
+    elseif startswith(k, "$(t)_")
+        key = Symbol(k[length("$(t)_")+1:end])
     end
     (key, value)
 end
 
-function change{AC<:ApplicationController}(c::AC, T::Type)::Changeset
-    Changeset(default(T), Assoc(map(param->cutout_brackets(T,param), c[:query_params])))
-end
-
 function change{T<:Any,AC<:ApplicationController}(c::AC, model::T)::Changeset
     Changeset(model, Assoc(map(param->cutout_brackets(T,param), c[:query_params])))
+end
+
+function change{AC<:ApplicationController}(c::AC, T::Type)::Changeset
+    change(c, default(T))
 end
 
 function change(model; kw...)::Changeset

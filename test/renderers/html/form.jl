@@ -12,8 +12,9 @@ end
 
 user = User("tom", 20)
 
-post_result(c::UserController) = change(c, user)
-
+function post_result(c::UserController)
+    change(c, user)
+end
 
 function test_form(changes::Assoc)
     form = Changeset(user, changes)
@@ -34,7 +35,7 @@ end
 
 layout(::Layout, body) = "<div>$body</div>"
 function index(::UserController)
-    contents = test_form(Assoc(name="jack"))
+    contents = test_form(Assoc(name="foo bar"))
     render(HTML/Layout, contents)
 end
 
@@ -47,10 +48,12 @@ end
 
 using Base.Test
 
+contents = test_form(Assoc(name="foo bar"))
+
 @test """
-<form action="/post_result" method="post">
+<form action="/post_result" method="post" accept-charset="utf-8">
 <label>
-    Name: <input id="user_name" name="user[name]" type="text" value="jack" />
+    Name: <input id="user_name" name="user[name]" type="text" value="foo bar" />
 </label>
 
 <label>
@@ -62,11 +65,8 @@ using Base.Test
 </label>
 
 <input type="submit" value="Submit" />
-</form>""" == test_form(Assoc(name="jack"))
+</form>""" == contents
 
-contents = test_form(Assoc(name="jack"))
-
-using Base.Test
 conn = (Router)(get, "/")
 @test "<div>$contents</div>" == conn.resp_body
 
@@ -79,14 +79,34 @@ conn = (Router)(post, "/post_result", user_age="20")
 conn = (Router)(post, "/post_result", user_age="19")
 @test Changeset(User("tom",20),Assoc(age=19)) == conn.resp_body
 
+conn = (Router)(post, "/post_result", user_undefined="undefined")
+@test Changeset(User("tom",20),Assoc()) == conn.resp_body
+
 form = change(default(User), name="jack")
 @test_throws NoRouteError form_for(()->"", form, action=post_result)
 @test """
-<form method="post" action="/post_result">
+<form method="post" action="/post_result" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, method=post, action=post_result)
 @test """
-<form id="ex" method="post" action="/post_result">
+<form id="ex" method="post" action="/post_result" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, id="ex", method=post, action=post_result)
 @test """
-<form class="ex" method="post" action="/test">
+<form class="ex" method="post" action="/test" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, class="ex", method=post, action="/test")
+@test """
+<form class="ex" action="/test" method="get" accept-charset="utf-8">
+</form>""" == form_for((f)->"", form, class="ex", action="/test")
+
+import Requests: statuscode, text
+
+Bukdu.start(8082)
+resp1 = Requests.get("http://localhost:8082/")
+@test 200 == statuscode(resp1)
+@test "<div>$contents</div>" == text(resp1)
+
+resp2 = Requests.post("http://localhost:8082/post_result", data=Dict("user[name]"=>"foo bar"))
+@test 200 == statuscode(resp2)
+@test """Bukdu.Octo.Changeset(User("tom",20),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[(:name,"foo bar")]))""" == text(resp2)
+
+sleep(0.1)
+Bukdu.stop()

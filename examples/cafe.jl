@@ -10,16 +10,33 @@ type User
     age::Int
 end
 
-user = User("jack", 19)
+user = User("foo bar", 19)
+
+layout(::Layout, body) = """
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+$body
+</body>
+</html>
+"""
 
 function post_result(c::CafeController)
     changeset = change(c, user)
+    changed = isempty(changeset.changes) ? "<p>no changes</p>" : ""
+    render(HTML/Layout, """
+        <div>$(changeset.model)</div>
+        <div>$(changeset.changes)</div>
+        <p>$changed</p>
+    """)
 end
 
 
 function index(::CafeController)
     form = change(user, age=20)
-    form_for(form, action=post_result, method=post) do f
+    contents = form_for(form, action=post_result, method=post) do f
 """
 <label>
   Name: $(text_input(f, :name))
@@ -32,6 +49,7 @@ function index(::CafeController)
 $(submit("Submit"))
 """
     end
+    render(HTML/Layout, contents)
 end
 
 Router() do

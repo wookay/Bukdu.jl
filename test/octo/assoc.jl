@@ -32,3 +32,7 @@ r = Assoc([(:title,"title")])
 
 merge!(l, r)
 @test Assoc([(:author,"bar"), (:title,"title")]) == l
+
+@test !isempty(l)
+empty!(l)
+@test isempty(l)
