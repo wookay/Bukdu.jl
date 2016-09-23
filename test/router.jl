@@ -39,7 +39,7 @@ conn = (Router)(get, "/pages/1/users")
 
 conn = (Router)(get, "/pages/1/users/2")
 @test conn.status == 200
-@test conn.resp_body == Dict("page_id"=>"1","id"=>"2")
+@test conn.resp_body == Assoc(page_id="1", id="2")
 @test conn.params["page_id"] == "1"
 @test conn.params["id"] == "2"
 

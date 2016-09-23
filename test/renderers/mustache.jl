@@ -15,6 +15,7 @@ conn = (Router)(get, "/1")
 @test 200 == conn.status
 @test "<div>hello</div>" == conn.resp_body
 @test "1" == conn.params["page"]
+@test "1" == conn.params[:page]
 
 layout(::Layout, body) = """<html><body>$body<body></html>"""
 index(c::PageController) = render(View/Layout; path="renderers/page.tpl", contents="hello")

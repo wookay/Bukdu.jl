@@ -81,7 +81,7 @@ function inner_contents(args...)
             if isa(arg, Vector{StackFrame})
                 string('\n', join(arg, '\n'))
             else
-                join(arg, ' ')
+                inner_contents(arg...)
             end
         else
             arg

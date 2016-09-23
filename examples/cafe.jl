@@ -1,7 +1,6 @@
 importall Bukdu
-
-import Bukdu.Octo: default, change
-import Tag: form_for, text_input, select, submit
+importall Bukdu.Octo
+importall Tag
 
 type CafeController <: ApplicationController
 end
@@ -11,13 +10,15 @@ type User
     age::Int
 end
 
+user = User("jack", 19)
+
 function post_result(c::CafeController)
-    c[:query_params]
+    changeset = change(c, user)
 end
 
 
 function index(::CafeController)
-    form = change(default(User), name="jack")
+    form = change(user, age=20)
     form_for(form, action=post_result, method=post) do f
 """
 <label>

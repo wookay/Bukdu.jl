@@ -1,5 +1,6 @@
 importall Bukdu
 importall Bukdu.Octo
+import Bukdu.Octo: |>
 
 type User
     name::String

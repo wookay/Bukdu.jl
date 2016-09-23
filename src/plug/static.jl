@@ -4,6 +4,7 @@ immutable Static
 end
 
 import HttpServer: Response, mimetypes
+import ..Octo: Assoc
 
 function FileResponse(filename)
     if isfile(filename)
@@ -25,8 +26,8 @@ end
 function read(c::StaticController)
     filepath = c[:assigns][:filepath]
     resp = FileResponse(filepath)
-    params = Dict{String,String}()
-    query_params = Dict{String,String}()
+    params = Assoc()
+    query_params = Assoc()
     private = Dict{Symbol,String}()
     assigns = Dict{Symbol,String}()
     Conn(resp.status, Dict{String,String}(resp.headers), resp.data, params, query_params, private, assigns)

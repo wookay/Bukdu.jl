@@ -64,21 +64,39 @@ function form_for(block::Function, changeset::Changeset; kw...)
     end
 end
 
-function label(changeset::Changeset, field::Symbol, body)
+function label(changeset::Changeset, field::Symbol, body=nothing)
+    if isa(body,Void) && haskey(changeset.changes, field)
+        body = changeset.changes[field]
+    end
     build("label", changeset, field, (:for=>tag_id,); body=body)
 end
 
-function text_input(changeset::Changeset, field::Symbol, value="")
+function value_from_changeset(changeset::Changeset, field::Symbol, value=nothing)
+    if isa(value, Void)
+        if haskey(changeset.changes, field)
+            return changeset.changes[field]
+        elseif field in fieldnames(typeof(changeset.model))
+            return getfield(changeset.model, field)
+        end
+    end
+    return nothing
+end
+
+function text_input(changeset::Changeset, field::Symbol, value=nothing)
+    value = value_from_changeset(changeset, field, value)
     build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"text", :value=>value))
 end
 
-function select_option(options)
+function select_option(changeset::Changeset, field::Symbol, options, value=nothing)
     # broadcast #
     # string(join(string.("    <option value=\"", options, "\">", options, "</option>"), '\n'), '\n')
-    string(join(map(x-> string("    <option value=\"", x, "\">", x, "</option>"), options), '\n'), '\n')
+    selected_value = value_from_changeset(changeset, field, value)
+    string(join(map(x->
+        string("    <option value=\"", x, '"', (selected_value==x ? " selected" : ""), '>', x, "</option>"), options), '\n'), '\n')
 end
-function select(changeset::Changeset, field::Symbol, options)
-    build("select", changeset, field, (:id=>tag_id, :name=>tag_name); body=select_option(options), LF=true)
+
+function select(changeset::Changeset, field::Symbol, options, value=nothing)
+    build("select", changeset, field, (:id=>tag_id, :name=>tag_name); body=select_option(changeset, field, options, value), LF=true)
 end
 
 function submit(value)

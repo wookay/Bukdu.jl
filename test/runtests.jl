@@ -9,8 +9,13 @@ Base.Test.@testset "params.jl" begin
 end
 
 workspace()
-Base.Test.@testset "octo.jl" begin
-    include("octo.jl")
+Base.Test.@testset "octo/assoc.jl" begin
+    include("octo/assoc.jl")
+end
+
+workspace()
+Base.Test.@testset "octo/changeset.jl" begin
+    include("octo/changeset.jl")
 end
 
 workspace()

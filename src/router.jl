@@ -44,11 +44,11 @@ function (::Type{AR}){AR<:ApplicationRouter}(context::Function)
     nothing
 end
 
-function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String; kw...)
+function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, args...; kw...)
     routes = haskey(Routing.routing_map, AR) ? Routing.routing_map[AR] : Vector{Route}()
     data = Vector{UInt8}()
-    if !isempty(kw)
-        data = Vector{UInt8}(join(map(kw) do kv
+    if !isempty(args) || !isempty(kw)
+        data = Vector{UInt8}(join(map(vcat(args..., kw...)) do kv
             (k,v) = kv
             string(k, '=', escape(v))
         end, '&'))
@@ -108,6 +108,7 @@ import ..Bukdu: Conn
 import ..Bukdu: index, edit, new, show, create, update, delete
 import ..Bukdu: get, post, delete, patch, put
 import ..Bukdu: plugins, before, after
+import ..Bukdu: Assoc
 import URIParser: URI
 import HttpCommon: parsequerystring
 
@@ -115,8 +116,8 @@ const SLASH = '/'
 const COLON = ':'
 
 immutable Branch
-    query_params::Dict{String,String}
-    params::Dict{String,String}
+    query_params::Assoc
+    params::Assoc
     action::Function
     host::String
     assigns::Dict{Symbol,Any}
@@ -206,15 +207,15 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     (idx,rouseg) = idx_rouseg
                     startswith(rouseg, COLON)
                 end
-                params = Dict(map(filter(startswithcolon, enumerate(rousegs))) do idx_rouseg
+                params = Assoc(map(filter(startswithcolon, enumerate(rousegs))) do idx_rouseg
                     (idx,rouseg) = idx_rouseg
                     (replace(rouseg, r"^:", ""),String(reqsegs[idx]))
                 end)
                 C = route.controller
                 controller = C()
-                query_params = Dict{String,String}(parsequerystring(uri.query))
+                query_params = Assoc(parsequerystring(uri.query))
                 if verb == post && !isempty(data)
-                    merge!(query_params, parsequerystring(String(data)))
+                    merge!(query_params, Assoc(parsequerystring(String(data))))
                 end
                 branch = Branch(query_params, params, route.action, uri.host, route.assigns)
                 task = current_task()
@@ -234,7 +235,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     result = route.action(controller)
                 catch ex
                     Logger.error() do
-                        verb, Logger.with_color(:bold, path), '\n', ex, '\n', route, stacktrace()
+                        verb, Logger.with_color(:bold, path), '\n', Logger.with_color(:red, ex), '\n', route, stacktrace()
                     end
                     result = Conn(400, Dict{String,String}(), "bad request $ex", params, query_params, route.private, route.assigns)
                 end
