@@ -8,17 +8,22 @@ end
 type User
     name::String
     age::Int
+    description::String
 end
 
-user = User("foo bar", 19)
+user = User("foo bar", 20, "")
 
 layout(::Layout, body) = """
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Hello Livecoding</title>
+    <link rel="stylesheet" href="/css/style.css"/>
 </head>
 <body>
+<div>
 $body
+</div>
 </body>
 </html>
 """
@@ -35,7 +40,7 @@ end
 
 
 function index(::CafeController)
-    form = change(user, age=20)
+    form = change(user)
     contents = form_for(form, action=post_result, method=post) do f
 """
 <label>
@@ -43,8 +48,12 @@ function index(::CafeController)
 </label>
 
 <label>
-    Age: $(select(f, :age, 18:20))
+    Age: $(select(f, :age, 18:30))
 </label>
+
+<div>
+$(textarea(f, :description, placeholder="enter description"))
+</div>
 
 $(submit("Submit"))
 """
@@ -58,6 +67,7 @@ Router() do
 end
 
 Endpoint() do
+    plug(Plug.Static, at= "/", from= "$(dirname(@__FILE__))/public"; try_index_html=false)
     plug(Plug.Logger)
     plug(Router)
 end

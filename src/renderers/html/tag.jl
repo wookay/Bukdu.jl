@@ -2,7 +2,7 @@
 
 module Tag
 
-export form_for, label, text_input, select, submit
+export form_for, label, text_input, select, textarea, submit
 
 import ....Bukdu
 import ....Bukdu.Octo: Changeset, change
@@ -109,6 +109,10 @@ end
 
 function select(changeset::Changeset, field::Symbol, options, value=nothing)
     build("select", changeset, field, (:id=>tag_id, :name=>tag_name); body=select_option(changeset, field, options, value), LF=true)
+end
+
+function textarea(changeset::Changeset, field::Symbol, value=""; kw...)
+    build("textarea", changeset, field, (:id=>tag_id, :name=>tag_name, kw...); body=value, LF=true)
 end
 
 function submit(value)

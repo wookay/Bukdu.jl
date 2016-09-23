@@ -8,9 +8,10 @@ end
 type User
     name::String
     age::Int
+    description::String
 end
 
-user = User("tom", 20)
+user = User("tom", 20, "")
 
 function post_result(c::UserController)
     change(c, user)
@@ -71,16 +72,16 @@ conn = (Router)(get, "/")
 @test "<div>$contents</div>" == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_name="jack")
-@test Changeset(User("tom",20),Assoc(name="jack")) == conn.resp_body
+@test Changeset(User("tom",20,""),Assoc(name="jack")) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="20")
-@test Changeset(User("tom",20),Assoc()) == conn.resp_body
+@test Changeset(User("tom",20,""),Assoc()) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="19")
-@test Changeset(User("tom",20),Assoc(age=19)) == conn.resp_body
+@test Changeset(User("tom",20,""),Assoc(age=19)) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_undefined="undefined")
-@test Changeset(User("tom",20),Assoc()) == conn.resp_body
+@test Changeset(User("tom",20,""),Assoc()) == conn.resp_body
 
 form = change(default(User), name="jack")
 @test_throws NoRouteError form_for(()->"", form, action=post_result)
@@ -96,6 +97,10 @@ form = change(default(User), name="jack")
 @test """
 <form class="ex" action="/test" method="get" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, class="ex", action="/test")
+
+@test """
+<textarea id="user_description" name="user[description]">
+</textarea>""" == textarea(form, :description)
 
 import Requests: statuscode, text
 
