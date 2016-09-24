@@ -84,7 +84,7 @@ Listening on 127.0.0.1:8080...
 function start(ports::Vector{Int}; host=getaddrinfo("localhost"))
     for port in ports
         server = HttpServer.Server(handler)
-        server.http.events["listen"] = (port) -> Logger.info("Listening on $port..."; LF=false)
+        server.http.events["listen"] = (port) -> Logger.info("Listening on $port..."; LF=!isdefined(:Juno))
         task = @async begin
             HttpServer.run(server, host=host, port=port)
         end

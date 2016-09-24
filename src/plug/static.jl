@@ -47,17 +47,21 @@ function plug(::Type{Plug.Static}; kw...)
     opts = Dict(kw)
     at = opts[:at]
     from = opts[:from]
+    try_index_html = true
     if haskey(opts, :only)
         only = opts[:only]
         has_only = !isempty(only)
     else
         has_only = false
     end
+    if haskey(opts, :try_index_html)
+        try_index_html = opts[:try_index_html]
+    end
     for (root, dirs, files) in walkdir(from)
         for file in files
             filepath = joinpath(root, file)
             opts = Dict(:assigns => Dict{Symbol,String}(:filepath=>filepath))
-            if "index.html" == file
+            if try_index_html && "index.html" == file
                 Routing.match(get, "/", StaticController, read, opts)
             end
             if has_only

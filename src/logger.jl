@@ -30,6 +30,7 @@ const levels = Dict{Union{Bool,Symbol},Int}(
 settings = Dict(
     :level => level_info,
     :have_color => Base.have_color,
+    :have_datetime => false,
     :info_prefix => "INFO",
     :info_sub => ""
 )
@@ -74,12 +75,22 @@ function print_info(args...; kw...)
     print_log(:green, prefix, sub, args...; kw...)
 end
 
+function inner_callstack(stackframe::Vector{StackFrame})
+    !settings[:have_color] && return stackframe
+    pat = r"(.* at )(?P<file>.*.jl):(?P<lineno>\d*)"
+    string('\n', join(map(stackframe) do frame
+        str = string(frame)
+        m = match(pat, str)
+        isa(m, RegexMatch) ? string(m[1], with_color(:bold, m[:file]), ':', with_color(:bold, m[:lineno])) : nothing
+    end, '\n'))
+end
+
 function inner_contents(args...)
     if 1 == length(args)
         arg = first(args)
         if any(x->isa(arg,x), [Array, Tuple])
             if isa(arg, Vector{StackFrame})
-                string('\n', join(arg, '\n'))
+                inner_callstack(arg)
             else
                 inner_contents(arg...)
             end
@@ -93,11 +104,16 @@ end
 
 function print_log(color::Symbol, prefix::String, sub::String, args...; LF=true)
     print(string(
+        settings[:have_datetime] ? rpad(string(Dates.now()), 24) : "",
         with_color(color, prefix),
         ' ',
         isempty(sub) ? "" : string(sub, ' '),
         inner_contents(args...),
         (LF ? "\n" : "")))
+end
+
+function have_datetime(enabled::Bool)
+    settings[:have_datetime] = enabled
 end
 
 function have_color(enabled::Bool)

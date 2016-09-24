@@ -2,7 +2,7 @@
 
 module Tag
 
-export form_for, label, text_input, select, submit
+export form_for, label, text_input, select, textarea, submit
 
 import ....Bukdu
 import ....Bukdu.Octo: Changeset, change
@@ -90,13 +90,13 @@ function value_from_changeset(changeset::Changeset, field::Symbol, value=nothing
     return nothing
 end
 
-function label(changeset::Changeset, field::Symbol, body=nothing)
-    build("label", changeset, field, (:for=>tag_id,); body=body)
+function label(changeset::Changeset, field::Symbol, body=nothing; kw...)
+    build("label", changeset, field, (:for=>tag_id, kw...); body=body)
 end
 
-function text_input(changeset::Changeset, field::Symbol, value=nothing)
+function text_input(changeset::Changeset, field::Symbol, value=nothing; kw...)
     value = value_from_changeset(changeset, field, value)
-    build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"text", :value=>value))
+    build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"text", :value=>value, kw...))
 end
 
 function select_option(changeset::Changeset, field::Symbol, options, value=nothing)
@@ -104,15 +104,19 @@ function select_option(changeset::Changeset, field::Symbol, options, value=nothi
     # string(join(string.("    <option value=\"", options, "\">", options, "</option>"), '\n'), '\n')
     selected_value = value_from_changeset(changeset, field, value)
     string(join(map(x->
-        string("    <option value=\"", x, '"', (selected_value==x ? " selected" : ""), '>', x, "</option>"), options), '\n'), '\n')
+        string("    <option value=\"", x, '"', (selected_value==x ? " selected" : ""), ">", x, "</option>"), options), '\n'), '\n')
 end
 
-function select(changeset::Changeset, field::Symbol, options, value=nothing)
-    build("select", changeset, field, (:id=>tag_id, :name=>tag_name); body=select_option(changeset, field, options, value), LF=true)
+function select(changeset::Changeset, field::Symbol, options, value=nothing; kw...)
+    build("select", changeset, field, (:id=>tag_id, :name=>tag_name, kw...); body=select_option(changeset, field, options, value), LF=true)
 end
 
-function submit(value)
-    build("input", nothing, :submit, (:type=>"submit", :value=>value))
+function textarea(changeset::Changeset, field::Symbol, value=""; kw...)
+    build("textarea", changeset, field, (:id=>tag_id, :name=>tag_name, kw...); body=value, LF=true)
+end
+
+function submit(value; kw...)
+    build("input", nothing, :submit, (:type=>"submit", :value=>value, kw...))
 end
 
 end # module Bukdu.Tag

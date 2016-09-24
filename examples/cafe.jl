@@ -8,20 +8,13 @@ end
 type User
     name::String
     age::Int
+    description::String
+    happiness::Float64
 end
 
-user = User("foo bar", 19)
+user = User("foo bar", 20, "", 0.5)
 
-layout(::Layout, body) = """
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-</head>
-<body>
-$body
-</body>
-</html>
-"""
+include("layout.jl")
 
 function post_result(c::CafeController)
     changeset = change(c, user)
@@ -33,23 +26,33 @@ function post_result(c::CafeController)
     """)
 end
 
-
-function index(::CafeController)
-    form = change(user, age=20)
-    contents = form_for(form, action=post_result, method=post) do f
-"""
+function input_form(form)
+    form_for(form, action=post_result, method=post) do f
+         """
 <label>
   Name: $(text_input(f, :name))
 </label>
 
 <label>
-    Age: $(select(f, :age, 18:20))
+    Age: $(select(f, :age, 18:30))
 </label>
+
+<label>
+    Happiness: $(text_input(f, :happiness))
+</label>
+
+<div>
+$(textarea(f, :description, placeholder="enter description"))
+</div>
 
 $(submit("Submit"))
 """
     end
-    render(HTML/Layout, contents)
+end
+
+function index(::CafeController)
+    form = change(user)
+    render(HTML/Layout, input_form(form))
 end
 
 Router() do
@@ -58,6 +61,7 @@ Router() do
 end
 
 Endpoint() do
+    plug(Plug.Static, at= "/", from=normpath(dirname(@__FILE__), "public"); try_index_html=false)
     plug(Plug.Logger)
     plug(Router)
 end
