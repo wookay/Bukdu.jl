@@ -98,10 +98,6 @@ form = change(default(User), name="jack")
 <form class="ex" action="/test" method="get" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, class="ex", action="/test")
 
-@test """
-<textarea id="user_description" name="user[description]">
-</textarea>""" == textarea(form, :description)
-
 import Requests: statuscode, text
 
 Bukdu.start(8082)
@@ -111,7 +107,7 @@ resp1 = Requests.get("http://localhost:8082/")
 
 resp2 = Requests.post("http://localhost:8082/post_result", data=Dict("user[name]"=>"foo bar"))
 @test 200 == statuscode(resp2)
-@test """Bukdu.Octo.Changeset(User("tom",20),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[(:name,"foo bar")]))""" == text(resp2)
+@test """Bukdu.Octo.Changeset(User("tom",20,""),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[(:name,"foo bar")]))""" == text(resp2)
 
 sleep(0.1)
 Bukdu.stop()
