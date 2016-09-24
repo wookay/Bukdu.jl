@@ -7,6 +7,8 @@ import ..ApplicationController
 
 default(T::Type, ::Type{String}) = ""
 default(T::Type, ::Type{Int}) = 0
+default(T::Type, ::Type{Float64}) = 0.0
+default(T::Type, ::Type{Float32}) = 0.0
 
 function default(T::Type)::T
     # broadcast #

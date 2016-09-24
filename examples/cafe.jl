@@ -9,9 +9,10 @@ type User
     name::String
     age::Int
     description::String
+    happiness::Float64
 end
 
-user = User("foo bar", 20, "")
+user = User("foo bar", 20, "", 0.5)
 
 include("layout.jl")
 
@@ -34,6 +35,10 @@ function input_form(form)
 
 <label>
     Age: $(select(f, :age, 18:30))
+</label>
+
+<label>
+    Happiness: $(text_input(f, :happiness))
 </label>
 
 <div>

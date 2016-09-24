@@ -9,9 +9,10 @@ type User
     name::String
     age::Int
     description::String
+    happiness::Float64
 end
 
-user = User("tom", 20, "")
+user = User("tom", 20, "", 0.5)
 
 function post_result(c::UserController)
     change(c, user)
@@ -27,6 +28,10 @@ function test_form(changes::Assoc)
 
 <label>
     Age: $(select(f, :age, 18:20))
+</label>
+
+<label>
+    Happiness: $(text_input(f, :happiness))
 </label>
 
 $(submit("Submit"))
@@ -65,23 +70,29 @@ contents = test_form(Assoc(name="foo bar"))
 </select>
 </label>
 
+<label>
+    Happiness: <input id="user_happiness" name="user[happiness]" type="text" value="0.5" />
+</label>
+
 <input type="submit" value="Submit" />
 </form>""" == contents
 
 conn = (Router)(get, "/")
 @test "<div>$contents</div>" == conn.resp_body
 
+tom = User("tom",20,"",0.5)
+
 conn = (Router)(post, "/post_result", user_name="jack")
-@test Changeset(User("tom",20,""),Assoc(name="jack")) == conn.resp_body
+@test Changeset(tom,Assoc(name="jack")) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="20")
-@test Changeset(User("tom",20,""),Assoc()) == conn.resp_body
+@test Changeset(tom,Assoc()) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="19")
-@test Changeset(User("tom",20,""),Assoc(age=19)) == conn.resp_body
+@test Changeset(tom,Assoc(age=19)) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_undefined="undefined")
-@test Changeset(User("tom",20,""),Assoc()) == conn.resp_body
+@test Changeset(tom,Assoc()) == conn.resp_body
 
 form = change(default(User), name="jack")
 @test_throws NoRouteError form_for(()->"", form, action=post_result)
@@ -107,7 +118,7 @@ resp1 = Requests.get("http://localhost:8082/")
 
 resp2 = Requests.post("http://localhost:8082/post_result", data=Dict("user[name]"=>"foo bar"))
 @test 200 == statuscode(resp2)
-@test """Bukdu.Octo.Changeset(User("tom",20,""),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[(:name,"foo bar")]))""" == text(resp2)
+@test """Bukdu.Octo.Changeset(User("tom",20,"",0.5),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[(:name,"foo bar")]))""" == text(resp2)
 
 sleep(0.1)
 Bukdu.stop()
