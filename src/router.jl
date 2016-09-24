@@ -184,6 +184,26 @@ function add_route(resource::Resource)
     end
 end
 
+function trail(s::String, n)
+    length(s) > n > 2 ? string(s[1:n-2], "..") : s
+end
+
+function debug_route{AC<:ApplicationController}(route, path, ::Type{AC})
+    verb = uppercase(string(Base.function_name(route.verb)))
+    path_pad = 25
+    trailed_path = trail(path, path_pad)
+    rpaded_path = rpad(Logger.with_color(:bold, trailed_path), path_pad)
+    verb, rpaded_path, "$(Base.function_name(route.action))(::$AC)"
+end
+
+function error_route(route, path, controller, ex, callstack)
+    tuple(
+        debug_route(route, path, controller)...,
+        '\n',
+        Logger.with_color(:red, ex),
+        callstack)
+end
+
 function request(compare::Function, routes::Vector{Route}, verb::Function, path::String, data::Vector{UInt8})::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
@@ -227,21 +247,16 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     before(controller)
                 end
                 result = nothing
-                if ==(1,1)
-                    try
-                        Logger.debug() do
-                            padding = length(path) > 4 ? "\t" : "\t\t"
-                            uppercase(string(Base.function_name(route.verb))), Logger.with_color(:bold, path), padding, string(typeof(controller), '.', Base.function_name(route.action))
-                        end
-                        result = route.action(controller)
-                    catch ex
-                        Logger.error() do
-                            verb, Logger.with_color(:bold, path), '\n', Logger.with_color(:red, ex), '\n', route, stacktrace()
-                        end
-                        result = Conn(400, Dict{String,String}(), "bad request $ex", params, query_params, route.private, route.assigns)
+                try
+                    Logger.debug() do
+                        debug_route(route, path, C)
                     end
-                else
                     result = route.action(controller)
+                catch ex
+                    Logger.error() do
+                        error_route(route, path, C, ex, stacktrace(catch_backtrace()))
+                    end
+                    result = Conn(400, Dict{String,String}(), "bad request $ex", params, query_params, route.private, route.assigns)
                 end
                 if method_exists(after, (C,))
                     after(controller)

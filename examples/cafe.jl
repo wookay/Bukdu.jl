@@ -13,20 +13,7 @@ end
 
 user = User("foo bar", 20, "")
 
-layout(::Layout, body) = """
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Hello Livecoding</title>
-    <link rel="stylesheet" href="/css/style.css"/>
-</head>
-<body>
-<div>
-$body
-</div>
-</body>
-</html>
-"""
+include("layout.jl")
 
 function post_result(c::CafeController)
     changeset = change(c, user)
@@ -38,11 +25,9 @@ function post_result(c::CafeController)
     """)
 end
 
-
-function index(::CafeController)
-    form = change(user)
-    contents = form_for(form, action=post_result, method=post) do f
-"""
+function input_form(form)
+    form_for(form, action=post_result, method=post) do f
+         """
 <label>
   Name: $(text_input(f, :name))
 </label>
@@ -58,7 +43,11 @@ $(textarea(f, :description, placeholder="enter description"))
 $(submit("Submit"))
 """
     end
-    render(HTML/Layout, contents)
+end
+
+function index(::CafeController)
+    form = change(user)
+    render(HTML/Layout, input_form(form))
 end
 
 Router() do
@@ -67,7 +56,7 @@ Router() do
 end
 
 Endpoint() do
-    plug(Plug.Static, at= "/", from= "$(dirname(@__FILE__))/public"; try_index_html=false)
+    plug(Plug.Static, at= "/", from=normpath(dirname(@__FILE__), "public"); try_index_html=false)
     plug(Plug.Logger)
     plug(Router)
 end
