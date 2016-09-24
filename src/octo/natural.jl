@@ -1,8 +1,10 @@
 # module Bukdu.Octo
 
+export singularize, pluralize
+
 function singularize(s::String)::String
     word = lowercase(s)
-    m = match(r"/(\w*)s/", word)
+    m = match(r"(\w*)s", word)
     if isa(m, RegexMatch)
         return first(m.captures)
     else
@@ -14,3 +16,5 @@ function pluralize(s::String)::String
     word = lowercase(s)
     string(word, "s")
 end
+
+# irregular

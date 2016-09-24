@@ -19,6 +19,11 @@ Base.Test.@testset "octo/changeset.jl" begin
 end
 
 workspace()
+Base.Test.@testset "octo/natural.jl" begin
+    include("octo/natural.jl")
+end
+
+workspace()
 Base.Test.@testset "view.jl" begin
     include("view.jl")
 end
