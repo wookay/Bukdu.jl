@@ -45,12 +45,12 @@ end
 
 workspace()
 Base.Test.@testset "renderers/html/tag.jl" begin
-    include("renderers/html.jl")
+    include("renderers/html/tag.jl")
 end
 
 workspace()
 Base.Test.@testset "renderers/html/form.jl" begin
-    include("renderers/html.jl")
+    include("renderers/html/form.jl")
 end
 
 workspace()
@@ -106,4 +106,9 @@ end
 workspace()
 Base.Test.@testset "server.jl" begin
     include("server.jl")
+end
+
+workspace()
+Base.Test.@testset "server/form_data.jl" begin
+    include("server/form_data.jl")
 end

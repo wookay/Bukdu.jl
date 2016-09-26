@@ -29,13 +29,7 @@ end
 function index
 end
 
-function edit
-end
-
 function new
-end
-
-function show
 end
 
 function create

@@ -18,16 +18,18 @@ include("layout.jl")
 
 function post_result(c::CafeController)
     changeset = change(c, user)
-    changed = isempty(changeset.changes) ? "<p>no changes</p>" : ""
+    changed = isempty(changeset.changes) ? "<h3>no changes</h3>" : ""
     render(HTML/Layout, """
         <div>$(changeset.model)</div>
         <div>$(changeset.changes)</div>
         <p>$changed</p>
+
+        <div>$(c[:query_params])</div>
     """)
 end
 
 function input_form(form)
-    form_for(form, action=post_result, method=post) do f
+    form_for(form, action=post_result, method=post, multipart=true) do f
          """
 <label>
   Name: $(text_input(f, :name))
@@ -42,7 +44,11 @@ function input_form(form)
 </label>
 
 <div>
-$(textarea(f, :description, placeholder="enter description"))
+    $(textarea(f, :description, placeholder="enter description"))
+</div>
+
+<div>
+    $(file_input(f, :attach))
 </div>
 
 $(submit("Submit"))

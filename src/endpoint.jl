@@ -45,7 +45,7 @@ end
 
 function (::Type{AE}){AE<:ApplicationEndpoint}(path::String)
     routes = haskey(EndpointManagement.endpoint_routes,AE) ? EndpointManagement.endpoint_routes[AE] : Vector{Route}()
-    Routing.request(routes, |, path, Vector{UInt8}()) do route
+    Routing.request(routes, |, path, Assoc()) do route
         true
     end
 end

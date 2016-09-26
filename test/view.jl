@@ -96,7 +96,7 @@ let oldout = STDERR
    redirect_stdout(oldout)
    close(wrout)
 
-   @test "INFO Markdown/Layout mark layout\nINFO Markdown mark\n" == wait(reader)
+   @test "INFO  Markdown/Layout mark layout\nINFO  Markdown mark\n" == wait(reader)
 end
 
 
@@ -118,5 +118,5 @@ let oldout = STDERR
     redirect_stdout(oldout)
     close(wrout)
 
-    @test "INFO View/Layout view layout\nINFO View view\n" == wait(reader)
+    @test "INFO  View/Layout view layout\nINFO  View view\n" == wait(reader)
 end

@@ -46,12 +46,12 @@ end
 
 function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, args...; kw...)
     routes = haskey(Routing.routing_map, AR) ? Routing.routing_map[AR] : Vector{Route}()
-    data = Vector{UInt8}()
+    data = Assoc()
     if !isempty(args) || !isempty(kw)
-        data = Vector{UInt8}(join(map(vcat(args..., kw...)) do kv
+        data = Assoc(map(vcat(args..., kw...)) do kv
             (k,v) = kv
-            string(k, '=', escape(v))
-        end, '&'))
+            (k, escape(v))
+        end)
     end
     Routing.request(routes, verb, path, data) do route
         Base.function_name(route.verb) == Base.function_name(verb)
@@ -104,12 +104,12 @@ module Routing
 import ..Bukdu: ApplicationController
 import ..Bukdu: RouterRoute, Route, RouterScope, RouterResource, Resource, NoRouteError
 import ..Bukdu: Logger
-import ..Bukdu: Conn
+import ..Bukdu: Conn, conn_bad_request
 import ..Bukdu: index, edit, new, show, create, update, delete
 import ..Bukdu: get, post, delete, patch, put
 import ..Bukdu: plugins, before, after
 import ..Bukdu: Assoc
-import URIParser: URI, unescape_form
+import URIParser: URI
 import HttpCommon: parsequerystring
 
 const SLASH = '/'
@@ -189,8 +189,8 @@ function trail(s::String, n)
 end
 
 function debug_route{AC<:ApplicationController}(route, path, ::Type{AC})
-    verb = uppercase(string(Base.function_name(route.verb)))
-    path_pad = 25
+    verb = lpad(Logger.verb_uppercase(route.verb), 4)
+    path_pad = 35
     trailed_path = trail(path, path_pad)
     rpaded_path = rpad(Logger.with_color(:bold, trailed_path), path_pad)
     verb, rpaded_path, "$(Base.function_name(route.action))(::$AC)"
@@ -204,7 +204,7 @@ function error_route(route, path, controller, ex, callstack)
         callstack)
 end
 
-function request(compare::Function, routes::Vector{Route}, verb::Function, path::String, data::Vector{UInt8})::Conn
+function request(compare::Function, routes::Vector{Route}, verb::Function, path::String, data::Assoc)::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
@@ -235,7 +235,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 controller = C()
                 query_params = Assoc(parsequerystring(uri.query))
                 if verb == post && !isempty(data)
-                    merge!(query_params, Assoc(parsequerystring(unescape_form(String(data)))))
+                    merge!(query_params, data)
                 end
                 branch = Branch(query_params, params, route.action, uri.host, route.assigns)
                 task = current_task()
@@ -253,10 +253,11 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     end
                     result = route.action(controller)
                 catch ex
+                    stackframes = stacktrace(catch_backtrace())
                     Logger.error() do
-                        error_route(route, path, C, ex, stacktrace(catch_backtrace()))
+                        error_route(route, path, C, ex, stackframes)
                     end
-                    result = Conn(400, Dict{String,String}(), "bad request $ex", params, query_params, route.private, route.assigns)
+                    result = conn_bad_request(verb, path, ex, stackframes)
                 end
                 if method_exists(after, (C,))
                     after(controller)
@@ -271,7 +272,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
         end
     end
     Logger.warn() do
-        uppercase(string(Base.function_name(verb))), Logger.with_color(:bold, path)
+        Logger.verb_uppercase(verb), Logger.with_color(:bold, path)
     end
     throw(NoRouteError(""))
 end

@@ -34,7 +34,7 @@ conn = (Router)(get, "/")
    redirect_stdout(oldout)
    close(wrout)
 
-   lines = split(wait(reader), '\n')
-@test startswith(lines[1], "DEBUG GET /")
-@test lines[2] == "INFO WelcomeController.index hi"
+lines = split(wait(reader), '\n')
+@test startswith(lines[1], "DEBUG  GET /")
+@test lines[2] == "INFO  index(::WelcomeController) hi"
 end

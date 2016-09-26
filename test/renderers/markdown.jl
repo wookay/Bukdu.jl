@@ -46,11 +46,11 @@ let oldout = STDERR
 
 conn = (Router)(get, "/undefined_variable")
 @test 400 == conn.status
-@test "bad request UndefVarError(:undefined_variable)" == conn.resp_body
+@test contains(conn.resp_body, "400 UndefVarError(:undefined_variable)")
 
    reader = @async readstring(rdout)
    redirect_stdout(oldout)
    close(wrout)
 
-@test startswith(wait(reader), "ERROR")
+@test startswith(wait(reader), "ERROR  GET /undefined_variable                 index(::MarkdownController)")
 end

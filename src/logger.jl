@@ -69,19 +69,12 @@ function set_level(lvl::Union{Symbol,Bool})
     end
 end
 
-function print_info(args...; kw...)
-    prefix = settings[:info_prefix]
-    sub = string(settings[:info_sub])
-    print_log(:green, prefix, sub, args...; kw...)
-end
-
-function inner_callstack(stackframe::Vector{StackFrame})
-    !settings[:have_color] && return stackframe
+function inner_stackframes(stackframes::Vector{StackFrame}, with_color::Function)
     pat = r"(.* at )(?P<file>.*.jl):(?P<lineno>\d*)"
-    string('\n', join(map(stackframe) do frame
+    string('\n', join(map(stackframes) do frame
         str = string(frame)
         m = match(pat, str)
-        isa(m, RegexMatch) ? string(m[1], with_color(:bold, m[:file]), ':', with_color(:bold, m[:lineno])) : nothing
+        isa(m, RegexMatch) ? string(m[1], with_color(:bold, m[:file]), ':', with_color(:bold, m[:lineno])) : str
     end, '\n'))
 end
 
@@ -90,7 +83,7 @@ function inner_contents(args...)
         arg = first(args)
         if any(x->isa(arg,x), [Array, Tuple])
             if isa(arg, Vector{StackFrame})
-                inner_callstack(arg)
+                settings[:have_color] ? inner_stackframes(arg, with_color) : arg
             else
                 inner_contents(arg...)
             end
@@ -105,11 +98,17 @@ end
 function print_log(color::Symbol, prefix::String, sub::String, args...; LF=true)
     print(string(
         settings[:have_datetime] ? rpad(string(Dates.now()), 24) : "",
-        with_color(color, prefix),
+        with_color(color, rpad(prefix, 5)),
         ' ',
         isempty(sub) ? "" : string(sub, ' '),
         inner_contents(args...),
         (LF ? "\n" : "")))
+end
+
+function print_info(args...; kw...)
+    prefix = settings[:info_prefix]
+    sub = string(settings[:info_sub])
+    print_log(:green, prefix, sub, args...; kw...)
 end
 
 function have_datetime(enabled::Bool)
@@ -147,9 +146,12 @@ function log_message(modul::Module)
 end
 
 function log_message{AC<:ApplicationController}(c::AC)
-    controller = AC
     action = Base.function_name(c[:action])
-    settings[:info_sub] = string(AC, '.', action)
+    settings[:info_sub] = "$action(::$AC)"
+end
+
+function verb_uppercase(verb::Function)
+    uppercase(string(Base.function_name(verb)))
 end
 
 end # module Bukdu.Logger

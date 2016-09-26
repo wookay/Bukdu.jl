@@ -13,7 +13,7 @@ Router() do
 end
 
 Endpoint() do
-    plug(Plug.Logger, level=:error)
+    plug(Plug.Logger, level=:fatal)
     plug(Router)
 end
 
@@ -25,24 +25,24 @@ req = Request()
 
 req.method = "GET"
 req.resource = "/"
-res = Bukdu.handler(req, Response())
+res = Bukdu.Server.handler(req, Response())
 @test 200 == res.status
 @test "hello world" == String(res.data)
 
 req.method = "GET"
 req.resource = "/pi"
-res = Bukdu.handler(req, Response())
+res = Bukdu.Server.handler(req, Response())
 @test 200 == res.status
 @test "π = 3.1415926535897..." == String(res.data)
 
 req.method = "POST"
 req.resource = "/"
-res = Bukdu.handler(req, Response())
+res = Bukdu.Server.handler(req, Response())
 @test 404 == res.status
 
 req.method = "GET"
 req.resource = "/test"
-res = Bukdu.handler(req, Response())
+res = Bukdu.Server.handler(req, Response())
 @test 404 == res.status
 
 import Requests: statuscode, text
