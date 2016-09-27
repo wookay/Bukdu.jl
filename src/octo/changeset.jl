@@ -1,14 +1,33 @@
 # module Bukdu.Octo
 
+import ..Bukdu
+
 export default, Changeset, change, cast, validate_length
+export FormFile
 
 import Base: ==
-import ..ApplicationController
+import Bukdu: ApplicationController
+
+immutable FormFile
+    filename::String
+    content_type::String
+    data::Vector{UInt8}
+
+    FormFile() = new("", "application/octet-stream", Vector{UInt8}())
+    FormFile(filename::String, content_type::String, data::Vector{UInt8}) = new(filename, content_type, data)
+end
+
+==(lhs::FormFile, rhs::FormFile) =
+    ==(lhs.filename, rhs.filename) &&
+    ==(lhs.content_type, rhs.content_type) &&
+    ==(lhs.data, rhs.data)
+
 
 default(T::Type, ::Type{String}) = ""
 default(T::Type, ::Type{Int}) = 0
 default(T::Type, ::Type{Float64}) = 0.0
 default(T::Type, ::Type{Float32}) = 0.0
+default(T::Type, ::Type{FormFile}) = FormFile()
 
 function default(T::Type)::T
     # broadcast #
@@ -24,7 +43,7 @@ type Changeset
     changes::Assoc
     function Changeset(model, changes::Assoc)
         T = typeof(model)
-        lhs = Assoc(map(x->(x,getfield(model, x)), fieldnames(T)))
+        lhs = Assoc(map(x->(x, getfield(model, x)), fieldnames(T)))
         rhs = typed_assoc(T, changes)
         new(model, setdiff(rhs, lhs))
     end
@@ -33,7 +52,8 @@ end
 function ==(lhs::Changeset, rhs::Changeset)
     T = typeof(lhs.model)
     !isa(rhs.model, T) && return false
-    all(x -> ==(getfield(lhs.model, x), getfield(rhs.model, x)), fieldnames(T)) && ==(lhs.changes, rhs.changes)
+    all(x -> ==(getfield(lhs.model, x), getfield(rhs.model, x)), fieldnames(T)) &&
+             ==(lhs.changes, rhs.changes)
 end
 
 function |>(changeset::Changeset, func::Function)

@@ -29,29 +29,18 @@ Bukdu.start(8080)
 
 ### Endpoint
 
-* Plug.Logger
-```
-Endpoint() do
-    plug(Plug.Logger)
-    plug(Router)
-end
-```
+Use `Endpoint` to define the plug pipelines.
 
-* Plug.Static
+* plug `Plug.Static` to serve the static files.
+* plug `Plug.Logger` to write the event logs.
+* plug `Router` to give the routes into the Endpoint.
+
 ```
 Endpoint() do
     plug(Plug.Static, at= "/", from= "public")
     plug(Plug.Logger)
     plug(Router)
 end
-```
-
-
-### Logger
-
-* Logger level
-```
-Logger.set_level(false)
 ```
 
 

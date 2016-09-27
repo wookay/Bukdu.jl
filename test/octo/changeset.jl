@@ -21,3 +21,12 @@ function validates(model::User, params)
 end
 
 @test isa(validates(model, params), Changeset)
+
+lhs = Assoc(attach=FormFile())
+lhs2 = Assoc(attach=FormFile())
+rhs = Assoc(attach=FormFile("one.png","",UInt8[0]))
+rhs2 = Assoc(attach=FormFile("one.png","",UInt8[0]))
+@test Assoc() == setdiff(lhs, lhs2)
+@test Assoc() == setdiff(rhs, rhs2)
+@test Assoc(attach=FormFile()) == setdiff(lhs, rhs)
+@test Assoc(attach=FormFile("one.png","",UInt8[0])) == setdiff(rhs, lhs)

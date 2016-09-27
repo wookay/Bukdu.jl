@@ -109,6 +109,10 @@ form = change(default(User), name="jack")
 <form class="ex" action="/test" method="get" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, class="ex", action="/test")
 
+lhs = FormFile()
+rhs = FormFile()
+@test lhs == rhs
+
 import Requests: statuscode, text
 
 Bukdu.start(8082)

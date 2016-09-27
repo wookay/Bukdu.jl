@@ -66,5 +66,19 @@ function ==(lhs::Assoc, rhs::Assoc)
 end
 
 function Base.setdiff(lhs::Assoc, rhs::Assoc)::Assoc
-    Assoc(setdiff(lhs.vector, rhs.vector))
+    diffs = setdiff(lhs.vector, rhs.vector)
+    vec = Vector()
+    for x in lhs.vector
+        eq = false
+        for v in rhs.vector
+            if ==(x, v)
+                eq = true
+                break
+            end
+        end
+        if !eq
+            push!(vec, x)
+        end
+    end
+    Assoc(vec)
 end

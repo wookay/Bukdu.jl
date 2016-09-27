@@ -63,7 +63,7 @@ function scan(s::FormScanner)::Assoc
                 m_filename = match(pat_filename, chunk)
                 if isa(m_filename, RegexMatch)
                     name = Symbol(m_filename[:name])
-                    filename = m_filename[:filename]
+                    filename = String(m_filename[:filename])
                 else
                     m = match(pat, chunk)
                     if isa(m, RegexMatch)

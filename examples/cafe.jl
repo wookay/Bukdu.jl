@@ -10,38 +10,45 @@ type User
     age::Int
     description::String
     happiness::Float64
+    attach::FormFile
 end
 
-user = User("foo bar", 20, "", 0.5)
+user = User("foo bar", 20, "", 0.5, FormFile())
 
 include("layout.jl")
 
 function post_result(c::CafeController)
     changeset = change(c, user)
-    changed = isempty(changeset.changes) ? "<h3>no changes</h3>" : ""
-    render(HTML/Layout, """
-        <div>$(changeset.model)</div>
-        <div>$(changeset.changes)</div>
-        <p>$changed</p>
+    no_changes = isempty(changeset.changes) ? "-------------\n# < no changes >" : ""
+    render(Markdown/Layout, """
+# model
+```
+$(changeset.model)
+```
+# changes
+```
+$(changeset.changes)
+```
 
-        <div>$(c[:query_params])</div>
-    """)
+$no_changes
+""")
 end
+
 
 function input_form(form)
     form_for(form, action=post_result, method=post, multipart=true) do f
          """
-<label>
+<div>
   Name: $(text_input(f, :name))
-</label>
+</div>
 
-<label>
+<div>
     Age: $(select(f, :age, 18:30))
-</label>
+</div>
 
-<label>
+<div>
     Happiness: $(text_input(f, :happiness))
-</label>
+</div>
 
 <div>
     $(textarea(f, :description, placeholder="enter description"))

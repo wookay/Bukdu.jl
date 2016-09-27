@@ -12,7 +12,7 @@ export index, edit, new, show, create, update, delete # actions
 export ApplicationLayout, Layout, layout, /
 
 # in octo.jl
-export Assoc
+export Assoc, FormFile
 export validates
 
 # in view.jl
