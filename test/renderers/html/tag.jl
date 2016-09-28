@@ -38,3 +38,7 @@ f = change(user)
 
 @test """<textarea id="user_description" name="user[description]">
 </textarea>""" == textarea(f, :description)
+
+f = nothing
+@test """<input id="description" name="description" type="hidden" />""" == hidden_input(f, :description)
+@test """<input id="description" name="description" type="hidden" value="hello" />""" == hidden_input(f, :description, "hello")

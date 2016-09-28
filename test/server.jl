@@ -25,24 +25,24 @@ req = Request()
 
 req.method = "GET"
 req.resource = "/"
-res = Bukdu.Server.handler(req, Response())
+res = Bukdu.Server.handler(Endpoint, req, Response())
 @test 200 == res.status
 @test "hello world" == String(res.data)
 
 req.method = "GET"
 req.resource = "/pi"
-res = Bukdu.Server.handler(req, Response())
+res = Bukdu.Server.handler(Endpoint, req, Response())
 @test 200 == res.status
 @test "π = 3.1415926535897..." == String(res.data)
 
 req.method = "POST"
 req.resource = "/"
-res = Bukdu.Server.handler(req, Response())
+res = Bukdu.Server.handler(Endpoint, req, Response())
 @test 404 == res.status
 
 req.method = "GET"
 req.resource = "/test"
-res = Bukdu.Server.handler(req, Response())
+res = Bukdu.Server.handler(Endpoint, req, Response())
 @test 404 == res.status
 
 import Requests: statuscode, text
@@ -59,7 +59,7 @@ resp2 = Requests.get("http://localhost:8083/")
 req.method = "GET"
 req.resource = "/"
 
-(server,task) = first(Bukdu.Farm.servers)
+(server,task) = first(Bukdu.Farm.servers[Endpoint])
 @test :runnable == task.state
 @test "hello world" == text(server.http.handle(req, Response()))
 
@@ -69,8 +69,8 @@ Bukdu.stop()
 logs = []
 
 before(::Request, ::Response) = push!(logs, :br)
-before(::WelcomeController) = push!(logs, :bc)
-after(::WelcomeController) = push!(logs, :ac)
+before(::Function, ::WelcomeController) = push!(logs, :bc)
+after(::Function, ::WelcomeController) = push!(logs, :ac)
 after(::Request, ::Response) = push!(logs, :ar)
 
 conn = (Router)(get, "/")

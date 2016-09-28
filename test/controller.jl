@@ -14,8 +14,8 @@ end
 
 using Base.Test
 logs = []
-before(::WelcomeController) = push!(logs, :b)
-after(::WelcomeController) = push!(logs, :a)
+before(f, ::WelcomeController) = push!(logs, :b)
+after(f, ::WelcomeController) = push!(logs, :a)
 conn = (Router)(get, "/")
 @test [:b, :a] == logs
 

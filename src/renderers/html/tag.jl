@@ -2,11 +2,13 @@
 
 module Tag
 
-export form_for, label, text_input, select, checkbox, textarea, file_input, submit
+export form_for, label, text_input, select, checkbox, textarea, file_input, hidden_input, submit
 
 import ....Bukdu
-import ....Bukdu.Octo: Changeset, change
+import Bukdu.Octo: Changeset, change
 import Base: select
+
+typealias ChangesetOrVoid Union{Changeset, Void}
 
 function tag_id(f, field)
     string(lowercase(string(typeof(f))), '_', field)
@@ -25,18 +27,18 @@ end
 function field_value(form, field; selected=false)
 end
 
-function build(tag::String, changeset::Union{Void,Changeset}, field::Symbol, opts; body=nothing, LF=false)
+function build(tag::String, changeset::ChangesetOrVoid, field::Symbol, opts; body=nothing, LF=false)
     result = "<$tag"
     for (k,v) in opts
         if !isa(v, Void)
-            result *= string(' ', k, "=\"", isa(v, Function) ? v(changeset.model, field) : v, '"')
+            result *= string(' ', k, "=\"", isa(v, Function) ? (isa(changeset,Void) ? field : v(changeset.model, field)) : v, '"')
         end
     end
     linefeed = LF ? "\n" : ""
     string(result, isa(body, Void) ? " />" : ">$linefeed$body</$tag>")
 end
 
-function form_for(block::Function, changeset::Changeset, args...; kw...)
+function form_for(block::Function, changeset::ChangesetOrVoid, args...; kw...)
     list = Vector{Tuple{Symbol,Union{Function,String,Bool}}}(vcat(args..., kw...))
     opts = Dict(list)
     if haskey(opts, :method)
@@ -86,8 +88,8 @@ function form_for(block::Function, changeset::Changeset, args...; kw...)
     end
 end
 
-function value_from_changeset(changeset::Changeset, field::Symbol, value=nothing)
-    if isa(value, Void)
+function value_from_changeset(changeset::ChangesetOrVoid, field::Symbol, value=nothing)
+    if isa(changeset,Changeset) && isa(value, Void)
         if haskey(changeset.changes, field)
             return changeset.changes[field]
         elseif field in fieldnames(typeof(changeset.model))
@@ -97,7 +99,7 @@ function value_from_changeset(changeset::Changeset, field::Symbol, value=nothing
     return value
 end
 
-function label(changeset::Changeset, field::Symbol, body=nothing; kw...)
+function label(changeset::ChangesetOrVoid, field::Symbol, body=nothing; kw...)
     build("label", changeset, field, (:for=>tag_id, kw...); body=body)
 end
 
@@ -105,12 +107,12 @@ function label(block::Function, changeset::Changeset, field::Symbol; kw...)
     label(changeset, field, body=block(); kw...)
 end
 
-function text_input(changeset::Changeset, field::Symbol, value=nothing; kw...)
+function text_input(changeset::ChangesetOrVoid, field::Symbol, value=nothing; kw...)
     value = value_from_changeset(changeset, field, value)
     build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"text", :value=>value, kw...))
 end
 
-function select_option(changeset::Changeset, field::Symbol, options, value=nothing)
+function select_option(changeset::ChangesetOrVoid, field::Symbol, options, value=nothing)
     # broadcast #
     # string(join(string.("    <option value=\"", options, "\">", options, "</option>"), '\n'), '\n')
     value = value_from_changeset(changeset, field, value)
@@ -118,22 +120,27 @@ function select_option(changeset::Changeset, field::Symbol, options, value=nothi
         string("    <option value=\"", x, '"', (value==x ? " selected" : ""), ">", x, "</option>"), options), '\n'), '\n')
 end
 
-function select(changeset::Changeset, field::Symbol, options, value=nothing; kw...)
+function select(changeset::ChangesetOrVoid, field::Symbol, options, value=nothing; kw...)
     build("select", changeset, field, (:id=>tag_id, :name=>tag_name, kw...); body=select_option(changeset, field, options, value), LF=true)
 end
 
-function checkbox(changeset::Changeset, field::Symbol, value=nothing; kw...)
+function checkbox(changeset::ChangesetOrVoid, field::Symbol, value=nothing; kw...)
     value = value_from_changeset(changeset, field, value)
     checked = (true==value) ? "checked" : nothing
     build("checkbox", changeset, field, (:id=>tag_id, :name=>tag_name, :checked=>cheked, :value=>value, kw...))
 end
 
-function textarea(changeset::Changeset, field::Symbol, value=""; kw...)
+function textarea(changeset::ChangesetOrVoid, field::Symbol, value=""; kw...)
     build("textarea", changeset, field, (:id=>tag_id, :name=>tag_name, kw...); body=value, LF=true)
 end
 
-function file_input(changeset::Changeset, field::Symbol; kw...)
+function file_input(changeset::ChangesetOrVoid, field::Symbol; kw...)
     build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"file", kw...))
+end
+
+function hidden_input(changeset::ChangesetOrVoid, field::Symbol, value=nothing; kw...)
+    value = value_from_changeset(changeset, field, value)
+    build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"hidden", :value=>value, kw...))
 end
 
 function submit(value; kw...)
