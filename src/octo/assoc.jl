@@ -13,6 +13,9 @@ type Assoc
     function Assoc(dict::Dict{AbstractString,AbstractString})
         new([(Symbol(k),v) for (k,v) in dict])
     end
+    function Assoc(dict::Dict{String,Any})
+        new([(Symbol(k),v) for (k,v) in dict])
+    end
 end
 
 function Base.getindex(assoc::Assoc, key::Symbol)

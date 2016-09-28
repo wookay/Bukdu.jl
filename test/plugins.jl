@@ -16,8 +16,8 @@ function plugins(c::WelcomeController)
    end
 end
 
-function before(c::WelcomeController)
-    push!(c.stack, (:b,c[:action]))
+function before(f::Function, c::WelcomeController)
+    push!(c.stack, (:b, c[:action]))
 end
 
 Router() do

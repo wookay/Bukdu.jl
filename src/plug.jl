@@ -12,9 +12,10 @@ import ..plug
 include("plug/router.jl")
 include("plug/static.jl")
 include("plug/logger.jl")
+include("plug/oauth2.jl")
 
-function plug(modul::Module; kw...)
-    plug(Val{Base.module_name(modul)}; kw...)
+function plug(modul::Module, args...; kw...)
+    plug(Val{Base.module_name(modul)}, args...; kw...)
 end
 
 end # module Bukdu.Plug

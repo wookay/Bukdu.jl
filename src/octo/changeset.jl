@@ -1,12 +1,11 @@
 # module Bukdu.Octo
 
 import ..Bukdu
+import Bukdu: ApplicationController
+import Base: ==
 
 export default, Changeset, change, cast, validate_length
 export FormFile
-
-import Base: ==
-import Bukdu: ApplicationController
 
 immutable FormFile
     filename::String
@@ -92,6 +91,24 @@ function cutout_brackets(typ::Type, param::Tuple{Symbol,Any})::Tuple{Symbol,Any}
     (key, value)
 end
 
+"""
+    change(model)::Changeset
+
+Get the changeset of the model.
+"""
+function change(model; kw...)::Changeset
+    Changeset(model, Assoc(kw))
+end
+
+"""
+    change(typ::Type)::Changeset
+
+Get the changeset of the Type.
+"""
+function change(typ::Type; kw...)::Changeset
+    change(default(typ); kw...)
+end
+
 function change{T<:Any,AC<:ApplicationController}(c::AC, model::T)::Changeset
     Changeset(model, Assoc(map(param->cutout_brackets(T,param), c[:query_params])))
 end
@@ -100,13 +117,6 @@ function change{AC<:ApplicationController}(c::AC, T::Type)::Changeset
     change(c, default(T))
 end
 
-function change(model; kw...)::Changeset
-    Changeset(model, Assoc(kw))
-end
-
-function change(typ::Type; kw...)::Changeset
-    change(default(typ); kw...)
-end
 
 function cast(changeset::Changeset, params, required_fields)::Changeset
     changeset

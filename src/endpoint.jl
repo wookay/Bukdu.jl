@@ -2,8 +2,6 @@
 
 import Base: reload
 
-abstract ApplicationEndpoint
-
 """
     Endpoint
 
@@ -35,17 +33,29 @@ function reload{AE<:ApplicationEndpoint}(::Type{AE})
     nothing
 end
 
+function has_called{AE<:ApplicationEndpoint}(::Type{AE})
+    haskey(Routing.runtime, AE)
+end
+
 function (::Type{AE}){AE<:ApplicationEndpoint}(context::Function)
     empty!(RouterRoute.routes)
     context()
     EndpointManagement.endpoint_routes[AE] = copy(RouterRoute.routes)
     EndpointManagement.endpoint_contexts[AE] = context
+    Routing.runtime[AE] = true
     nothing
 end
 
-function (::Type{AE}){AE<:ApplicationEndpoint}(path::String)
+function (::Type{AE}){AE<:ApplicationEndpoint}(path::String, args...; kw...)
     routes = haskey(EndpointManagement.endpoint_routes,AE) ? EndpointManagement.endpoint_routes[AE] : Vector{Route}()
-    Routing.request(routes, |, path, Assoc()) do route
+    data = Assoc()
+    if !isempty(args) || !isempty(kw)
+        data = Assoc(map(vcat(args..., kw...)) do kv
+            (k,v) = kv
+            (k, escape(v))
+        end)
+    end
+    Routing.request(routes, |, path, Assoc(), data) do route
         true
     end
 end

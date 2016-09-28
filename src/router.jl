@@ -1,7 +1,5 @@
 # module Bukdu
 
-abstract ApplicationRouter
-
 """
     Router
 
@@ -21,7 +19,7 @@ immutable Router <: ApplicationRouter
 end
 
 immutable NoRouteError
-    message
+    path
 end
 
 include("router/route.jl")
@@ -30,10 +28,14 @@ include("router/resource.jl")
 include("router/conn.jl")
 
 import Base: reset
-import URIParser: escape
+import URIParser: URI, escape
 
 function reset{AR<:ApplicationRouter}(::Type{AR})
     delete!(Routing.routing_map, AR)
+end
+
+function has_called{AR<:ApplicationRouter}(::Type{AR})
+    haskey(Routing.runtime, AR)
 end
 
 function (::Type{AR}){AR<:ApplicationRouter}(context::Function)
@@ -41,6 +43,7 @@ function (::Type{AR}){AR<:ApplicationRouter}(context::Function)
     context()
     Routing.routing_map[AR] = copy(RouterRoute.routes)
     empty!(RouterScope.stack)
+    Routing.runtime[AR] = true
     nothing
 end
 
@@ -53,7 +56,8 @@ function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, args.
             (k, escape(v))
         end)
     end
-    Routing.request(routes, verb, path, data) do route
+    headers = Assoc()
+    Routing.request(routes, verb, path, headers, data) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
 end
@@ -98,10 +102,20 @@ function resources{AC<:ApplicationController}(context::Function, path::String, :
     Routing.add_resources(context, path, AC, Dict(kw))
 end
 
+function redirect_to(url::String; kw...)
+    if isempty(kw)
+        location = url
+    else
+        params = join([string(k,'=',escape(v)) for (k,v) in kw], '&')
+        uri = URI(url)
+        location = string(url, isempty(uri.query) ? '?' : '&', params)
+    end
+    Conn(302, Dict("Location"=>location), nothing)
+end
 
 module Routing
 
-import ..Bukdu: ApplicationController
+import ..Bukdu: ApplicationController, Branch
 import ..Bukdu: RouterRoute, Route, RouterScope, RouterResource, Resource, NoRouteError
 import ..Bukdu: Logger
 import ..Bukdu: Conn, conn_bad_request
@@ -115,16 +129,9 @@ import HttpCommon: parsequerystring
 const SLASH = '/'
 const COLON = ':'
 
-immutable Branch
-    query_params::Assoc
-    params::Assoc
-    action::Function
-    host::String
-    assigns::Dict{Symbol,Any}
-end
-
 task_storage = Dict{Task,Branch}()
 routing_map = Dict{Type,Vector{Route}}()
+runtime = Dict{Type,Bool}()
 
 # route
 function match{AC<:ApplicationController}(verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
@@ -192,7 +199,7 @@ function debug_route{AC<:ApplicationController}(route, path, ::Type{AC})
     verb = lpad(Logger.verb_uppercase(route.verb), 4)
     path_pad = 35
     trailed_path = trail(path, path_pad)
-    rpaded_path = rpad(Logger.with_color(:bold, trailed_path), path_pad)
+    rpaded_path = Logger.with_color(:bold, rpad(trailed_path, path_pad))
     verb, rpaded_path, "$(Base.function_name(route.action))(::$AC)"
 end
 
@@ -204,7 +211,7 @@ function error_route(route, path, controller, ex, callstack)
         callstack)
 end
 
-function request(compare::Function, routes::Vector{Route}, verb::Function, path::String, data::Assoc)::Conn
+function request(compare::Function, routes::Vector{Route}, verb::Function, path::String, headers::Assoc, data::Assoc)::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
@@ -234,17 +241,17 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 C = route.controller
                 controller = C()
                 query_params = Assoc(parsequerystring(uri.query))
-                if verb == post && !isempty(data)
+                if !isempty(data)
                     merge!(query_params, data)
                 end
-                branch = Branch(query_params, params, route.action, uri.host, route.assigns)
+                branch = Branch(query_params, params, route.action, uri.host, headers, route.assigns)
                 task = current_task()
                 task_storage[task] = branch
                 if method_exists(plugins, (C,))
                     plugins(controller)
                 end
-                if method_exists(before, (C,))
-                    before(controller)
+                if method_exists(before, (Function, C))
+                    before(route.action, controller)
                 end
                 result = nothing
                 try
@@ -259,8 +266,8 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     end
                     result = conn_bad_request(verb, path, ex, stackframes)
                 end
-                if method_exists(after, (C,))
-                    after(controller)
+                if method_exists(after, (Function, C))
+                    after(route.action, controller)
                 end
                 pop!(task_storage, task)
                 if isa(result, Conn)
@@ -274,7 +281,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
     Logger.warn() do
         Logger.verb_uppercase(verb), Logger.with_color(:bold, path)
     end
-    throw(NoRouteError(""))
+    throw(NoRouteError(path))
 end
 
 end # module Bukdu.Routing

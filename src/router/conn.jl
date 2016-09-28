@@ -34,6 +34,10 @@ function conn_error_response(code::Int, verb, path::String, ex, stackframes::Vec
         "</pre>"))
 end
 
+function conn_no_content()
+    Conn(204, Dict{String,String}(), nothing)
+end
+
 function conn_server_error(verb, path::String, ex, stackframes::Vector{StackFrame})
     conn_error_response(404, verb, path, ex, stackframes)
 end

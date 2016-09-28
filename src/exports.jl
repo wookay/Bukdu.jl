@@ -1,22 +1,28 @@
 # module Bukdu
 
+# in application.jl
+export ApplicationRouter
+export ApplicationEndpoint
+export ApplicationController
+export ApplicationLayout
+export ApplicationView
+
 # in filter.jl
 export plugins, before, after
 
-# in controller.jl
-export ApplicationController
-export get, post, delete, patch, put # verbs
-export index, edit, new, show, create, update, delete # actions
-
 # in layout.jl
-export ApplicationLayout, Layout, layout, /
+export Layout, layout, /
 
 # in octo.jl
 export Assoc, FormFile
 export validates
 
+# in controller.jl
+export get, post, delete, patch, put # verbs
+export index, edit, new, show, create, update, delete # actions
+
 # in view.jl
-export ApplicationView, View
+export View
 
 # in renderers.jl
 export render
@@ -26,11 +32,12 @@ export Tag # html
 export Logger
 
 # in router.jl
-export ApplicationRouter, Router, NoRouteError, reset
-export scope, resources
+export redirect_to, has_called
+export Router, NoRouteError, reset
+export Conn, scope, resources
 
 # in endpoint.jl
-export ApplicationEndpoint, Endpoint, reload
+export Endpoint, reload
 
 # in plug.jl
 export Plug, plug

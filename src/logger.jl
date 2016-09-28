@@ -2,7 +2,7 @@
 
 module Logger
 
-import ..Bukdu: ApplicationController, ApplicationLayout, ApplicationView, LayoutDivision
+import ..Bukdu: ApplicationController, ApplicationLayout, ApplicationView, LayoutDivision, viewlayout_symbol
 
 const level_false =   0
 const level_fatal = 100
@@ -134,7 +134,7 @@ function log_message(prefix::String)
 end
 
 function log_message{AL<:ApplicationLayout}(D::LayoutDivision{AL})
-    settings[:info_sub] = D
+    settings[:info_sub] = viewlayout_symbol(D)
 end
 
 function log_message{AV<:ApplicationView}(::Type{AV})

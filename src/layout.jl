@@ -2,8 +2,6 @@
 
 import Base: /
 
-abstract ApplicationLayout
-
 immutable Layout <: ApplicationLayout
 end
 
