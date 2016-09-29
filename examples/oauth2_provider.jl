@@ -96,6 +96,8 @@ end
 #key = MbedTLS.parse_keyfile(rel("keys/server.key"))
 Bukdu.start(8086) #, ssl=(cert,key))
 
-# wait()
+Logger.set_path_padding(60)
+
+wait()
 
 # Bukdu.stop()

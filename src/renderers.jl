@@ -1,5 +1,8 @@
 # module Bukdu
 
+include("renderers/layout.jl")
+include("renderers/view.jl")
+
 include("renderers/text.jl")
 include("renderers/json.jl")
 include("renderers/html.jl")

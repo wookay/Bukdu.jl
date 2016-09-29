@@ -23,7 +23,7 @@ function post_authorize
 end
 
 function post_access_token
-end 
+end
 
 immutable OAuth2Router <: ApplicationRouter
 end

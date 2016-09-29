@@ -113,14 +113,14 @@ lhs = FormFile()
 rhs = FormFile()
 @test lhs == rhs
 
-import Requests: statuscode, text
+import Requests: URI, statuscode, text
 
 Bukdu.start(8082)
-resp1 = Requests.get("http://localhost:8082/")
+resp1 = Requests.get(URI("http://localhost:8082/"))
 @test 200 == statuscode(resp1)
 @test "<div>$contents</div>" == text(resp1)
 
-resp2 = Requests.post("http://localhost:8082/post_result", data=Dict("user[name]"=>"foo bar"))
+resp2 = Requests.post(URI("http://localhost:8082/post_result"), data=Dict("user[name]"=>"foo bar"))
 @test 200 == statuscode(resp2)
 @test """Bukdu.Octo.Changeset(User("tom",20,"",0.5),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[(:name,"foo bar")]))""" == text(resp2)
 

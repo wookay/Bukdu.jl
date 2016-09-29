@@ -1,12 +1,11 @@
 # module Bukdu
 
-# verbs: get, post, delete, patch, put
+import Base: getindex, get, edit, show
+
 const HTTP_VERBS = [:get, :post, :delete, :patch, :put]
 
-import Base: getindex, edit
-
 for verb in HTTP_VERBS
-    @eval $verb{AC<:ApplicationController}(path::String, ::Type{AC}, action::Function; kw...) =
+    @eval ($verb){AC<:ApplicationController}(path::String, ::Type{AC}, action::Function; kw...) =
         Routing.match($verb, path, AC, action, Dict(kw))
 end
 
@@ -36,12 +35,12 @@ end
 function index
 end
 
-# edit
+#        edit
 
 function new
 end
 
-# show
+#        show
 
 function create
 end
@@ -50,4 +49,9 @@ function update
 end
 
 function delete
+end
+
+function Logger.log_message{AC<:ApplicationController}(c::AC)
+    action = Base.function_name(c[:action])
+    Logger.settings[:info_sub] = "$action(::$AC)"
 end

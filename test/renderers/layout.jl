@@ -29,8 +29,8 @@ conn = (Router)(get, "/custom")
 
 @test "custom layout hello" == render(Text/Layout/CustomLayout, "hello").resp_body
 @test "layout custom hello" == render(Text/CustomLayout/Layout, "hello").resp_body
-@test "custom layout hello" == render(HTML/Layout/CustomLayout, "hello")
-@test "layout custom hello" == render(HTML/CustomLayout/Layout, "hello")
+@test "custom layout hello" == render(HTML/Layout/CustomLayout, "hello").resp_body
+@test "layout custom hello" == render(HTML/CustomLayout/Layout, "hello").resp_body
 
 @test "Text{T}" == string(Text)
 @test "Text/Layout" == string(Text/Layout)

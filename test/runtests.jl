@@ -1,11 +1,6 @@
 workspace()
-Base.Test.@testset "controller.jl" begin
-    include("controller.jl")
-end
-
-workspace()
-Base.Test.@testset "params.jl" begin
-    include("params.jl")
+Base.Test.@testset "logger.jl" begin
+    include("logger.jl")
 end
 
 workspace()
@@ -24,8 +19,28 @@ Base.Test.@testset "octo/natural.jl" begin
 end
 
 workspace()
-Base.Test.@testset "view.jl" begin
-    include("view.jl")
+Base.Test.@testset "plugins.jl" begin
+    include("plugins.jl")
+end
+
+workspace()
+Base.Test.@testset "controller/params.jl" begin
+    include("controller/params.jl")
+end
+
+workspace()
+Base.Test.@testset "controller.jl" begin
+    include("controller.jl")
+end
+
+workspace()
+Base.Test.@testset "renderers/layout.jl" begin
+    include("renderers/layout.jl")
+end
+
+workspace()
+Base.Test.@testset "renderers/view.jl" begin
+    include("renderers/view.jl")
 end
 
 workspace()
@@ -39,11 +54,6 @@ Base.Test.@testset "renderers/json.jl" begin
 end
 
 workspace()
-Base.Test.@testset "renderers/html.jl" begin
-    include("renderers/html.jl")
-end
-
-workspace()
 Base.Test.@testset "renderers/html/tag.jl" begin
     include("renderers/html/tag.jl")
 end
@@ -51,6 +61,11 @@ end
 workspace()
 Base.Test.@testset "renderers/html/form.jl" begin
     include("renderers/html/form.jl")
+end
+
+workspace()
+Base.Test.@testset "renderers/html.jl" begin
+    include("renderers/html.jl")
 end
 
 workspace()
@@ -64,33 +79,23 @@ Base.Test.@testset "renderers/mustache.jl" begin
 end
 
 workspace()
-Base.Test.@testset "logger.jl" begin
-    include("logger.jl")
+Base.Test.@testset "router/scope.jl" begin
+    include("router/scope.jl")
+end
+
+workspace()
+Base.Test.@testset "router/resource.jl" begin
+    include("router/resource.jl")
+end
+
+workspace()
+Base.Test.@testset "router/endpoint.jl" begin
+    include("router/endpoint.jl")
 end
 
 workspace()
 Base.Test.@testset "router.jl" begin
     include("router.jl")
-end
-
-workspace()
-Base.Test.@testset "scope.jl" begin
-    include("scope.jl")
-end
-
-workspace()
-Base.Test.@testset "endpoint.jl" begin
-    include("endpoint.jl")
-end
-
-workspace()
-Base.Test.@testset "config.jl" begin
-    include("config.jl")
-end
-
-workspace()
-Base.Test.@testset "plugins.jl" begin
-    include("plugins.jl")
 end
 
 workspace()
@@ -109,11 +114,11 @@ Base.Test.@testset "plug/oauth2.jl" begin
 end
 
 workspace()
-Base.Test.@testset "server.jl" begin
-    include("server.jl")
+Base.Test.@testset "server/form_data.jl" begin
+    include("server/form_data.jl")
 end
 
 workspace()
-Base.Test.@testset "server/form_data.jl" begin
-    include("server/form_data.jl")
+Base.Test.@testset "server.jl" begin
+    include("server.jl")
 end

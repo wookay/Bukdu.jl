@@ -18,7 +18,7 @@ function viewlayout_symbol{AL<:ApplicationLayout}(D::LayoutDivision{AL})
     Symbol(view_name, '/', layout_name)
 end
 
-function show{AL<:ApplicationLayout}(io::IO, D::LayoutDivision{AL})
+function Base.show{AL<:ApplicationLayout}(io::IO, D::LayoutDivision{AL})
     write(io, viewlayout_symbol(D))
 end
 
@@ -41,4 +41,8 @@ julia> layout(::Layout, body) = "<html><body>\$body</body></html>"
 ```
 """
 function layout
+end
+
+function Logger.log_message{AL<:ApplicationLayout}(D::LayoutDivision{AL})
+    Logger.settings[:info_sub] = viewlayout_symbol(D)
 end
