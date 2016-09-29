@@ -1,4 +1,5 @@
 importall Bukdu
+import Bukdu: has_called
 using Base.Test
 
 @test !has_called(Router)

@@ -2,7 +2,7 @@
 
 module Logger
 
-import ..Bukdu: ApplicationController, ApplicationLayout, ApplicationView, LayoutDivision, viewlayout_symbol
+export log_message
 
 const level_false =   0
 const level_fatal = 100
@@ -32,7 +32,8 @@ settings = Dict(
     :have_color => Base.have_color,
     :have_datetime => false,
     :info_prefix => "INFO",
-    :info_sub => ""
+    :info_sub => "",
+    :path_padding => 35
 )
 
 fatal(block::Function) = settings[:level] >= level_fatal && fatal(block())
@@ -119,6 +120,10 @@ function have_color(enabled::Bool)
     settings[:have_color] = enabled
 end
 
+function set_path_padding(padding::Int)
+    settings[:path_padding] = padding
+end
+
 function with_color(color::Symbol, text)::String
     if settings[:have_color]
         string(Base.text_colors[color], text, Base.color_normal)
@@ -133,21 +138,8 @@ function log_message(prefix::String)
     settings[:info_prefix] = prefix
 end
 
-function log_message{AL<:ApplicationLayout}(D::LayoutDivision{AL})
-    settings[:info_sub] = viewlayout_symbol(D)
-end
-
-function log_message{AV<:ApplicationView}(::Type{AV})
-    settings[:info_sub] = AV.name.name
-end
-
 function log_message(modul::Module)
     settings[:info_sub] = Base.module_name(modul)
-end
-
-function log_message{AC<:ApplicationController}(c::AC)
-    action = Base.function_name(c[:action])
-    settings[:info_sub] = "$action(::$AC)"
 end
 
 function verb_uppercase(verb::Function)

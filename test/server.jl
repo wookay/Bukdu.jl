@@ -45,12 +45,12 @@ req.resource = "/test"
 res = Bukdu.Server.handler(Endpoint, req, Response())
 @test 404 == res.status
 
-import Requests: statuscode, text
+import Requests: URI, statuscode, text
 
 Bukdu.start([8082, 8083])
 
-resp1 = Requests.get("http://localhost:8082/")
-resp2 = Requests.get("http://localhost:8083/")
+resp1 = Requests.get(URI("http://localhost:8082/"))
+resp2 = Requests.get(URI("http://localhost:8083/"))
 @test 200 == statuscode(resp1)
 @test 200 == statuscode(resp2)
 @test "hello world" == text(resp1)
@@ -91,8 +91,8 @@ after(render, Text/Layout) do text
 end
 
 Bukdu.start(8082)
-resp1 = Requests.get("http://localhost:8082/")
-@test_throws Base.UVError Requests.get("http://localhost:8083/")
+resp1 = Requests.get(URI("http://localhost:8082/"))
+@test_throws Base.UVError Requests.get(URI("http://localhost:8083/"))
 @test 200 == statuscode(resp1)
 @test "hello world" == text(resp1)
 @test [:br,:bc,:bvl,:bv,:av,:avl,:ac,:ar] == logs
