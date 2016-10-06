@@ -19,8 +19,18 @@ Base.Test.@testset "octo/natural.jl" begin
 end
 
 workspace()
-Base.Test.@testset "plugins.jl" begin
-    include("plugins.jl")
+Base.Test.@testset "filter.jl" begin
+    include("filter.jl")
+end
+
+workspace()
+Base.Test.@testset "controller/conn.jl" begin
+    include("controller/conn.jl")
+end
+
+workspace()
+Base.Test.@testset "controller/pipeline.jl" begin
+    include("controller/pipeline.jl")
 end
 
 workspace()

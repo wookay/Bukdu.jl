@@ -1,7 +1,5 @@
 # module Bukdu.Octo
 
-export singularize, pluralize
-
 function singularize(s::String)::String
     word = lowercase(s)
     m = match(r"(\w*)s", word)

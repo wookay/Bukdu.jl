@@ -5,11 +5,11 @@ module Server
 import HttpCommon: Request, Response, parsequerystring
 import URIParser: unescape_form
 import ....Bukdu
-import Bukdu: Routing, RouterRoute, NoRouteError
-import Bukdu: ApplicationEndpoint
+import Bukdu: Routing, RouterRoute
+import Bukdu: ApplicationEndpoint, Conn
 import Bukdu: before, after, post
+import Bukdu: conn_no_content, conn_not_found
 import Bukdu: Logger
-import Bukdu: Conn, conn_no_content, conn_server_error
 
 include("form_data.jl")
 
@@ -29,14 +29,14 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
         end
     catch ex
         stackframes = stacktrace(catch_backtrace())
-        if !isa(ex, NoRouteError)
+        if !isa(ex, Bukdu.NoRouteError)
             Logger.error() do
                 Logger.verb_uppercase(verb), req.resource, ex, stackframes
             end
         end
-        conn = conn_server_error(verb, req.resource, ex, stackframes)
+        conn = conn_not_found(verb, req.resource, ex, stackframes)
     end
-    for (key,value) in conn.resp_header
+    for (key,value) in conn.resp_headers
         res.headers[key] = value
     end
     res.headers["Server"] = Server.info

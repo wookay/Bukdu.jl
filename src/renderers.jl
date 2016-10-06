@@ -13,7 +13,7 @@ module ViewFilter
 filters = Dict()
 end # module Bukdu.ViewFilter
 
-for func in [plugins, before, after]
+for func in [before, after]
     name = Base.function_name(func)
     function add_view_filter(block::Function, render_func::Function, typ_name)
         params = tuple(methods(block).mt.defs.func.sig.parameters[2:end]...)
@@ -43,9 +43,6 @@ function filtering(render_block::Function, render_func::Function, T::Type, args.
     typ_name = (:Val == T.name.name) ? T : T.name.name
     params = map(x->Any, args)
     key = (render_func,typ_name,params)
-    if haskey(ViewFilter.filters, (plugins,key))
-        ViewFilter.filters[(plugins,key)](args...)
-    end
     if haskey(ViewFilter.filters, (before,key))
         f = ViewFilter.filters[(before,key)]
         ViewFilter.filters[(before,key)](args...)
@@ -67,9 +64,6 @@ function render{AL<:ApplicationLayout}(D::LayoutDivision{AL}, args...; kw...)::C
     L = D.divisor
     params = map(x->Any,args)
     key = (render,viewlayout_symbol(D),params)
-    if haskey(ViewFilter.filters, (plugins,key))
-        ViewFilter.filters[(plugins,key)](args...)
-    end
     if haskey(ViewFilter.filters, (before,key))
         ViewFilter.filters[(before,key)](args...)
     end

@@ -69,8 +69,8 @@ Bukdu.stop()
 logs = []
 
 before(::Request, ::Response) = push!(logs, :br)
-before(::Function, ::WelcomeController) = push!(logs, :bc)
-after(::Function, ::WelcomeController) = push!(logs, :ac)
+before(::WelcomeController) = push!(logs, :bc)
+after(::WelcomeController) = push!(logs, :ac)
 after(::Request, ::Response) = push!(logs, :ar)
 
 conn = (Router)(get, "/")

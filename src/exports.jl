@@ -12,12 +12,12 @@ export ApplicationView
 
 # in octo.jl
 export Assoc, FormFile
-export validates
 
-# in plugins.jl
-export plugins, before, after
+# in filter.jl
+export before, after
 
 # in controller.jl
+export Conn, Pipeline # conn
 export get, post, delete, patch, put # verbs
 export index, edit, new, show, create, update, delete # actions
 
@@ -29,9 +29,8 @@ export render
 
 # in router.jl
 export Endpoint # endpoint
-export Conn # conn
-export Router, NoRouteError
-export redirect_to, scope, resources
+export Router
+export scope, resources, pipe_through, redirect_to
 
 # in plug.jl
 export Plug, plug

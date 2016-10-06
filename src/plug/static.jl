@@ -18,7 +18,7 @@ function FileResponse(filename)
 end
 
 
-import ..ApplicationController, ..Routing, ..Conn
+import ..ApplicationController, ..Conn, ..Routing
 
 immutable StaticController <: ApplicationController
 end
@@ -26,11 +26,7 @@ end
 function read(c::StaticController)
     filepath = c[:assigns][:filepath]
     resp = FileResponse(filepath)
-    params = Assoc()
-    query_params = Assoc()
-    private = Dict{Symbol,String}()
-    assigns = Dict{Symbol,String}()
-    Conn(resp.status, Dict{String,String}(resp.headers), resp.data, params, query_params, private, assigns)
+    Conn(resp.status, Dict{String,String}(resp.headers), resp.data)
 end
 
 """
@@ -60,12 +56,12 @@ function plug(::Type{Plug.Static}; kw...)
     for (root, dirs, files) in walkdir(from)
         for file in files
             filepath = joinpath(root, file)
-            opts = Dict(:assigns => Dict{Symbol,String}(:filepath=>filepath))
-            if try_index_html && "index.html" == file
-                Routing.match(get, "/", StaticController, read, opts)
-            end
             if has_only
                 !any(x->startswith(filepath, x), only) && continue
+            end
+            opts = Dict(:assigns => Assoc(filepath=filepath))
+            if try_index_html && "index.html" == file
+                Routing.match(get, "/", StaticController, read, opts)
             end
             reqpath = filepath[length(from)+1:end]
             Routing.match(get, reqpath, StaticController, read, opts)

@@ -3,10 +3,6 @@ importall Bukdu
 type WelcomeController <: ApplicationController
 end
 
-function plugins(c::WelcomeController)
-    plug(Logger.log_message, c)
-end
-
 function index(::WelcomeController)
     Logger.info("hi")
     "hello"
@@ -36,5 +32,5 @@ conn = (Router)(get, "/")
 
 lines = split(wait(reader), '\n')
 @test startswith(lines[1], "DEBUG  GET /")
-@test lines[2] == "INFO  index(::WelcomeController) hi"
+@test lines[2] == "INFO  hi"
 end

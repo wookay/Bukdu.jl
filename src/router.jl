@@ -97,6 +97,10 @@ function resources{AC<:ApplicationController}(context::Function, path::String, :
     Routing.add_resources(context, path, AC, Dict(kw))
 end
 
+function pipe_through(pipe::Pipeline)
+    RouterScope.pipe_through(pipe) 
+end
+
 function redirect_to(url::String; kw...)
     if isempty(kw)
         location = url
@@ -105,14 +109,14 @@ function redirect_to(url::String; kw...)
         uri = URI(url)
         location = string(url, isempty(uri.query) ? '?' : '&', params)
     end
-    Conn(302, Dict("Location"=>location), nothing)
+    Conn(:found, Dict("Location"=>location), nothing) # 302
 end
 
 include("router/keyword.jl")
 include("router/naming.jl")
-include("router/conn.jl")
 include("router/route.jl")
 include("router/scope.jl")
 include("router/resource.jl")
+include("router/response.jl")
 include("router/routing.jl")
 include("router/endpoint.jl")

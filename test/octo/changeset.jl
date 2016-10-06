@@ -30,3 +30,9 @@ rhs2 = Assoc(attach=FormFile("one.png","",UInt8[0]))
 @test Assoc() == setdiff(rhs, rhs2)
 @test Assoc(attach=FormFile()) == setdiff(lhs, rhs)
 @test Assoc(attach=FormFile("one.png","",UInt8[0])) == setdiff(rhs, lhs)
+
+@test_throws ArgumentError change(nothing)
+changeset = change(model)
+@test isa(changeset, Changeset)
+@test model == changeset.model
+@test isempty(changeset.changes)

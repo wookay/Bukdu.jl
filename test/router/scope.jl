@@ -98,8 +98,6 @@ Endpoint() do
 end
 
 
-Logger.set_level(false)
-
 using Base.Test
 
 @testset "single scope for single routes" begin
@@ -160,8 +158,8 @@ end
     conn = (Router)(get, "http://baz.pang.com/host/users/1")
     @test conn.status == 200
 
-    @test_throws NoRouteError (Router)(get, "http://foobar.com.br/host/users/1")
-    @test_throws NoRouteError (Router)(get, "http://ba.pang.com/host/users/1")
+    @test_throws Bukdu.NoRouteError (Router)(get, "http://foobar.com.br/host/users/1")
+    @test_throws Bukdu.NoRouteError (Router)(get, "http://ba.pang.com/host/users/1")
 end
 
 @testset "private data in scopes" begin
@@ -176,7 +174,7 @@ end
     conn = (Router)(delete, "/api/v1/users/13")
     @test conn.status == 200
     @test conn.private[:private_token] == "baz"
-  end
+end
 
 @testset "assigns data in scopes" begin
     conn = (Router)(get, "/assigns/users")

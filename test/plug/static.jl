@@ -21,7 +21,7 @@ end
 using Base.Test
 conn = (Endpoint)("/index.html")
 @test 200 == conn.status
-@test "text/html" == conn.resp_header["Content-Type"]
+@test "text/html" == conn.resp_headers["Content-Type"]
 @test startswith(String(conn.resp_body), "<!DOCTYPE html>")
 
 conn = (Endpoint)("/")
@@ -30,10 +30,10 @@ conn = (Endpoint)("/")
 
 conn = (Endpoint)("/js/vue.min.js")
 @test 200 == conn.status
-@test "application/javascript" == conn.resp_header["Content-Type"]
+@test "application/javascript" == conn.resp_headers["Content-Type"]
 @test 76807 == sizeof(conn.resp_body)
 
-@test_throws NoRouteError (Endpoint)("/js/not_found")
+@test_throws Bukdu.NoRouteError (Endpoint)("/js/not_found")
 
 @test [1] == loaded
 

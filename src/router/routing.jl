@@ -3,13 +3,14 @@
 module Routing
 
 import ..Bukdu
-import Bukdu: ApplicationController, Branch
-import Bukdu: RouterRoute, Route, RouterScope, RouterResource, Resource, NoRouteError
+import Bukdu: ApplicationController
+import Bukdu: RouterRoute, Route, RouterScope, RouterResource, Resource
 import Bukdu: Logger
-import Bukdu: Conn, conn_bad_request
+import Bukdu: Conn
+import Bukdu: conn_bad_request
 import Bukdu: index, edit, new, show, create, update, delete
 import Bukdu: get, post, delete, patch, put
-import Bukdu: plugins, before, after
+import Bukdu: before, after
 import Bukdu: Assoc
 import URIParser: URI
 import HttpCommon: parsequerystring
@@ -17,7 +18,7 @@ import HttpCommon: parsequerystring
 const SLASH = '/'
 const COLON = ':'
 
-task_storage = Dict{Task,Branch}()
+task_storage = Dict{Task,Conn}()
 routing_map = Dict{Type,Vector{Route}}()
 runtime = Dict{Type,Bool}()
 
@@ -124,7 +125,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 end
                 params = Assoc(map(filter(startswithcolon, enumerate(rousegs))) do idx_rouseg
                     (idx,rouseg) = idx_rouseg
-                    (replace(rouseg, r"^:", ""),String(reqsegs[idx]))
+                    (Symbol(replace(rouseg, r"^:", "")),String(reqsegs[idx]))
                 end)
                 C = route.controller
                 controller = C()
@@ -132,14 +133,22 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 if !isempty(data)
                     merge!(query_params, data)
                 end
-                branch = Branch(query_params, params, route.action, uri.host, headers, route.assigns)
+                conn = Conn()
+                conn.query_params = query_params
+                conn.params = params
+                conn.host = uri.host
+                conn.req_headers = Dict{String,String}()
+                conn.assigns = route.assigns
+                conn.private = route.private
+                conn.private[:action] = route.action
+                conn.private[:controller] = controller
                 task = current_task()
-                task_storage[task] = branch
-                if method_exists(plugins, (C,))
-                    plugins(controller)
+                task_storage[task] = conn
+                for pipe in route.pipes
+                    pipe(conn)
                 end
-                if method_exists(before, (Function, C))
-                    before(route.action, controller)
+                if method_exists(before, (C,))
+                    before(controller)
                 end
                 result = nothing
                 try
@@ -154,14 +163,14 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     end
                     result = conn_bad_request(verb, path, ex, stackframes)
                 end
-                if method_exists(after, (Function, C))
-                    after(route.action, controller)
+                if method_exists(after, (C,))
+                    after(controller)
                 end
                 pop!(task_storage, task)
                 if isa(result, Conn)
-                    return Conn(result.status, result.resp_header, result.resp_body, params, query_params, route.private, route.assigns)
+                    return Conn(result.status, result.resp_headers, result.resp_body, params, query_params, route.private, route.assigns)
                 else
-                    return Conn(200, Dict{String,String}(), result, params, query_params, route.private, route.assigns)
+                    return Conn(:ok, Dict{String,String}(), result, params, query_params, route.private, route.assigns) # 200
                 end
             end
         end
@@ -169,7 +178,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
     Logger.warn() do
         Logger.verb_uppercase(verb), Logger.with_color(:bold, path)
     end
-    throw(NoRouteError(path))
+    throw(Bukdu.NoRouteError(path))
 end
 
 end # module Bukdu.Routing
