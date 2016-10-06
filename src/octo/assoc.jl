@@ -101,3 +101,9 @@ function Base.setdiff(lhs::Assoc, rhs::Assoc)::Assoc
     end
     Assoc(vec)
 end
+
+function Base.show(stream::IO, mime::MIME"text/html", assoc::Assoc)
+    for x in assoc
+        show(stream, mime, x)
+    end
+end

@@ -32,5 +32,9 @@ conn = (Router)(get, "/")
    close(wrout)
 
 str = wait(reader)
-@test "DEBUG  GET /                                   index(::WelcomeController)\nWARN  GET /strange\nWARN  | /strange\n" == str
+@test """
+DEBUG  GET /                                   index(::WelcomeController)
+WARN   GET /strange                           
+WARN     | /strange                           
+""" == str
 end

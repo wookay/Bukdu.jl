@@ -14,5 +14,6 @@ include("plug/csrf_protection.jl")
 include("plug/static.jl")
 include("plug/logger.jl")
 include("plug/oauth2.jl")
+include("plug/upload.jl")
 
 end # module Bukdu.Plug

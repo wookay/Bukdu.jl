@@ -1,6 +1,7 @@
 importall Bukdu
 importall Bukdu.Octo
 importall Bukdu.Tag
+import Bukdu.Plug: Upload
 
 type UserController <: ApplicationController
 end
@@ -109,8 +110,8 @@ form = change(default(User), name="jack")
 <form class="ex" action="/test" method="get" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, class="ex", action="/test")
 
-lhs = FormFile()
-rhs = FormFile()
+lhs = Upload()
+rhs = Upload()
 @test lhs == rhs
 
 import Requests: URI, statuscode, text

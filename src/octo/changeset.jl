@@ -4,21 +4,6 @@ import ..Bukdu
 import Bukdu: ApplicationController
 import Base: ==
 
-immutable FormFile
-    filename::String
-    content_type::String
-    data::Vector{UInt8}
-
-    FormFile() = new("", "application/octet-stream", Vector{UInt8}())
-    FormFile(filename::String, content_type::String, data::Vector{UInt8}) = new(filename, content_type, data)
-end
-
-==(lhs::FormFile, rhs::FormFile) =
-    ==(lhs.filename, rhs.filename) &&
-    ==(lhs.content_type, rhs.content_type) &&
-    ==(lhs.data, rhs.data)
-
-
 type Changeset
     model
     changes::Assoc
@@ -107,7 +92,6 @@ default(T::Type, ::Type{String}) = ""
 default(T::Type, ::Type{Int}) = 0
 default(T::Type, ::Type{Float64}) = 0.0
 default(T::Type, ::Type{Float32}) = 0.0
-default(T::Type, ::Type{FormFile}) = FormFile()
 
 function default(T::Type)::T
     # broadcast #

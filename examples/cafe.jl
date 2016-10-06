@@ -10,10 +10,10 @@ type User
     age::Int
     description::String
     happiness::Float64
-    attach::FormFile
+    attach::Plug.Upload
 end
 
-user = User("foo bar", 20, "", 0.5, FormFile())
+user = User("foo bar", 20, "", 0.5, Plug.Upload())
 
 include("layout.jl")
 
@@ -27,7 +27,7 @@ $(changeset.model)
 ```
 # changes
 ```
-$(changeset.changes)
+$(stringmime("text/html", changeset.changes))
 ```
 
 $no_changes
@@ -81,6 +81,6 @@ end
 
 Bukdu.start(8080)
 
-# wait()
+wait()
 
 # Bukdu.stop()

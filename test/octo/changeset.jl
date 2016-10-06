@@ -1,6 +1,7 @@
 importall Bukdu
 importall Bukdu.Octo
 import Bukdu.Octo: |>
+import Bukdu.Plug: Upload
 
 type User
     name::String
@@ -22,14 +23,14 @@ end
 
 @test isa(validates(model, params), Changeset)
 
-lhs = Assoc(attach=FormFile())
-lhs2 = Assoc(attach=FormFile())
-rhs = Assoc(attach=FormFile("one.png","",UInt8[0]))
-rhs2 = Assoc(attach=FormFile("one.png","",UInt8[0]))
+lhs = Assoc(attach=Upload())
+lhs2 = Assoc(attach=Upload())
+rhs = Assoc(attach=Upload("one.png","",UInt8[0]))
+rhs2 = Assoc(attach=Upload("one.png","",UInt8[0]))
 @test Assoc() == setdiff(lhs, lhs2)
 @test Assoc() == setdiff(rhs, rhs2)
-@test Assoc(attach=FormFile()) == setdiff(lhs, rhs)
-@test Assoc(attach=FormFile("one.png","",UInt8[0])) == setdiff(rhs, lhs)
+@test Assoc(attach=Upload()) == setdiff(lhs, rhs)
+@test Assoc(attach=Upload("one.png","",UInt8[0])) == setdiff(rhs, lhs)
 
 @test_throws ArgumentError change(nothing)
 changeset = change(model)

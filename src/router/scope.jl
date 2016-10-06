@@ -3,9 +3,9 @@
 immutable Scope
     path::String
     host::String
+    pipes::Vector{Pipeline}
     private::Assoc
     assigns::Assoc
-    pipes::Vector{Pipeline}
 end
 
 
@@ -25,7 +25,7 @@ function push_scope!(options::Dict)
     private = Assoc(Keyword.get(options, :private, Assoc()))
     assigns = Assoc(Keyword.get(options, :assigns, Assoc()))
     pipes = Vector{Pipeline}()
-    scope = Scope(path, host, private, assigns, pipes)
+    scope = Scope(path, host, pipes, private, assigns)
     push!(RouterScope.stack, scope)
 end
 

@@ -84,12 +84,16 @@ function trail(s::String, n)
     length(s) > n > 2 ? string(s[1:n-2], "..") : s
 end
 
-function debug_route{AC<:ApplicationController}(route, path, ::Type{AC})
-    verb = lpad(Logger.verb_uppercase(route.verb), 4)
+function debug_verb(verb, path)
+    verb = lpad(Logger.verb_uppercase(verb), 4)
     path_pad = Logger.settings[:path_padding]
     trailed_path = trail(path, path_pad)
     rpaded_path = Logger.with_color(:bold, rpad(trailed_path, path_pad))
-    verb, rpaded_path, "$(Base.function_name(route.action))(::$AC)"
+    verb, rpaded_path
+end
+
+function debug_route{AC<:ApplicationController}(route, path, ::Type{AC})
+    tuple(debug_verb(route.verb, path)..., "$(Base.function_name(route.action))(::$AC)")
 end
 
 function error_route(route, path, controller, ex, callstack)
@@ -176,7 +180,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
         end
     end
     Logger.warn() do
-        Logger.verb_uppercase(verb), Logger.with_color(:bold, path)
+        debug_verb(verb, path)
     end
     throw(Bukdu.NoRouteError(path))
 end

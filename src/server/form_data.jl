@@ -1,6 +1,7 @@
 # module Bukdu.Server
 
-import ..Assoc, ..FormFile
+import ..Assoc
+import ..Plug
 import ..Logger
 import HttpCommon: Request
 
@@ -75,7 +76,7 @@ function scan(s::FormScanner)::Assoc
                 if isa(content_type, Void)
                     content_type = chomp(String(s.data[s.offset+length("Content-Type: ")+1:s.pos]))
                 else
-                    push!(assoc, (name, FormFile(filename, content_type, readData(s, len, s.boundary, lf, true))))
+                    push!(assoc, (name, Plug.Upload(filename, content_type, readData(s, len, s.boundary, lf, true))))
                     filename = nothing
                     content_type = nothing
                 end
