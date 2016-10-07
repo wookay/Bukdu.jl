@@ -3,32 +3,39 @@
 module Routing
 
 import ..Bukdu
-import Bukdu: ApplicationController, Branch
-import Bukdu: RouterRoute, Route, RouterScope, RouterResource, Resource, NoRouteError
-import Bukdu: Logger
-import Bukdu: Conn, conn_bad_request
+import Bukdu: ApplicationController, ApplicationEndpoint, ApplicationRouter
+import Bukdu: Endpoint, Router
+import Bukdu: Route, RouterScope, RouterResource, Resource
+import Bukdu: Assoc, Conn
 import Bukdu: index, edit, new, show, create, update, delete
 import Bukdu: get, post, delete, patch, put
-import Bukdu: plugins, before, after
-import Bukdu: Assoc
+import Bukdu: before, after
+import Bukdu: conn_bad_request
+import Bukdu: Logger
 import URIParser: URI
 import HttpCommon: parsequerystring
 
 const SLASH = '/'
 const COLON = ':'
 
-task_storage = Dict{Task,Branch}()
-routing_map = Dict{Type,Vector{Route}}()
-runtime = Dict{Type,Bool}()
+task_storage = Dict{Task,Conn}()
+routes = Vector{Route}()
+router_routes = Dict{Type,Vector{Route}}() # AR => Vector{Route}
+endpoint_routes = Dict{Type,Vector{Route}}() # AE => Vector{Route}
+endpoint_contexts = Dict{Type,Function}() # AE => context
 
 # route
 function match{AC<:ApplicationController}(verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
     add_route(:match, verb, path, AC, action, options)
 end
 
+function matchall{AC<:ApplicationController}(verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
+    add_route(:matchall, verb, path, AC, action, options)
+end
+
 function add_route{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
     route = RouterScope.route(kind, verb, path, AC, action, options)
-    push!(RouterRoute.routes, route)
+    push!(routes, route)
     route
 end
 
@@ -83,29 +90,32 @@ function trail(s::String, n)
     length(s) > n > 2 ? string(s[1:n-2], "..") : s
 end
 
-function debug_route{AC<:ApplicationController}(route, path, ::Type{AC})
-    verb = lpad(Logger.verb_uppercase(route.verb), 4)
+function debug_verb(verb::Symbol, path)
+    verb = lpad(uppercase(string(verb)), 4)
     path_pad = Logger.settings[:path_padding]
     trailed_path = trail(path, path_pad)
     rpaded_path = Logger.with_color(:bold, rpad(trailed_path, path_pad))
-    verb, rpaded_path, "$(Base.function_name(route.action))(::$AC)"
+    verb, rpaded_path
 end
 
-function error_route(route, path, controller, ex, callstack)
+function debug_route{AC<:ApplicationController}(route::Route, verb::Symbol, path::String, ::Type{AC})
+    tuple(debug_verb(verb, path)..., "$(Base.function_name(route.action))(::$AC)")
+end
+
+function error_route(verb::Symbol, path::String, ex, callstack)
     tuple(
-        debug_route(route, path, controller)...,
+        debug_verb(verb, path)...,
         '\n',
         Logger.with_color(:red, ex),
         callstack)
 end
 
-function request(compare::Function, routes::Vector{Route}, verb::Function, path::String, headers::Assoc, data::Assoc)::Conn
+function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, param_data::Assoc)::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
     for route in routes
-        rousegs = split(route.path, SLASH)
-        if compare(route) && length_reqsegs==length(rousegs)
+        if compare(route)
             if !isempty(route.host)
                 if endswith(route.host, ".")
                     !startswith(uri.host, route.host) && continue
@@ -113,9 +123,17 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                     !endswith(uri.host, route.host) && continue
                 end
             end
-            matched = all(enumerate(rousegs)) do idx_rouseg
-                (idx,rouseg) = idx_rouseg
-                startswith(rouseg, COLON) ? true : reqsegs[idx]==rouseg
+            matched = false
+            rousegs = split(route.path, SLASH)
+            if :match == route.kind
+                if length_reqsegs == length(rousegs)
+                    matched = all(enumerate(rousegs)) do idx_rouseg
+                        (idx,rouseg) = idx_rouseg
+                        startswith(rouseg, COLON) ? true : reqsegs[idx]==rouseg
+                    end
+                end
+            elseif :matchall == route.kind
+                matched = startswith(path, route.path)
             end
             if matched
                 function startswithcolon(idx_rouseg)
@@ -124,52 +142,63 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 end
                 params = Assoc(map(filter(startswithcolon, enumerate(rousegs))) do idx_rouseg
                     (idx,rouseg) = idx_rouseg
-                    (replace(rouseg, r"^:", ""),String(reqsegs[idx]))
+                    (Symbol(replace(rouseg, r"^:", "")),String(reqsegs[idx]))
                 end)
                 C = route.controller
                 controller = C()
                 query_params = Assoc(parsequerystring(uri.query))
-                if !isempty(data)
-                    merge!(query_params, data)
+                if !isempty(param_data)
+                    merge!(query_params, param_data)
                 end
-                branch = Branch(query_params, params, route.action, uri.host, headers, route.assigns)
+                conn = Conn()
+                conn.query_params = query_params
+                conn.params = params
+                conn.host = uri.host
+                conn.method = verb
+                conn.path = path
+                conn.req_headers = headers
+                conn.assigns = route.assigns
+                conn.private = route.private
+                conn.private[:action] = route.action
+                conn.private[:controller] = controller
+                conn.private[:endpoint] = isnull(endpoint) ? nothing : endpoint.value
                 task = current_task()
-                task_storage[task] = branch
-                if method_exists(plugins, (C,))
-                    plugins(controller)
+                task_storage[task] = conn
+                for pipe in route.pipes
+                    pipe(conn)
                 end
-                if method_exists(before, (Function, C))
-                    before(route.action, controller)
+                if method_exists(before, (C,))
+                    before(controller)
                 end
                 result = nothing
                 try
                     Logger.debug() do
-                        debug_route(route, path, C)
+                        debug_route(route, verb, path, C)
                     end
                     result = route.action(controller)
                 catch ex
                     stackframes = stacktrace(catch_backtrace())
                     Logger.error() do
-                        error_route(route, path, C, ex, stackframes)
+                        error_route(verb, path, ex, stackframes)
                     end
                     result = conn_bad_request(verb, path, ex, stackframes)
                 end
-                if method_exists(after, (Function, C))
-                    after(route.action, controller)
+                if method_exists(after, (C,))
+                    after(controller)
                 end
                 pop!(task_storage, task)
                 if isa(result, Conn)
-                    return Conn(result.status, result.resp_header, result.resp_body, params, query_params, route.private, route.assigns)
+                    return Conn(result.status, result.resp_headers, result.resp_body, params, query_params, route.private, route.assigns)
                 else
-                    return Conn(200, Dict{String,String}(), result, params, query_params, route.private, route.assigns)
+                    return Conn(:ok, Dict{String,String}(), result, params, query_params, route.private, route.assigns) # 200
                 end
             end
         end
     end
     Logger.warn() do
-        Logger.verb_uppercase(verb), Logger.with_color(:bold, path)
+        debug_verb(verb, path)
     end
-    throw(NoRouteError(path))
+    throw(Bukdu.NoRouteError(path))
 end
 
 end # module Bukdu.Routing

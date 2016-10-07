@@ -4,39 +4,6 @@ import ..Bukdu
 import Bukdu: ApplicationController
 import Base: ==
 
-export default, Changeset, change, cast, validate_length
-export FormFile
-
-immutable FormFile
-    filename::String
-    content_type::String
-    data::Vector{UInt8}
-
-    FormFile() = new("", "application/octet-stream", Vector{UInt8}())
-    FormFile(filename::String, content_type::String, data::Vector{UInt8}) = new(filename, content_type, data)
-end
-
-==(lhs::FormFile, rhs::FormFile) =
-    ==(lhs.filename, rhs.filename) &&
-    ==(lhs.content_type, rhs.content_type) &&
-    ==(lhs.data, rhs.data)
-
-
-default(T::Type, ::Type{String}) = ""
-default(T::Type, ::Type{Int}) = 0
-default(T::Type, ::Type{Float64}) = 0.0
-default(T::Type, ::Type{Float32}) = 0.0
-default(T::Type, ::Type{FormFile}) = FormFile()
-
-function default(T::Type)::T
-    # broadcast #
-    # fields = fieldtype.(T,fieldnames(T))
-    # T(default.(T, fields)...)
-    fields = map(x->fieldtype(T, x), fieldnames(T))
-    T(map(x-> default(T, x), fields)...)
-end
-
-
 type Changeset
     model
     changes::Assoc
@@ -109,6 +76,10 @@ function change(typ::Type; kw...)::Changeset
     change(default(typ); kw...)
 end
 
+function change(typ::Void; kw...)::Changeset
+    throw(ArgumentError("not allowd for Void model"))
+end
+
 function change{T<:Any,AC<:ApplicationController}(c::AC, model::T)::Changeset
     Changeset(model, Assoc(map(param->cutout_brackets(T,param), c[:query_params])))
 end
@@ -117,17 +88,34 @@ function change{AC<:ApplicationController}(c::AC, T::Type)::Changeset
     change(c, default(T))
 end
 
+default(T::Type, ::Type{String}) = ""
+default(T::Type, ::Type{Int}) = 0
+default(T::Type, ::Type{Float64}) = 0.0
+default(T::Type, ::Type{Float32}) = 0.0
+
+function default(T::Type)::T
+    # broadcast #
+    # fields = fieldtype.(T,fieldnames(T))
+    # T(default.(T, fields)...)
+    fields = map(x->fieldtype(T, x), fieldnames(T))
+    T(map(x-> default(T, x), fields)...)
+end
 
 function cast(changeset::Changeset, params, required_fields)::Changeset
     changeset
 end
 
-function validate_length(changeset::Changeset, field::Symbol; kw...)::Changeset
-    changeset
-end
-
 function cast(params, required_fields)::Function
     (changeset) -> cast(changeset, params, required_fields)
+end
+
+
+function validates(model, params)
+    throw(MethodError("Please define the `function validates(model::$(typeof(model)), params)`"))
+end
+
+function validate_length(changeset::Changeset, field::Symbol; kw...)::Changeset
+    changeset
 end
 
 function validate_length(field::Symbol; kw...)::Function

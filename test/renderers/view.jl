@@ -19,22 +19,6 @@ Endpoint() do
     plug(Router)
 end
 
-plugins(render, View/Layout) do
-    plug(Logger.log_message, View/Layout)
-end
-
-plugins(render, View) do
-    plug(Logger.log_message, View)
-end
-
-plugins(render, Markdown/Layout) do md
-    plug(Logger.log_message, Markdown/Layout)
-end
-
-plugins(render, Markdown) do md
-    plug(Logger.log_message, Markdown)
-end
-
 
 using Base.Test
 conn = (Router)(get, "/hey")
@@ -96,7 +80,7 @@ let oldout = STDERR
    redirect_stdout(oldout)
    close(wrout)
 
-   @test "INFO  Markdown/Layout mark layout\nINFO  Markdown mark\n" == wait(reader)
+   @test "INFO  mark layout\nINFO  mark\n" == wait(reader)
 end
 
 
@@ -118,5 +102,5 @@ let oldout = STDERR
     redirect_stdout(oldout)
     close(wrout)
 
-    @test "INFO  View/Layout view layout\nINFO  View view\n" == wait(reader)
+    @test "INFO  view layout\nINFO  view\n" == wait(reader)
 end

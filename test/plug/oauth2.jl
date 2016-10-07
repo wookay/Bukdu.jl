@@ -172,8 +172,11 @@ Router() do
     end
 end
 
-Bukdu.start(Endpoint, 8088)
+Endpoint() do
+    plug(Router)
+end
 
+Bukdu.start(Endpoint, 8088)
 
 conn = (Endpoint)("/oauth_authorize")
 @test 302 == conn.status

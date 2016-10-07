@@ -2,8 +2,6 @@
 
 module Logger
 
-export log_message
-
 const level_false =   0
 const level_fatal = 100
 const level_error = 200
@@ -130,20 +128,6 @@ function with_color(color::Symbol, text)::String
     else
         string(text)
     end
-end
-
-
-## log_message
-function log_message(prefix::String)
-    settings[:info_prefix] = prefix
-end
-
-function log_message(modul::Module)
-    settings[:info_sub] = Base.module_name(modul)
-end
-
-function verb_uppercase(verb::Function)
-    uppercase(string(Base.function_name(verb)))
 end
 
 end # module Bukdu.Logger

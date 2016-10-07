@@ -15,7 +15,7 @@ end
 module RouterResource
 
 import ..Bukdu: ApplicationController
-import ..Bukdu: Keyword, Naming
+import ..Bukdu: Assoc, Keyword, Naming
 import ..Bukdu: RouterScope
 import ..Bukdu: Resource
 import ..Bukdu: index, edit, new, show, create, update, delete
@@ -29,8 +29,8 @@ function build{AC<:ApplicationController}(path::String, ::Type{AC}, options::Dic
     param = Keyword.get(options, :param, default_param_key)
     name = Keyword.get(options, :name, Naming.resource_name(AC, "Controller"))
     as      = Keyword.get(options, :as, name)
-    private = Keyword.get(options, :private, Dict{Symbol,Any}())
-    assigns = Keyword.get(options, :assigns, Dict{Symbol,Any}())
+    private = Keyword.get(options, :private, Assoc())
+    assigns = Keyword.get(options, :assigns, Assoc())
 
     singleton = Keyword.get(options, :singleton, false)
     actions   = extract_actions(options, singleton)

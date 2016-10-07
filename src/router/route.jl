@@ -7,21 +7,19 @@ immutable Route{AC<:ApplicationController}
     host::String
     controller::Type{AC}
     action::Function
-    private::Dict{Symbol,String}
-    assigns::Dict{Symbol,String}
+    pipes::Vector{Pipeline}
+    private::Assoc
+    assigns::Assoc
 end
 
 
 module RouterRoute
 
-import ..Bukdu: ApplicationController
-import ..Bukdu: Route
-
-routes = Vector{Route}()
+import ..Bukdu: ApplicationController, Route, Pipeline, Assoc
 
 function build{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String,
-             host::String, ::Type{AC}, action::Function, private::Dict{Symbol,String}, assigns::Dict{Symbol,String})
-    Route(verb, kind, path, host, AC, action, private, assigns)
+             host::String, ::Type{AC}, action::Function, pipes::Vector{Pipeline}, private::Assoc, assigns::Assoc)
+    Route(verb, kind, path, host, AC, action, pipes, private, assigns)
 end
 
 end # module Bukdu.RouterRoute

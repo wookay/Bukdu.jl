@@ -16,7 +16,7 @@ end
 using Base.Test
 conn = (Router)(get, "/index")
 @test 200 == conn.status
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "" == conn.resp_body
 
 logs = []
@@ -34,7 +34,7 @@ empty!(logs)
 
 
 conn = (Router)(get, "/index_with_layout")
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "empty layout" == conn.resp_body
 @test ["b", "a"] == logs
 empty!(logs)
@@ -50,7 +50,7 @@ Router() do
 end
 
 conn = (Router)(get, "/index1")
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "hello" == conn.resp_body
 @test [] == logs
 
@@ -62,13 +62,13 @@ after(render, Text) do body
 end
 
 conn = (Router)(get, "/index1")
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "hello" == conn.resp_body
 @test ["b hello", "a hello"] == logs
 empty!(logs)
 
 conn = (Router)(get, "/index_with_layout1")
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "layout - hello" == conn.resp_body
 @test ["b hello", "a hello"] == logs
 empty!(logs)
@@ -81,13 +81,13 @@ after(render, Text/Layout) do body
 end
 
 conn = (Router)(get, "/index1")
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "hello" == conn.resp_body
 @test ["b hello", "a hello"] == logs
 empty!(logs)
 
 conn = (Router)(get, "/index_with_layout1")
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "layout - hello" == conn.resp_body
 @test ["bl hello","b hello","a hello","al hello"] == logs
 empty!(logs)
@@ -103,7 +103,7 @@ Router() do
 end
 
 conn = (Router)(get, "/index2")
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "foo" == conn.resp_body
 @test [] == logs
 empty!(logs)
@@ -125,7 +125,7 @@ after(render, Text/Layout) do body, c
 end
 
 conn = (Router)(get, "/index_with_layout2")
-@test "text/plain" == conn.resp_header["Content-Type"]
+@test "text/plain" == conn.resp_headers["Content-Type"]
 @test "layout2 - foo, TextController()" == conn.resp_body
 @test ["bl","b foo, TextController()","a foo, TextController()","al"] == logs
 empty!(logs)

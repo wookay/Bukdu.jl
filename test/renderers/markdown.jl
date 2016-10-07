@@ -52,5 +52,5 @@ conn = (Router)(get, "/undefined_variable")
    redirect_stdout(oldout)
    close(wrout)
 
-@test startswith(wait(reader), "ERROR  GET /undefined_variable                 index(::MarkdownController)")
+@test startswith(wait(reader), "ERROR  GET /undefined_variable                 ")
 end

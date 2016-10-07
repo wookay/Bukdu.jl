@@ -14,8 +14,8 @@ end
 
 using Base.Test
 logs = []
-before(f, ::WelcomeController) = push!(logs, :b)
-after(f, ::WelcomeController) = push!(logs, :a)
+before(::WelcomeController) = push!(logs, :b)
+after(::WelcomeController) = push!(logs, :a)
 conn = (Router)(get, "/")
 @test [:b, :a] == logs
 
@@ -26,4 +26,4 @@ conn = (Router)(get, "/foobar")
 
 c = WelcomeController()
 @test_throws ErrorException c[:query_params]
-@test_throws KeyError c[:invalid_key]
+@test_throws ErrorException c[:invalid_key]

@@ -10,27 +10,31 @@ type User
     age::Int
     description::String
     happiness::Float64
-    attach::FormFile
+    attach::Plug.Upload
 end
 
-user = User("foo bar", 20, "", 0.5, FormFile())
+user = User("foo bar", 20, "", 0.5, Plug.Upload())
 
 include("layout.jl")
 
 function post_result(c::CafeController)
     changeset = change(c, user)
-    no_changes = isempty(changeset.changes) ? "-------------\n# < no changes >" : ""
-    render(Markdown/Layout, """
-# model
-```
-$(changeset.model)
-```
-# changes
-```
-$(changeset.changes)
-```
+    changes = isempty(changeset.changes) ? "<div><strong>no changes</strong></div>" : """
+<h3>changes</h3>
+<pre>
+$(stringmime("text/html", changeset.changes))
+</pre>
 
-$no_changes
+$(Tag.uploaded_image(changeset, :attach))
+"""
+
+    render(HTML/Layout, """
+<h3>model</h3>
+<pre>
+$(changeset.model)
+</pre>
+
+$changes
 """)
 end
 
@@ -74,13 +78,14 @@ Router() do
 end
 
 Endpoint() do
-    plug(Plug.Static, at= "/", from=normpath(dirname(@__FILE__), "public"); try_index_html=false)
     plug(Plug.Logger)
+    plug(Plug.Static, at="/", from=normpath(dirname(@__FILE__), "public"), only=["css"])
+    plug(Plug.Upload, at="/upload", tmp_dir=normpath(dirname(@__FILE__), "tmp"))
     plug(Router)
 end
 
 Bukdu.start(8080)
 
-# wait()
+wait()
 
 # Bukdu.stop()

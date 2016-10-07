@@ -1,20 +1,25 @@
 # module Bukdu.Octo
 
-import ..Bukdu
-
-export Assoc
-
 import Base: ==
+import ..Logger
 
 type Assoc
     vector::Vector{Tuple{Symbol,Any}}
     Assoc(; kw...) = new(Vector(kw))
-    Assoc(vector) = new(vector)
     function Assoc(dict::Dict{AbstractString,AbstractString})
         new([(Symbol(k),v) for (k,v) in dict])
     end
     function Assoc(dict::Dict{String,Any})
         new([(Symbol(k),v) for (k,v) in dict])
+    end
+    function Assoc(dict::Dict{Symbol,Any})
+        new([(k,v) for (k,v) in dict])
+    end
+    function Assoc(vector)
+        new(vector)
+    end
+    function Assoc(assoc::Assoc)
+        assoc
     end
 end
 
@@ -45,21 +50,32 @@ Base.isempty(assoc::Assoc) = isempty(assoc.vector)
 Base.empty!(assoc::Assoc) = empty!(assoc.vector)
 
 function Base.setindex!(assoc::Assoc, value::Any, key::Symbol)
-    if haskey(assoc, key)
-        assoc.vector = map((k,v)->k==key ? value : v, assoc.vector)
+    ind = findfirst(keys(assoc), key)
+    if ind > 0
+        assoc.vector[ind] = (key, value)
     else
-        push!(assoc, (key,value))
+        push!(assoc, (key, value))
     end
 end
 
-function Base.merge!(lhs::Assoc, rhs::Assoc)
-    lkeys = keys(lhs)
+function Base.merge(lhs::Assoc, dict::Dict{Symbol,Any})
+    merge(lhs, Assoc(dict))
+end
+
+function Base.merge(lhs::Assoc, rhs::Assoc)
+    assoc = Assoc()
+    for (lk,lv) in lhs
+        assoc[lk] = lv
+    end
     for (rk,rv) in rhs
-        if rk in lkeys
-            lhs.vector[findn(lkeys,rk)] = rv
-        else
-            push!(lhs.vector, (rk,rv))
-        end
+        assoc[rk] = rv
+    end
+    assoc
+end
+
+function Base.merge!(lhs::Assoc, rhs::Assoc)
+    for (rk,rv) in rhs
+        lhs[rk] = rv
     end
     lhs
 end
@@ -84,4 +100,15 @@ function Base.setdiff(lhs::Assoc, rhs::Assoc)::Assoc
         end
     end
     Assoc(vec)
+end
+
+function Base.show(stream::IO, mime::MIME"text/html", assoc::Assoc)
+    for (k,v) in assoc
+        if mimewritable(mime, (k,v))
+            show(stream, mime, (k,v))
+        else
+            write(stream, string("(", repr(k), ", ", repr(v), ")"))
+        end
+        write(stream, "\n")
+    end
 end

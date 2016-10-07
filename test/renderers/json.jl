@@ -15,7 +15,7 @@ end
 using Base.Test
 conn = (Router)(get, "/api/users")
 @test 200 == conn.status
-@test "application/json" == conn.resp_header["Content-Type"]
+@test "application/json" == conn.resp_headers["Content-Type"]
 @test """\"hello\"""" == conn.resp_body
 
 import HttpCommon: Request, Response

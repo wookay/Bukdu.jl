@@ -26,33 +26,34 @@ immutable NoRouteError
 end
 
 function reset{AR<:ApplicationRouter}(::Type{AR})
-    delete!(Routing.routing_map, AR)
-end
-
-function has_called{AR<:ApplicationRouter}(::Type{AR})
-    haskey(Routing.runtime, AR)
+    delete!(Routing.router_routes, AR)
+    empty!(Routing.routes)
 end
 
 function (::Type{AR}){AR<:ApplicationRouter}(context::Function)
-    empty!(RouterRoute.routes)
+    empty!(Routing.routes)
     context()
-    Routing.routing_map[AR] = copy(RouterRoute.routes)
+    routes = copy(Routing.routes)
+    for route in routes
+        route.private[:router] = AR
+    end
+    Routing.router_routes[AR] = routes
     empty!(RouterScope.stack)
-    Routing.runtime[AR] = true
     nothing
 end
 
 function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, args...; kw...)
-    routes = haskey(Routing.routing_map, AR) ? Routing.routing_map[AR] : Vector{Route}()
-    data = Assoc()
     if !isempty(args) || !isempty(kw)
-        data = Assoc(map(vcat(args..., kw...)) do kv
+        param_data = Assoc(map(vcat(args..., kw...)) do kv
             (k,v) = kv
             (k, escape(v))
         end)
+    else
+        param_data = Assoc()
     end
     headers = Assoc()
-    Routing.request(routes, verb, path, headers, data) do route
+    routes = haskey(Routing.router_routes, AR) ? Routing.router_routes[AR] : Vector{Route}()
+    Routing.request(Nullable{Type{Endpoint}}(), routes, Base.function_name(verb), path, headers, param_data) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
 end
@@ -97,6 +98,10 @@ function resources{AC<:ApplicationController}(context::Function, path::String, :
     Routing.add_resources(context, path, AC, Dict(kw))
 end
 
+function pipe_through(pipe::Pipeline)
+    RouterScope.pipe_through(pipe) 
+end
+
 function redirect_to(url::String; kw...)
     if isempty(kw)
         location = url
@@ -105,14 +110,14 @@ function redirect_to(url::String; kw...)
         uri = URI(url)
         location = string(url, isempty(uri.query) ? '?' : '&', params)
     end
-    Conn(302, Dict("Location"=>location), nothing)
+    Conn(:found, Dict("Location"=>location), nothing) # 302
 end
 
 include("router/keyword.jl")
 include("router/naming.jl")
-include("router/conn.jl")
 include("router/route.jl")
 include("router/scope.jl")
 include("router/resource.jl")
-include("router/routing.jl")
+include("router/response.jl")
 include("router/endpoint.jl")
+include("router/routing.jl")
