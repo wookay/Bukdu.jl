@@ -15,7 +15,8 @@ authorize_uri(P::Type{CustomProvider}) = "http://localhost:8089$(authorize_path(
 access_token_uri(P::Type{CustomProvider}) = "http://localhost:8089$(access_token_path(P))"
 
 function json_error(error, error_description)
-    Conn(400, Dict("Content-Type"=>"application/json"), JSON.json(Dict(
+    # 400
+    Conn(:bad_request, Dict("Content-Type"=>"application/json"), JSON.json(Dict(
         :error => error,
         :error_description => string(error_description)
     )))
@@ -29,8 +30,8 @@ function get_authorize(c::OAuthController{CustomProvider})
            "<h3>Authorize application</h3>",
            form_for(nothing, action=post_authorize, method=post) do f
                string(
-                   hidden_input(f, :redirect_uri, params[:redirect_uri]),
-                   hidden_input(f, :state, params[:state]),
+                   hidden_input(f, :redirect_uri, value=params[:redirect_uri]),
+                   hidden_input(f, :state, value=params[:state]),
                    submit("Authorize application")
                )
            end
@@ -86,6 +87,7 @@ immutable ProviderEndpoint <: ApplicationEndpoint
 end
 
 ProviderEndpoint() do
+    plug(Plug.Logger, level=:info)
     plug(Plug.OAuth2.Provider, CustomProvider)
 end
 

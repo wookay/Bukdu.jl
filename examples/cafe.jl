@@ -7,13 +7,15 @@ end
 
 type User
     name::String
+    attendance::Bool
     age::Int
+    job::String
     description::String
     happiness::Float64
     attach::Plug.Upload
 end
 
-user = User("foo bar", 20, "", 0.5, Plug.Upload())
+user = User("foo bar", false, 20, "artist", "", 0.5, Plug.Upload())
 
 include("layout.jl")
 
@@ -43,15 +45,25 @@ function input_form(form)
     form_for(form, action=post_result, method=post, multipart=true) do f
          """
 <div>
-  Name: $(text_input(f, :name))
+    Name: $(text_input(f, :name))
 </div>
 
 <div>
-    Age: $(select(f, :age, 18:30))
+    Attendance: $(checkbox(f, :attendance))
+</div>
+
+<div>
+    Age: $(select(f, :age, 15:30))
 </div>
 
 <div>
     Happiness: $(text_input(f, :happiness))
+</div>
+
+<div>
+    Job: $(radio_button(f, :job, "chef")) Chef
+         $(radio_button(f, :job, "designer")) Designer
+         $(radio_button(f, :job, "artist")) Artist
 </div>
 
 <div>

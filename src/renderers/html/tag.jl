@@ -2,11 +2,11 @@
 
 module Tag
 
-export form_for, label, text_input, select, checkbox, textarea, file_input, hidden_input, submit
+export form_for, label, text_input, select, checkbox, radio_button, textarea, file_input, hidden_input, submit
 
 import ....Bukdu
 import Bukdu.Octo: Changeset, change
-import Bukdu: Plug
+import Bukdu: Plug, Logger
 import Base: select
 
 typealias ChangesetOrVoid Union{Changeset, Void}
@@ -108,7 +108,7 @@ function label(block::Function, changeset::Changeset, field::Symbol; kw...)
     label(changeset, field, body=block(); kw...)
 end
 
-function text_input(changeset::ChangesetOrVoid, field::Symbol, value=nothing; kw...)
+function text_input(changeset::ChangesetOrVoid, field::Symbol; value=nothing, kw...)
     value = value_from_changeset(changeset, field, value)
     build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"text", :value=>value, kw...))
 end
@@ -121,17 +121,23 @@ function select_option(changeset::ChangesetOrVoid, field::Symbol, options, value
         string("    <option value=\"", x, '"', (value==x ? " selected" : ""), ">", x, "</option>"), options), '\n'), '\n')
 end
 
-function select(changeset::ChangesetOrVoid, field::Symbol, options, value=nothing; kw...)
+function select(changeset::ChangesetOrVoid, field::Symbol, options; value=nothing, kw...)
     build("select", changeset, field, (:id=>tag_id, :name=>tag_name, kw...); body=select_option(changeset, field, options, value), LF=true)
 end
 
-function checkbox(changeset::ChangesetOrVoid, field::Symbol, value=nothing; kw...)
+function checkbox(changeset::ChangesetOrVoid, field::Symbol; value=nothing, kw...)
     value = value_from_changeset(changeset, field, value)
-    checked = (true==value) ? "checked" : nothing
-    build("checkbox", changeset, field, (:id=>tag_id, :name=>tag_name, :checked=>cheked, :value=>value, kw...))
+    checked = value ? "checked" : nothing
+    build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"checkbox", :checked=>checked, :value=>string(value), kw...))
 end
 
-function textarea(changeset::ChangesetOrVoid, field::Symbol, value=""; kw...)
+function radio_button(changeset::ChangesetOrVoid, field::Symbol, value::String; kw...)
+    v = value_from_changeset(changeset, field, nothing)
+    checked = v==value ? "checked" : nothing
+    build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"radio", :checked=>checked, :value=>value, kw...))
+end
+
+function textarea(changeset::ChangesetOrVoid, field::Symbol; value="", kw...)
     build("textarea", changeset, field, (:id=>tag_id, :name=>tag_name, kw...); body=value, LF=true)
 end
 
@@ -139,7 +145,7 @@ function file_input(changeset::ChangesetOrVoid, field::Symbol; kw...)
     build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"file", kw...))
 end
 
-function hidden_input(changeset::ChangesetOrVoid, field::Symbol, value=nothing; kw...)
+function hidden_input(changeset::ChangesetOrVoid, field::Symbol; value=nothing, kw...)
     value = value_from_changeset(changeset, field, value)
     build("input", changeset, field, (:id=>tag_id, :name=>tag_name, :type=>"hidden", :value=>value, kw...))
 end

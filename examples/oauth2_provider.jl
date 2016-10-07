@@ -26,8 +26,8 @@ function get_authorize(c::OAuthController{CustomProvider})
             "<h3>Authorize application</h3>",
             form_for(nothing, action=post_authorize, method=post) do f
                 string(
-                    hidden_input(f, :redirect_uri, params[:redirect_uri]),
-                    hidden_input(f, :state, params[:state]),
+                    hidden_input(f, :redirect_uri, value=params[:redirect_uri]),
+                    hidden_input(f, :state, value=params[:state]),
                     submit("Authorize application")
                 )
             end

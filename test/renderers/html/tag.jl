@@ -4,6 +4,7 @@ importall Bukdu.Tag
 
 type User
     name::String
+    attendance::Bool
     age::Int
     description::String
 end
@@ -27,7 +28,7 @@ f = change(User, name="foo bar")
     <option value="20">20</option>
 </select>""" == select(f, :age, 18:20)
 
-user = User("tom", 20, "")
+user = User("tom", false, 20, "")
 f = change(user)
 @test """
 <select id="user_age" name="user[age]">
@@ -41,4 +42,4 @@ f = change(user)
 
 f = nothing
 @test """<input id="description" name="description" type="hidden" />""" == hidden_input(f, :description)
-@test """<input id="description" name="description" type="hidden" value="hello" />""" == hidden_input(f, :description, "hello")
+@test """<input id="description" name="description" type="hidden" value="hello" />""" == hidden_input(f, :description, value="hello")

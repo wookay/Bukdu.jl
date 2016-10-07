@@ -79,12 +79,15 @@ import Base: ==
 
 default(T::Type, ::Type{Upload}) = Upload()
 
+function strong(x)
+    "<strong>$x</strong>"
+end
 
 function Base.show(stream::IO, mime::MIME"text/html", upload::Plug.Upload)
     write(stream, string("Plug.Upload("))
-    write(stream, string("filename: ", upload.filename, ", "))
-    write(stream, string("content_type: ", upload.content_type, ", "))
-    write(stream, string("filesize: ", UploadData.sizeof(upload), ", "))
+    write(stream, string("filename: ", strong(upload.filename), ", "))
+    write(stream, string("content_type: ", strong(upload.content_type), ", "))
+    write(stream, string("filesize: ", strong(UploadData.sizeof(upload)), ", "))
     len = length(upload.data)
     if len > 6
         write(stream, string("data: ", eltype(upload.data), "[",
@@ -101,7 +104,7 @@ function Base.show(stream::IO, mime::MIME"text/html", tup::Tuple{Symbol,Plug.Upl
         if isa(x, Plug.Upload)
             show(stream, mime, x)
         else
-            write(stream, string("(:", x, ", "))
+            write(stream, string("(:", strong(x), ", "))
         end
     end
     write(stream, string(")"))

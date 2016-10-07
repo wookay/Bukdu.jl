@@ -38,5 +38,5 @@ empty!(l)
 @test isempty(l)
 
 @test "" == stringmime("text/html", l)
-@test """(:title, "title")
+@test """(<strong>:title</strong>, <strong>"title"</strong>)
 """ == stringmime("text/html", r)
