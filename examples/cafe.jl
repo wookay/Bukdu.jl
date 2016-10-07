@@ -98,6 +98,6 @@ end
 
 Bukdu.start(8080)
 
-wait()
+wait() # comment for Juno
 
 # Bukdu.stop()

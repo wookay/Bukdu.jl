@@ -157,7 +157,7 @@ end
 function uploaded_image(changeset::Changeset, field::Symbol)
     if haskey(changeset.changes, field)
         upload = changeset.changes[field]
-        if startswith(upload.content_type, "image")
+        if startswith(upload.content_type, "image") && Plug.UploadData.plugged()
             path = Plug.UploadData.upload_path(upload)
             alt = upload.filename
             return """<img src="$path" alt="$alt" title="$alt" />"""

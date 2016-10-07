@@ -18,6 +18,10 @@ import Bukdu: Assoc, Logger
 
 settings = Assoc()
 
+function plugged()
+    !isempty(settings)
+end
+
 function make_tmp_dir(; kw...)
     for (k,v) in kw
         settings[k] = v
