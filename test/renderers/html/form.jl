@@ -7,12 +7,13 @@ end
 
 type User
     name::String
+    attendance::Bool
     age::Int
     description::String
     happiness::Float64
 end
 
-user = User("tom", 20, "", 0.5)
+user = User("tom", false, 20, "", 0.5)
 
 function post_result(c::UserController)
     change(c, user)
@@ -22,17 +23,21 @@ function test_form(changes::Assoc)
     form = Changeset(user, changes)
     form_for(form, action=post_result, method=post) do f
 """
-<label>
+<div>
     Name: $(text_input(f, :name))
-</label>
+</div>
 
-<label>
+<div>
+    Attendance: $(checkbox(f, :attendance))
+</div>
+
+<div>
     Age: $(select(f, :age, 18:20))
-</label>
+</div>
 
-<label>
+<div>
     Happiness: $(text_input(f, :happiness))
-</label>
+</div>
 
 $(submit("Submit"))
 """
@@ -58,21 +63,25 @@ contents = test_form(Assoc(name="foo bar"))
 
 @test """
 <form action="/post_result" method="post" accept-charset="utf-8">
-<label>
+<div>
     Name: <input id="user_name" name="user[name]" type="text" value="foo bar" />
-</label>
+</div>
 
-<label>
+<div>
+    Attendance: <input id="user_attendance" name="user[attendance]" type="checkbox" value="false" />
+</div>
+
+<div>
     Age: <select id="user_age" name="user[age]">
     <option value="18">18</option>
     <option value="19">19</option>
     <option value="20" selected>20</option>
 </select>
-</label>
+</div>
 
-<label>
+<div>
     Happiness: <input id="user_happiness" name="user[happiness]" type="text" value="0.5" />
-</label>
+</div>
 
 <input type="submit" value="Submit" />
 </form>""" == contents
@@ -80,10 +89,13 @@ contents = test_form(Assoc(name="foo bar"))
 conn = (Router)(get, "/")
 @test "<div>$contents</div>" == conn.resp_body
 
-tom = User("tom",20,"",0.5)
+tom = User("tom", false, 20, "", 0.5)
 
 conn = (Router)(post, "/post_result", user_name="jack")
 @test Changeset(tom,Assoc(name="jack")) == conn.resp_body
+
+conn = (Router)(post, "/post_result", user_attendance="true")
+@test Changeset(tom,Assoc(attendance=true)) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="20")
 @test Changeset(tom,Assoc()) == conn.resp_body
@@ -118,7 +130,7 @@ resp1 = Requests.get(URI("http://localhost:8082/"))
 
 resp2 = Requests.post(URI("http://localhost:8082/post_result"), data=Dict("user[name]"=>"foo bar"))
 @test 200 == statuscode(resp2)
-@test """Bukdu.Octo.Changeset(User("tom",20,"",0.5),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[(:name,"foo bar")]))""" == text(resp2)
+@test """Bukdu.Octo.Changeset(User("tom",false,20,"",0.5),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[(:name,"foo bar")]))""" == text(resp2)
 
 sleep(0.1)
 Bukdu.stop()

@@ -81,7 +81,14 @@ function change(typ::Void; kw...)::Changeset
 end
 
 function change{T<:Any,AC<:ApplicationController}(c::AC, model::T)::Changeset
-    Changeset(model, Assoc(map(param->cutout_brackets(T,param), c[:query_params])))
+    assoc = Assoc(map(param->cutout_brackets(T,param), c[:query_params]))
+    for name in fieldnames(T)
+        typ = fieldtype(T, name)
+        if Bool==typ && !haskey(assoc, name)
+            assoc[name] = default(T, typ)
+        end
+    end
+    Changeset(model, assoc)
 end
 
 function change{AC<:ApplicationController}(c::AC, T::Type)::Changeset
@@ -92,6 +99,7 @@ default(T::Type, ::Type{String}) = ""
 default(T::Type, ::Type{Int}) = 0
 default(T::Type, ::Type{Float64}) = 0.0
 default(T::Type, ::Type{Float32}) = 0.0
+default(T::Type, ::Type{Bool}) = false
 
 function default(T::Type)::T
     # broadcast #

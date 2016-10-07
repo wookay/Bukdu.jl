@@ -31,17 +31,22 @@ Bukdu.start(8080)
 
 Use `Endpoint` to define the plug pipelines.
 
-* plug `Plug.Static` to serve the static files.
 * plug `Plug.Logger` to write the event logs.
+* plug `Plug.Static` to serve the static files.
 * plug `Router` to give the routes into the Endpoint.
 
 ```
 Endpoint() do
-    plug(Plug.Static, at= "/", from= "public")
     plug(Plug.Logger)
+    plug(Plug.Static, at="/", from="public")
     plug(Router)
 end
 ```
+
+
+### Deploy on Heroku
+
+Bukdu can be deploy on Heroku. Visit to look around (https://bukdu.herokuapp.com).
 
 
 ### Jupyter notebook
