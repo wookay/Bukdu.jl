@@ -35,6 +35,6 @@ str = wait(reader)
 @test """
 DEBUG  GET /                                   index(::WelcomeController)
 WARN   GET /strange                           
-WARN     | /strange                           
+WARN       /strange                           
 """ == str
 end

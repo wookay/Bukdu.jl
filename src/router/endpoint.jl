@@ -43,7 +43,7 @@ function (::Type{AE}){AE<:ApplicationEndpoint}(path::String, args...; kw...)
         end)
     end
     routes = haskey(Routing.endpoint_routes, AE) ? Routing.endpoint_routes[AE] : Vector{Route}()
-    Routing.request(Nullable{Type{AE}}(AE), routes, |, path, Assoc(), data) do route
+    Routing.request(Nullable{Type{AE}}(AE), routes, Symbol(""), path, Assoc(), data) do route
         true
     end
 end

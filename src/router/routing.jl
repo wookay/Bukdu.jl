@@ -86,27 +86,27 @@ function trail(s::String, n)
     length(s) > n > 2 ? string(s[1:n-2], "..") : s
 end
 
-function debug_verb(verb, path)
-    verb = lpad(Logger.verb_uppercase(verb), 4)
+function debug_verb(verb::Symbol, path)
+    verb = lpad(uppercase(string(verb)), 4)
     path_pad = Logger.settings[:path_padding]
     trailed_path = trail(path, path_pad)
     rpaded_path = Logger.with_color(:bold, rpad(trailed_path, path_pad))
     verb, rpaded_path
 end
 
-function debug_route{AC<:ApplicationController}(route, path, ::Type{AC})
-    tuple(debug_verb(route.verb, path)..., "$(Base.function_name(route.action))(::$AC)")
+function debug_route{AC<:ApplicationController}(route::Route, verb::Symbol, path::String, ::Type{AC})
+    tuple(debug_verb(verb, path)..., "$(Base.function_name(route.action))(::$AC)")
 end
 
-function error_route(route, path, controller, ex, callstack)
+function error_route(verb::Symbol, path::String, ex, callstack)
     tuple(
-        debug_route(route, path, controller)...,
+        debug_verb(verb, path)...,
         '\n',
         Logger.with_color(:red, ex),
         callstack)
 end
 
-function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Function, path::String, headers::Assoc, data::Assoc)::Conn
+function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, data::Assoc)::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
@@ -160,13 +160,13 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 result = nothing
                 try
                     Logger.debug() do
-                        debug_route(route, path, C)
+                        debug_route(route, verb, path, C)
                     end
                     result = route.action(controller)
                 catch ex
                     stackframes = stacktrace(catch_backtrace())
                     Logger.error() do
-                        error_route(route, path, C, ex, stackframes)
+                        error_route(verb, path, ex, stackframes)
                     end
                     result = conn_bad_request(verb, path, ex, stackframes)
                 end

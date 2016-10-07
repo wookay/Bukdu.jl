@@ -52,7 +52,7 @@ function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, args.
     end
     headers = Assoc()
     routes = haskey(Routing.router_routes, AR) ? Routing.router_routes[AR] : Vector{Route}()
-    Routing.request(Nullable{Type{Endpoint}}(), routes, verb, path, headers, data) do route
+    Routing.request(Nullable{Type{Endpoint}}(), routes, Base.function_name(verb), path, headers, data) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
 end

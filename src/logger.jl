@@ -130,8 +130,4 @@ function with_color(color::Symbol, text)::String
     end
 end
 
-function verb_uppercase(verb::Function)
-    uppercase(string(Base.function_name(verb)))
-end
-
 end # module Bukdu.Logger

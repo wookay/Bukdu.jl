@@ -56,6 +56,12 @@ resp2 = Requests.get(URI("http://localhost:8083/"))
 @test "hello world" == text(resp1)
 @test "hello world" == text(resp2)
 
+resp1 = Requests.head(URI("http://localhost:8082/"))
+resp2 = Requests.head(URI("http://localhost:8082/err"))
+@test 200 == statuscode(resp1)
+@test 404 == statuscode(resp2)
+@test "" == text(resp1)
+
 req.method = "GET"
 req.resource = "/"
 
