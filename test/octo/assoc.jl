@@ -36,3 +36,7 @@ merge!(l, r)
 @test !isempty(l)
 empty!(l)
 @test isempty(l)
+
+@test "" == stringmime("text/html", l)
+@test """(:title, "title")
+""" == stringmime("text/html", r)

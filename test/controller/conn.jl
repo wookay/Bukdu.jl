@@ -12,7 +12,7 @@ using Base.Test
 
 
 ## Request fields - host, method, path, req_headers, scheme
-@test get == conn.method
+@test :get == conn.method
 
 ## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
 

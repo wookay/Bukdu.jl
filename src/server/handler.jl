@@ -30,8 +30,8 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
     verb = :head == method ? get : getfield(Bukdu, method)
     local conn::Conn
     try
-        data = post==verb ? post_form_data(req) : Assoc()
-        conn = Routing.request(Nullable{Type{AE}}(AE), routes, method, req.resource, Assoc(req.headers), data) do route
+        param_data = post==verb ? post_form_data(req) : Assoc()
+        conn = Routing.request(Nullable{Type{AE}}(AE), routes, method, req.resource, Assoc(req.headers), param_data) do route
             Base.function_name(route.verb) == Base.function_name(verb)
         end
     catch ex

@@ -39,12 +39,12 @@ conn = (Router)(get, "/api/contacts")
 @test index == conn.private[:action]
 @test isa(conn.private[:controller], ContactController)
 @test Router == conn.private[:router]
-@test isnull(conn.private[:endpoint])
+@test nothing == conn.private[:endpoint]
 
 conn = (Endpoint)("/api/contacts")
 @test "json" == conn.private[:format]
 @test Router == conn.private[:router]
-@test !isnull(conn.private[:endpoint])
+@test Endpoint == conn.private[:endpoint]
 
 api = Pipeline() do conn
     accepts(conn, ["json"])

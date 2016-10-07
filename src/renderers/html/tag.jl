@@ -6,6 +6,7 @@ export form_for, label, text_input, select, checkbox, textarea, file_input, hidd
 
 import ....Bukdu
 import Bukdu.Octo: Changeset, change
+import Bukdu: Plug
 import Base: select
 
 typealias ChangesetOrVoid Union{Changeset, Void}
@@ -145,6 +146,18 @@ end
 
 function submit(value; kw...)
     build("input", nothing, :submit, (:type=>"submit", :value=>value, kw...))
+end
+
+function uploaded_image(changeset::Changeset, field::Symbol)
+    if haskey(changeset.changes, field)
+        upload = changeset.changes[field]
+        if startswith(upload.content_type, "image")
+            path = Plug.UploadData.upload_path(upload)
+            alt = upload.filename
+            return """<img src="$path" alt="$alt" title="$alt" />"""
+        end
+    end
+    ""
 end
 
 end # module Bukdu.Tag

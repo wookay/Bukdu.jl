@@ -34,7 +34,7 @@ plug `Plug.Static` to serve the static files.
 
 ```julia
 Endpoint() do
-    plug(Plug.Static, at= "/", from= "public")
+    plug(Plug.Static, at="/", from="public")
 end
 ```
 """
@@ -43,24 +43,20 @@ function plug(::Type{Plug.Static}; kw...)
     opts = Dict(kw)
     at = opts[:at]
     from = opts[:from]
-    try_index_html = true
     if haskey(opts, :only)
         only = opts[:only]
         has_only = !isempty(only)
     else
         has_only = false
     end
-    if haskey(opts, :try_index_html)
-        try_index_html = opts[:try_index_html]
-    end
     for (root, dirs, files) in walkdir(from)
-        for file in files
-            filepath = joinpath(root, file)
+        for filename in files
+            filepath = joinpath(root, filename)
             if has_only
-                !any(x->startswith(filepath, x), only) && continue
+                !any(x->startswith(filepath, normpath(from, x)), only) && continue
             end
             opts = Dict(:assigns => Assoc(filepath=filepath))
-            if try_index_html && "index.html" == file
+            if root == from && "index.html" == filename
                 Routing.match(get, "/", StaticController, read, opts)
             end
             reqpath = filepath[length(from)+1:end]

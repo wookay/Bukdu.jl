@@ -103,7 +103,12 @@ function Base.setdiff(lhs::Assoc, rhs::Assoc)::Assoc
 end
 
 function Base.show(stream::IO, mime::MIME"text/html", assoc::Assoc)
-    for x in assoc
-        show(stream, mime, x)
+    for (k,v) in assoc
+        if mimewritable(mime, (k,v))
+            show(stream, mime, (k,v))
+        else
+            write(stream, string("(", repr(k), ", ", repr(v), ")"))
+        end
+        write(stream, "\n")
     end
 end

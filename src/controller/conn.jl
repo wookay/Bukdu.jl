@@ -9,9 +9,9 @@ end
 type Conn
     ## Request fields
     host::String
-    method::Function
+    method::Symbol
     path::String
-    req_headers::Dict{String,String}
+    req_headers::Assoc
     scheme::Symbol
 
     ## Fetchable fields
@@ -53,7 +53,7 @@ type Conn
 
     function Conn(code::Int, resp_headers::Dict{String,String}, resp_body::Any, params::Assoc, query_params::Assoc, private::Assoc, assigns::Assoc)
         new(
-            "", get, "", Dict{String,String}(), :http,   # host, method, path, req_headers, scheme,
+            "", :get, "", Assoc(), :http,   # host, method, path, req_headers, scheme,
             Dict{String,String}(), query_params, params, # req_cookies, query_params, params,
             resp_body, "utf-8", Dict{String,String}(), resp_headers, code, identity, # resp_body, resp_charset, resp_cookies, resp_headers, status, before_send,
             assigns, false, :unset,                      # assigns, halted, state,
@@ -66,15 +66,17 @@ end
 ## Request fields - host, method, path, req_headers, scheme
 
 function get_req_header(conn::Conn, key::String)
-    if haskey(conn.req_headers, key)
-        conn.req_headers[key]
+    k = Symbol(key)
+    if haskey(conn.req_headers, k)
+        conn.req_headers[k]
     else
-        conn.req_headers[key]
+        ""
     end
 end
 
 function put_req_header(conn::Conn, key::String, value::String)
-    conn.req_headers[key] = value
+    k = Symbol(key)
+    conn.req_headers[k] = value
 end
 
 

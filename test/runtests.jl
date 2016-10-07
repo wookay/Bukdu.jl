@@ -44,6 +44,46 @@ Base.Test.@testset "controller.jl" begin
 end
 
 workspace()
+Base.Test.@testset "router/endpoint.jl" begin
+    include("router/endpoint.jl")
+end
+
+workspace()
+Base.Test.@testset "router/scope.jl" begin
+    include("router/scope.jl")
+end
+
+workspace()
+Base.Test.@testset "router/resource.jl" begin
+    include("router/resource.jl")
+end
+
+workspace()
+Base.Test.@testset "router.jl" begin
+    include("router.jl")
+end
+
+workspace()
+Base.Test.@testset "plug/static.jl" begin
+    include("plug/static.jl")
+end
+
+workspace()
+Base.Test.@testset "plug/logger.jl" begin
+    include("plug/logger.jl")
+end
+
+workspace()
+Base.Test.@testset "plug/oauth2.jl" begin
+    include("plug/oauth2.jl")
+end
+
+workspace()
+Base.Test.@testset "plug/upload.jl" begin
+    include("plug/upload.jl")
+end
+
+workspace()
 Base.Test.@testset "renderers/layout.jl" begin
     include("renderers/layout.jl")
 end
@@ -86,46 +126,6 @@ end
 workspace()
 Base.Test.@testset "renderers/mustache.jl" begin
     include("renderers/mustache.jl")
-end
-
-workspace()
-Base.Test.@testset "router/scope.jl" begin
-    include("router/scope.jl")
-end
-
-workspace()
-Base.Test.@testset "router/resource.jl" begin
-    include("router/resource.jl")
-end
-
-workspace()
-Base.Test.@testset "router/endpoint.jl" begin
-    include("router/endpoint.jl")
-end
-
-workspace()
-Base.Test.@testset "router.jl" begin
-    include("router.jl")
-end
-
-workspace()
-Base.Test.@testset "plug/static.jl" begin
-    include("plug/static.jl")
-end
-
-workspace()
-Base.Test.@testset "plug/logger.jl" begin
-    include("plug/logger.jl")
-end
-
-workspace()
-Base.Test.@testset "plug/oauth2.jl" begin
-    include("plug/oauth2.jl")
-end
-
-workspace()
-Base.Test.@testset "plug/upload.jl" begin
-    include("plug/upload.jl")
 end
 
 workspace()

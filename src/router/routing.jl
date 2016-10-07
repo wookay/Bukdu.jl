@@ -29,6 +29,10 @@ function match{AC<:ApplicationController}(verb::Function, path::String, ::Type{A
     add_route(:match, verb, path, AC, action, options)
 end
 
+function matchall{AC<:ApplicationController}(verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
+    add_route(:matchall, verb, path, AC, action, options)
+end
+
 function add_route{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
     route = RouterScope.route(kind, verb, path, AC, action, options)
     push!(routes, route)
@@ -106,13 +110,12 @@ function error_route(verb::Symbol, path::String, ex, callstack)
         callstack)
 end
 
-function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, data::Assoc)::Conn
+function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, param_data::Assoc)::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
     for route in routes
-        rousegs = split(route.path, SLASH)
-        if compare(route) && length_reqsegs==length(rousegs)
+        if compare(route)
             if !isempty(route.host)
                 if endswith(route.host, ".")
                     !startswith(uri.host, route.host) && continue
@@ -120,9 +123,17 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                     !endswith(uri.host, route.host) && continue
                 end
             end
-            matched = all(enumerate(rousegs)) do idx_rouseg
-                (idx,rouseg) = idx_rouseg
-                startswith(rouseg, COLON) ? true : reqsegs[idx]==rouseg
+            matched = false
+            rousegs = split(route.path, SLASH)
+            if :match == route.kind
+                if length_reqsegs == length(rousegs)
+                    matched = all(enumerate(rousegs)) do idx_rouseg
+                        (idx,rouseg) = idx_rouseg
+                        startswith(rouseg, COLON) ? true : reqsegs[idx]==rouseg
+                    end
+                end
+            elseif :matchall == route.kind
+                matched = startswith(path, route.path)
             end
             if matched
                 function startswithcolon(idx_rouseg)
@@ -136,19 +147,21 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 C = route.controller
                 controller = C()
                 query_params = Assoc(parsequerystring(uri.query))
-                if !isempty(data)
-                    merge!(query_params, data)
+                if !isempty(param_data)
+                    merge!(query_params, param_data)
                 end
                 conn = Conn()
                 conn.query_params = query_params
                 conn.params = params
                 conn.host = uri.host
-                conn.req_headers = Dict{String,String}()
+                conn.method = verb
+                conn.path = path
+                conn.req_headers = headers
                 conn.assigns = route.assigns
                 conn.private = route.private
                 conn.private[:action] = route.action
                 conn.private[:controller] = controller
-                conn.private[:endpoint] = endpoint
+                conn.private[:endpoint] = isnull(endpoint) ? nothing : endpoint.value
                 task = current_task()
                 task_storage[task] = conn
                 for pipe in route.pipes

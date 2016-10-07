@@ -117,10 +117,13 @@ end
 
 conn = (Endpoint)("/")
 @test 1 == conn.resp_body
+@test Router == conn.private[:router]
+@test Endpoint == conn.private[:endpoint]
 
 conn = (SecondEndpoint)("/")
 @test 2 == conn.resp_body
-
+@test SecondRouter == conn.private[:router]
+@test SecondEndpoint == conn.private[:endpoint]
 
 type NothingRouter <: ApplicationRouter
 end

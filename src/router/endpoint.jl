@@ -35,15 +35,16 @@ function (::Type{AE}){AE<:ApplicationEndpoint}(context::Function)
 end
 
 function (::Type{AE}){AE<:ApplicationEndpoint}(path::String, args...; kw...)
-    data = Assoc()
     if !isempty(args) || !isempty(kw)
-        data = Assoc(map(vcat(args..., kw...)) do kv
+        param_data = Assoc(map(vcat(args..., kw...)) do kv
             (k,v) = kv
             (k, escape(v))
         end)
+    else
+        param_data = Assoc()
     end
     routes = haskey(Routing.endpoint_routes, AE) ? Routing.endpoint_routes[AE] : Vector{Route}()
-    Routing.request(Nullable{Type{AE}}(AE), routes, Symbol(""), path, Assoc(), data) do route
+    Routing.request(Nullable{Type{AE}}(AE), routes, Symbol(""), path, Assoc(), param_data) do route
         true
     end
 end

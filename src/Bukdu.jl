@@ -9,9 +9,9 @@ include("application.jl")
 include("octo.jl")
 include("filter.jl")
 include("controller.jl")
-include("renderers.jl")
 include("router.jl")
 include("plug.jl")
+include("renderers.jl")
 include("server.jl")
 
 end # module Bukdu
