@@ -46,12 +46,6 @@ function start(ports::Vector{Int}, host=getaddrinfo("localhost"); kw...)
 end
 
 function start{AE<:ApplicationEndpoint}(::Type{AE}, ports::Vector{Int}, host=getaddrinfo("localhost"); kw...)
-    if AE==Endpoint && !haskey(Routing.runtime, AE)
-        Endpoint() do
-            plug(Router)
-        end
-    end
-
     handler = (req::Request, res::Response) -> Server.handler(AE,req,res)
     for port in ports
         server = HttpServer.Server(handler)
@@ -92,7 +86,6 @@ function stop{AE<:ApplicationEndpoint}(::Type{AE})
         Logger.info("Stopped.")
         empty!(Farm.servers[AE])
         delete!(Farm.servers, AE)
-        delete!(Routing.runtime, AE)
     end
     nothing
 end

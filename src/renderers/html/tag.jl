@@ -75,7 +75,7 @@ function form_for(block::Function, changeset::ChangesetOrVoid, args...; kw...)
 
     action = opts[:action]
     if isa(action, Function)
-        for route in Bukdu.RouterRoute.routes
+        for route in Bukdu.Routing.routes
             if route.action == action && route.verb == verb
                 return build_form(route.path)
             end

@@ -124,6 +124,11 @@ Base.Test.@testset "plug/oauth2.jl" begin
 end
 
 workspace()
+Base.Test.@testset "plug/upload.jl" begin
+    include("plug/upload.jl")
+end
+
+workspace()
 Base.Test.@testset "server/form_data.jl" begin
     include("server/form_data.jl")
 end

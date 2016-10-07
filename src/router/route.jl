@@ -17,8 +17,6 @@ module RouterRoute
 
 import ..Bukdu: ApplicationController, Route, Pipeline, Assoc
 
-routes = Vector{Route}()
-
 function build{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String,
              host::String, ::Type{AC}, action::Function, pipes::Vector{Pipeline}, private::Assoc, assigns::Assoc)
     Route(verb, kind, path, host, AC, action, pipes, private, assigns)

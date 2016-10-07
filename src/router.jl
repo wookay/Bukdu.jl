@@ -26,24 +26,23 @@ immutable NoRouteError
 end
 
 function reset{AR<:ApplicationRouter}(::Type{AR})
-    delete!(Routing.routing_map, AR)
-end
-
-function has_called{AR<:ApplicationRouter}(::Type{AR})
-    haskey(Routing.runtime, AR)
+    delete!(Routing.router_routes, AR)
+    empty!(Routing.routes)
 end
 
 function (::Type{AR}){AR<:ApplicationRouter}(context::Function)
-    empty!(RouterRoute.routes)
+    empty!(Routing.routes)
     context()
-    Routing.routing_map[AR] = copy(RouterRoute.routes)
+    routes = copy(Routing.routes)
+    for route in routes
+        route.private[:router] = AR
+    end
+    Routing.router_routes[AR] = routes
     empty!(RouterScope.stack)
-    Routing.runtime[AR] = true
     nothing
 end
 
 function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, args...; kw...)
-    routes = haskey(Routing.routing_map, AR) ? Routing.routing_map[AR] : Vector{Route}()
     data = Assoc()
     if !isempty(args) || !isempty(kw)
         data = Assoc(map(vcat(args..., kw...)) do kv
@@ -52,7 +51,8 @@ function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, args.
         end)
     end
     headers = Assoc()
-    Routing.request(routes, verb, path, headers, data) do route
+    routes = haskey(Routing.router_routes, AR) ? Routing.router_routes[AR] : Vector{Route}()
+    Routing.request(Nullable{Type{Endpoint}}(), routes, verb, path, headers, data) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
 end
@@ -118,5 +118,5 @@ include("router/route.jl")
 include("router/scope.jl")
 include("router/resource.jl")
 include("router/response.jl")
-include("router/routing.jl")
 include("router/endpoint.jl")
+include("router/routing.jl")

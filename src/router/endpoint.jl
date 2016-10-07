@@ -18,36 +18,23 @@ end
 immutable Endpoint <: ApplicationEndpoint
 end
 
-module EndpointManagement
-import ..Route
-endpoint_routes = Dict{Type,Vector{Route}}()
-endpoint_contexts = Dict{Type,Function}()
-end # module Bukdu.EndpointManagement
-
-
 function reload{AE<:ApplicationEndpoint}(::Type{AE})
-    context = EndpointManagement.endpoint_contexts[AE]
-    empty!(RouterRoute.routes)
+    context = Routing.endpoint_contexts[AE]
+    empty!(Routing.routes)
     context()
-    EndpointManagement.endpoint_routes[AE] = copy(RouterRoute.routes)
+    Routing.endpoint_routes[AE] = copy(Routing.routes)
     nothing
 end
 
-function has_called{AE<:ApplicationEndpoint}(::Type{AE})
-    haskey(Routing.runtime, AE)
-end
-
 function (::Type{AE}){AE<:ApplicationEndpoint}(context::Function)
-    empty!(RouterRoute.routes)
+    empty!(Routing.routes)
     context()
-    EndpointManagement.endpoint_routes[AE] = copy(RouterRoute.routes)
-    EndpointManagement.endpoint_contexts[AE] = context
-    Routing.runtime[AE] = true
+    Routing.endpoint_routes[AE] = copy(Routing.routes)
+    Routing.endpoint_contexts[AE] = context
     nothing
 end
 
 function (::Type{AE}){AE<:ApplicationEndpoint}(path::String, args...; kw...)
-    routes = haskey(EndpointManagement.endpoint_routes,AE) ? EndpointManagement.endpoint_routes[AE] : Vector{Route}()
     data = Assoc()
     if !isempty(args) || !isempty(kw)
         data = Assoc(map(vcat(args..., kw...)) do kv
@@ -55,7 +42,8 @@ function (::Type{AE}){AE<:ApplicationEndpoint}(path::String, args...; kw...)
             (k, escape(v))
         end)
     end
-    Routing.request(routes, |, path, Assoc(), data) do route
+    routes = haskey(Routing.endpoint_routes, AE) ? Routing.endpoint_routes[AE] : Vector{Route}()
+    Routing.request(Nullable{Type{AE}}(AE), routes, |, path, Assoc(), data) do route
         true
     end
 end

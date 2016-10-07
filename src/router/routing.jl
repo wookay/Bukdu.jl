@@ -3,15 +3,15 @@
 module Routing
 
 import ..Bukdu
-import Bukdu: ApplicationController
-import Bukdu: RouterRoute, Route, RouterScope, RouterResource, Resource
-import Bukdu: Logger
-import Bukdu: Conn
-import Bukdu: conn_bad_request
+import Bukdu: ApplicationController, ApplicationEndpoint, ApplicationRouter
+import Bukdu: Endpoint, Router
+import Bukdu: Route, RouterScope, RouterResource, Resource
+import Bukdu: Assoc, Conn
 import Bukdu: index, edit, new, show, create, update, delete
 import Bukdu: get, post, delete, patch, put
 import Bukdu: before, after
-import Bukdu: Assoc
+import Bukdu: conn_bad_request
+import Bukdu: Logger
 import URIParser: URI
 import HttpCommon: parsequerystring
 
@@ -19,8 +19,10 @@ const SLASH = '/'
 const COLON = ':'
 
 task_storage = Dict{Task,Conn}()
-routing_map = Dict{Type,Vector{Route}}()
-runtime = Dict{Type,Bool}()
+routes = Vector{Route}()
+router_routes = Dict{Type,Vector{Route}}() # AR => Vector{Route}
+endpoint_routes = Dict{Type,Vector{Route}}() # AE => Vector{Route}
+endpoint_contexts = Dict{Type,Function}() # AE => context
 
 # route
 function match{AC<:ApplicationController}(verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
@@ -29,7 +31,7 @@ end
 
 function add_route{AC<:ApplicationController}(kind::Symbol, verb::Function, path::String, ::Type{AC}, action::Function, options::Dict)
     route = RouterScope.route(kind, verb, path, AC, action, options)
-    push!(RouterRoute.routes, route)
+    push!(routes, route)
     route
 end
 
@@ -104,7 +106,7 @@ function error_route(route, path, controller, ex, callstack)
         callstack)
 end
 
-function request(compare::Function, routes::Vector{Route}, verb::Function, path::String, headers::Assoc, data::Assoc)::Conn
+function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Function, path::String, headers::Assoc, data::Assoc)::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
@@ -146,6 +148,7 @@ function request(compare::Function, routes::Vector{Route}, verb::Function, path:
                 conn.private = route.private
                 conn.private[:action] = route.action
                 conn.private[:controller] = controller
+                conn.private[:endpoint] = endpoint
                 task = current_task()
                 task_storage[task] = conn
                 for pipe in route.pipes

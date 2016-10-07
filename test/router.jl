@@ -20,7 +20,7 @@ Router() do
 end
 
 
-Logger.set_level(false)
+Logger.set_level(:error)
 using Base.Test
 conn = (Router)(get, "/pages")
 @test conn.status == 200

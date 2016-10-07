@@ -1,35 +1,20 @@
 importall Bukdu
-import Bukdu: has_called
 using Base.Test
-
-@test !has_called(Router)
-@test !has_called(Endpoint)
 
 Router() do
 end
 
-@test has_called(Router)
-@test !has_called(Endpoint)
-
 Bukdu.start(8082)
-
-@test has_called(Endpoint)
 
 immutable Endpoint2 <: ApplicationEndpoint
 end
 
 Bukdu.start(Endpoint2, 8083)
 
-@test !has_called(Endpoint2)
-
 sleep(0.1)
 Bukdu.stop()
 
-@test !has_called(Endpoint)
-
 Bukdu.stop(Endpoint2)
-
-@test !has_called(Endpoint2)
 
 immutable EndpointController <: ApplicationController
 end
@@ -67,7 +52,7 @@ conn = (Endpoint)("/first")
 conn = (Endpoint2)("/second")
 @test 200 == conn.status
 
-Logger.set_level(:fatal)
+Logger.set_level(:error)
 @test_throws Bukdu.NoRouteError (Router)(get, "/second")
 @test_throws Bukdu.NoRouteError (Router2)(get, "/first")
 @test_throws Bukdu.NoRouteError (Endpoint)("/second")
@@ -86,7 +71,7 @@ Router() do
     get("/", WelcomeController, first)
 end
 
-@test !isempty(Bukdu.RouterRoute.routes)
+@test !isempty(Bukdu.Routing.routes)
 
 conn = (Router)(get, "/")
 @test 200 == conn.status
@@ -100,13 +85,13 @@ end
 SecondRouter() do
 end
 
-@test isempty(Bukdu.RouterRoute.routes)
+@test isempty(Bukdu.Routing.routes)
 
 SecondRouter() do
     get("/", WelcomeController, second)
 end
 
-@test !isempty(Bukdu.RouterRoute.routes)
+@test !isempty(Bukdu.Routing.routes)
 
 Endpoint() do
     plug(Router)

@@ -5,9 +5,9 @@ module Server
 import HttpCommon: Request, Response, parsequerystring
 import URIParser: unescape_form
 import ....Bukdu
-import Bukdu: Routing, RouterRoute
-import Bukdu: ApplicationEndpoint, Conn
-import Bukdu: before, after, post
+import Bukdu: Routing
+import Bukdu: ApplicationEndpoint, Endpoint, Router, Conn
+import Bukdu: before, after, post, plug
 import Bukdu: conn_no_content, conn_not_found
 import Bukdu: Logger
 
@@ -17,6 +17,12 @@ const commit_short = string(LibGit2.revparseid(LibGit2.GitRepo(Pkg.dir("Bukdu"))
 const info = "Bukdu (commit $commit_short with Julia $VERSION"
 
 function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Response)
+    if AE==Endpoint && !haskey(Routing.endpoint_routes, AE)
+        Endpoint() do
+            plug(Router)
+        end
+    end
+    routes = Routing.endpoint_routes[AE]
     if method_exists(before, (Request,Response))
         before(req, res)
     end
@@ -24,7 +30,7 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
     local conn::Conn
     try
         data = post==verb ? post_form_data(req) : Assoc()
-        conn = Routing.request(RouterRoute.routes, verb, req.resource, Assoc(req.headers), data) do route
+        conn = Routing.request(Nullable{Type{AE}}(AE), routes, verb, req.resource, Assoc(req.headers), data) do route
             Base.function_name(route.verb) == Base.function_name(verb)
         end
     catch ex

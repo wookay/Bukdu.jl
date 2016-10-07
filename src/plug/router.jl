@@ -1,6 +1,6 @@
 # module Bukdu.Plug
 
-import ..ApplicationRouter, ..Routing, ..RouterRoute
+import ..ApplicationRouter, ..Routing
 
 """
 plug `Router` to give the routes into the Endpoint.
@@ -12,7 +12,7 @@ end
 ```
 """
 function plug{AR<:ApplicationRouter}(::Type{AR})
-    if haskey(Routing.routing_map, AR)
-        append!(RouterRoute.routes, Routing.routing_map[AR])
+    if haskey(Routing.router_routes, AR)
+        append!(Routing.routes, Routing.router_routes[AR])
     end
 end
