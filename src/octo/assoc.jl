@@ -15,6 +15,9 @@ type Assoc
     function Assoc(dict::Dict{Symbol,Any})
         new([(k,v) for (k,v) in dict])
     end
+    function Assoc(tup::Tuple)
+        new([(k,v) for (k,v) in tup])
+    end
     function Assoc(vector)
         new(vector)
     end
@@ -78,6 +81,29 @@ function Base.merge!(lhs::Assoc, rhs::Assoc)
         lhs[rk] = rv
     end
     lhs
+end
+
+function Base.delete!(assoc::Assoc, key::Symbol)
+    ind = findfirst(keys(assoc), key)
+    if ind > 0
+        deleteat!(assoc.vector, ind)
+    end
+    assoc
+end
+
+function combine(T::Type, rhs::Assoc, key::Symbol)
+    assoc = Assoc()
+    vec = T()
+    for (rk,rv) in rhs
+        if key==rk
+            eltyp = eltype(T)
+            push!(vec, isa(rv, eltyp) ? rv : parse(eltyp, rv))
+        else
+            push!(assoc, (rk,rv))
+        end
+    end
+    assoc[key] = vec
+    assoc
 end
 
 function ==(lhs::Assoc, rhs::Assoc)

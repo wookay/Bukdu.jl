@@ -75,6 +75,7 @@ end
 end # Bukdu.Plug.UploadData
 
 import Base: ==
+import ..Octo: default
 
 ==(lhs::Upload, rhs::Upload) =
     ==(lhs.filename, rhs.filename) &&

@@ -2,7 +2,7 @@
 
 module Octo
 
-export Assoc
+export Assoc, combine
 include("octo/assoc.jl")
 
 export Changeset, change, default, cast
