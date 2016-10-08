@@ -71,8 +71,10 @@ function get_pipes()
 end
 
 function pipe_through(pipe::Pipeline)
-    scope = first(stack)
-    push!(scope.pipes, pipe)
+    if !isempty(stack)
+        scope = first(stack)
+        push!(scope.pipes, pipe)
+    end
     push!(RouterScope.pipes, pipe)
 end
 

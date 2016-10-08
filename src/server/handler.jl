@@ -3,6 +3,7 @@
 module Server
 
 import HttpCommon: Request, Response, parsequerystring
+import HttpServer: setcookie!
 import URIParser: unescape_form
 import ....Bukdu
 import Bukdu: Routing
@@ -48,6 +49,10 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
     end
     res.headers["Server"] = Server.info
     res.status = conn.status
+    if !isempty(conn.resp_cookies)
+        cook = Plug.SessionData.store_cookies(conn.resp_cookies)
+        setcookie!(res, Plug.bukdu_cookie_id, cook, conn.resp_cookies)
+    end
     if :head == method
         res.data = UInt8[]
     else

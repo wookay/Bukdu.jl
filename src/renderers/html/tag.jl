@@ -6,7 +6,7 @@ export form_for, label, text_input, select, checkbox, radio_button, textarea, fi
 
 import ....Bukdu
 import Bukdu.Octo: Changeset, change
-import Bukdu: Assoc, Plug, Logger
+import Bukdu: Assoc, Plug, ApplicationController, Logger
 import Base: select
 
 typealias ChangesetOrVoid Union{Changeset, Void}
@@ -188,6 +188,10 @@ function uploaded_image(changeset::Changeset, field::Symbol)
         end
     end
     ""
+end
+
+function hidden_csrf_token{AC<:ApplicationController}(c::AC)
+    hidden_input(nothing, :_csrf_token, value=Plug.csrf_token(c[:conn]))
 end
 
 end # module Bukdu.Tag

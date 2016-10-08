@@ -9,6 +9,7 @@ module Plug
 
 import ..plug
 
+include("plug/session.jl")
 include("plug/router.jl")
 include("plug/csrf_protection.jl")
 include("plug/static.jl")
