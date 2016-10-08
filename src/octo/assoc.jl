@@ -96,12 +96,8 @@ function combine(T::Type, rhs::Assoc, key::Symbol)
     vec = T()
     for (rk,rv) in rhs
         if key==rk
-            typ = T.parameters[1]
-            if TypeVar <: typ || isa(rv, typ)
-                push!(vec, rv)
-            else
-                push!(vec, parse(typ, rv))
-            end
+            eltyp = eltype(T)
+            push!(vec, isa(rv, eltyp) ? rv : parse(eltyp, rv))
         else
             push!(assoc, (rk,rv))
         end
