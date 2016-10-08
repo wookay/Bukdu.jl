@@ -40,3 +40,12 @@ empty!(l)
 @test "" == stringmime("text/html", l)
 @test """(<strong>:title</strong>, <strong>"title"</strong>)
 """ == stringmime("text/html", r)
+
+assoc = combine(Vector{String}, Assoc(a="1", a="2", b="3"), :a)
+@test assoc == Assoc(b="3", a=["1", "2"])
+
+assoc = combine(Vector{Int}, Assoc(a="1", a="2", b="3"), :a)
+@test assoc == Assoc(b="3", a=[1, 2])
+
+assoc = combine(Vector{Float64}, Assoc(a="1", a="2", b="3"), :a)
+@test assoc == Assoc(b="3", a=[1.0, 2.0])

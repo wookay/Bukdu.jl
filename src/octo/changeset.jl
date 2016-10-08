@@ -50,9 +50,10 @@ function cutout_brackets(typ::Type, param::Tuple{Symbol,Any})::Tuple{Symbol,Any}
     t = lowercase(string(typ))
     (key,value) = param
     k = string(key)
-    if startswith(k, "$t[") && endswith(k, "]")
-        key = Symbol(last(split(k,"["))[1:end-1])
-    elseif startswith(k, "$(t)_")
+    if endswith(k, "]")
+        k = first(split(k, "["))
+    end
+    if startswith(k, "$(t)_")
         key = Symbol(k[length("$(t)_")+1:end])
     end
     (key, value)
@@ -81,10 +82,13 @@ function change(typ::Void; kw...)::Changeset
 end
 
 function change{T<:Any,AC<:ApplicationController}(c::AC, model::T)::Changeset
-    assoc = Assoc(map(param->cutout_brackets(T,param), c[:query_params]))
+    params = map(param->cutout_brackets(T,param), c[:query_params])
+    assoc = Assoc(params)
     for name in fieldnames(T)
         typ = fieldtype(T, name)
-        if Bool==typ && !haskey(assoc, name)
+        if typ <: Vector
+            assoc = combine(typ, assoc, name)
+        elseif Bool==typ && !haskey(assoc, name)
             assoc[name] = default(T, typ)
         end
     end
@@ -100,6 +104,7 @@ default(T::Type, ::Type{Int}) = 0
 default(T::Type, ::Type{Float64}) = 0.0
 default(T::Type, ::Type{Float32}) = 0.0
 default(T::Type, ::Type{Bool}) = false
+default(T::Type, ::Type{Vector{String}}) = Vector{String}()
 
 function default(T::Type)::T
     # broadcast #

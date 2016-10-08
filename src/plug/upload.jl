@@ -1,5 +1,6 @@
 # module Bukdu.Plug
 
+
 immutable Upload
     filename::String
     content_type::String
@@ -75,6 +76,7 @@ end
 end # Bukdu.Plug.UploadData
 
 import Base: ==
+import ..Octo: default
 
 ==(lhs::Upload, rhs::Upload) =
     ==(lhs.filename, rhs.filename) &&

@@ -9,13 +9,14 @@ type User
     name::String
     attendance::Bool
     age::Int
-    job::String
+    job::Vector{String}
+    lunch::String
     description::String
     happiness::Float64
     attach::Plug.Upload
 end
 
-user = User("foo bar", false, 20, "artist", "", 0.5, Plug.Upload())
+user = User("foo bar", false, 20, [], "chicken", "", 0.5, Plug.Upload())
 
 include("layout.jl")
 
@@ -41,9 +42,10 @@ $changes
 end
 
 
+
 function input_form(form)
     form_for(form, action=post_result, method=post, multipart=true) do f
-         """
+        """
 <div>
     Name: $(text_input(f, :name))
 </div>
@@ -61,9 +63,15 @@ function input_form(form)
 </div>
 
 <div>
-    Job: $(radio_button(f, :job, "chef")) Chef
-         $(radio_button(f, :job, "designer")) Designer
-         $(radio_button(f, :job, "artist")) Artist
+Job: $(checkbox(f, :job, "chef", label_for="Chef"))
+     $(checkbox(f, :job, "designer", label_for="Designer"))
+     $(checkbox(f, :job, "artist", label_for="Artist"))
+</div>
+
+<div>
+Lunch: $(radio_button(f, :lunch, "pizza", label_for="Pizza"))
+       $(radio_button(f, :lunch, "chicken", label_for="Chiken"))
+       $(radio_button(f, :lunch, "noodles", label_for="Noodles"))
 </div>
 
 <div>
