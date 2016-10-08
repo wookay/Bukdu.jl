@@ -108,6 +108,12 @@ Router() do
     end
 end
 
+Endpoint() do
+    plug(Plug.Logger)
+    plug(Plug.CSRFProtection)
+    plug(Router)
+end
+
 
 rel(p::String) = joinpath(dirname(@__FILE__), p)
 if !isfile(rel("keys/server.crt"))

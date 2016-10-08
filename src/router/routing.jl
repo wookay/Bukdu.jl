@@ -151,13 +151,22 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                     merge!(query_params, param_data)
                 end
                 conn = Conn()
-                conn.query_params = query_params
-                conn.params = params
+                ## Request fields - host, method, path, req_headers, scheme
                 conn.host = uri.host
                 conn.method = verb
                 conn.path = path
                 conn.req_headers = headers
+                conn.scheme = uri.scheme
+                ## Fetchable fields - req_cookies, query_params, params
+                if haskey(headers, :Cookie)
+                    parse_cookie_string(s) = Dict(map(x->split(x, "="), split(s, "; ")))
+                    conn.req_cookies = Dict{String,String}(parse_cookie_string(headers[:Cookie]))
+                end
+                conn.query_params = query_params
+                conn.params = params
+                ## Connection fields - assigns, halted, state
                 conn.assigns = route.assigns
+                ## Private fields - private
                 conn.private = route.private
                 conn.private[:action] = route.action
                 conn.private[:controller] = controller
@@ -187,11 +196,16 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                     after(controller)
                 end
                 pop!(task_storage, task)
+                ## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
                 if isa(result, Conn)
-                    return Conn(result.status, result.resp_headers, result.resp_body, params, query_params, route.private, route.assigns)
+                    conn.status = result.status
+                    conn.resp_headers = result.resp_headers
+                    conn.resp_body = result.resp_body
                 else
-                    return Conn(:ok, Dict{String,String}(), result, params, query_params, route.private, route.assigns) # 200
+                    conn.status = 200 # :ok
+                    conn.resp_body = result
                 end
+                return conn
             end
         end
     end

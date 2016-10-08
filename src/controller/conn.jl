@@ -102,6 +102,9 @@ function put_status(conn::Conn, status::Symbol)
     put_status(conn, statuses[status])
 end
 
+function register_before_send(conn::Conn, callback::Function)
+    conn.before_send = callback
+end
 
 ## Connection fields - assigns, halted, state
 

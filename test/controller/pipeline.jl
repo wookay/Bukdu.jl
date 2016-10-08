@@ -27,7 +27,6 @@ end
 
 Endpoint() do
     plug(Plug.Logger, level=:info)
-    plug(Plug.CSRFProtection)
     plug(Router)
 end
 

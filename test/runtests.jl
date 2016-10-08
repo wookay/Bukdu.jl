@@ -84,6 +84,11 @@ Base.Test.@testset "plug/upload.jl" begin
 end
 
 workspace()
+Base.Test.@testset "plug/csrf_protection.jl" begin
+    include("plug/csrf_protection.jl")
+end
+
+workspace()
 Base.Test.@testset "renderers/layout.jl" begin
     include("renderers/layout.jl")
 end

@@ -41,11 +41,11 @@ $changes
 """)
 end
 
-
-
-function input_form(form)
+function input_form(c, form)
     form_for(form, action=post_result, method=post, multipart=true) do f
         """
+$(Tag.hidden_csrf_token(c))
+
 <div>
     Name: $(text_input(f, :name))
 </div>
@@ -87,9 +87,9 @@ $(submit("Submit"))
     end
 end
 
-function index(::CafeController)
+function index(c::CafeController)
     form = change(user)
-    render(HTML/Layout, input_form(form))
+    render(HTML/Layout, input_form(c, form))
 end
 
 Router() do
@@ -101,6 +101,7 @@ Endpoint() do
     plug(Plug.Logger)
     plug(Plug.Static, at="/", from=normpath(dirname(@__FILE__), "public"), only=["css"])
     plug(Plug.Upload, at="/upload", tmp_dir=normpath(dirname(@__FILE__), "tmp"))
+#    plug(Plug.CSRFProtection)
     plug(Router)
 end
 

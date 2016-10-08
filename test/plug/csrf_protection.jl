@@ -1,32 +1,40 @@
-import Bukdu: Conn
-import Bukdu: put_status
-import Bukdu: halt
+importall Bukdu
+import Requests: URI, text, statuscode
 
-conn = Conn()
+type UserController <: ApplicationController
+end
+
+function index(c::UserController)
+    render(HTML, """
+$(Tag.hidden_csrf_token(c))
+""")
+end
+
+function post_result(::UserController)
+end
+
+Router() do
+    get("/", UserController, index)
+    post("/post_result", UserController, post_result)
+end
+
+Endpoint() do
+    plug(Plug.Logger, level=:fatal)
+    plug(Plug.CSRFProtection)
+    plug(Router)
+end
 
 
 using Base.Test
 
-## Request fields - host, method, path, req_headers, scheme
-@test get == conn.method
+Bukdu.start(8082)
 
-## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
+resp1 = Requests.get(URI("http://localhost:8082/"))
+token = match(r"value=\"(.*)\"", text(resp1))[1]
 
-@test 418 == conn.status # :im_a_teapot
+@test 404 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), data=Dict("_csrf_token"=>token)))
+@test 200 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token)))
+@test 404 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token)))
 
-put_status(conn, 200)
-@test 200 == conn.status
-
-put_status(conn, :not_found)
-@test 404 == conn.status
-
-
-## Connection fields - assigns, halted, state
-
-@test !conn.halted
-
-halt(conn)
-@test conn.halted
-
-
-## Private fields - private
+sleep(0.1)
+Bukdu.stop()
