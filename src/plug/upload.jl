@@ -1,6 +1,5 @@
 # module Bukdu.Plug
 
-
 immutable Upload
     filename::String
     content_type::String
