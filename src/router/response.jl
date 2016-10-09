@@ -54,3 +54,7 @@ end
 function conn_bad_request(verb::Symbol, path::String, ex, stackframes::Vector{StackFrame})
     conn_error_response(:bad_request, verb, path, ex, stackframes) # 400
 end
+
+function conn_internal_server_error(verb::Symbol, path::String, ex, stackframes::Vector{StackFrame})
+    conn_error_response(:internal_server_error, verb, path, ex, stackframes) # 500
+end

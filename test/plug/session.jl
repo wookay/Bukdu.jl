@@ -74,10 +74,12 @@ token = match(r"hidden\" value=\"(?P<value>[^\"]*)\"", text(resp1))[:value]
 cookies = Vector{Cookie}(collect(values(resp_cookies)))
 @test_throws Plug.InvalidCSRFTokenError (Router)(post, "/create", Assoc(), cookies)
 
+Logger.set_level(:fatal)
 resp5 = Requests.post(URI("http://localhost:8082/create"), cookies=resp1.cookies, data=Dict("_csrf_token"=>""))
 @test 403 == statuscode(resp5)
 @test isempty(resp5.cookies)
 
+Logger.set_level(:info)
 resp2 = Requests.post(URI("http://localhost:8082/create"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token))
 @test 200 == statuscode(resp2)
 @test isempty(resp2.cookies)

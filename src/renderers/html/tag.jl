@@ -7,8 +7,16 @@ export uploaded_image, hidden_csrf_token
 
 import ....Bukdu
 import Bukdu.Octo: Changeset, change
-import Bukdu: Assoc, Plug, ApplicationController, Logger
+import Bukdu: Assoc, Plug, ApplicationController
+import Bukdu: Conn, ApplicationError
+import Bukdu: put_status
+import Bukdu: Logger
 import Base: select
+
+immutable FormBuildError <: ApplicationError
+    conn::Conn
+    message::String
+end
 
 typealias ChangesetOrVoid Union{Changeset, Void}
 
@@ -86,7 +94,9 @@ function form_for(block::Function, changeset::ChangesetOrVoid, args...; kw...)
         end
         action_name = Base.function_name(action)
         method = string(Base.function_name(verb))
-        throw(Bukdu.NoRouteError("not found a route for $action_name $method"))
+        conn = Conn()
+        put_status(conn, :internal_server_error)
+        throw(FormBuildError(conn, "not found a route for $action_name $method"))
     else
         return build_form(action)
     end

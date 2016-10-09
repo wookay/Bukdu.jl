@@ -21,8 +21,9 @@ end
 immutable Router <: ApplicationRouter
 end
 
-immutable NoRouteError
-    path
+immutable NoRouteError <: ApplicationError
+    conn::Conn
+    message::String
 end
 
 function reset{AR<:ApplicationRouter}(::Type{AR})

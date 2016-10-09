@@ -10,7 +10,8 @@ import Bukdu: Assoc, Conn
 import Bukdu: index, edit, new, show, create, update, delete
 import Bukdu: get, post, delete, patch, put
 import Bukdu: before, after
-import Bukdu: parse_cookie_string, conn_bad_request
+import Bukdu: put_status, parse_cookie_string, conn_bad_request
+import Bukdu: NoRouteError
 import Bukdu: Logger
 import URIParser: URI
 import HttpCommon: Cookie, parsequerystring
@@ -114,6 +115,7 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
+    conn = Conn()
     for route in routes
         if compare(route)
             if !isempty(route.host)
@@ -150,7 +152,6 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 if !isempty(param_data)
                     merge!(query_params, param_data)
                 end
-                conn = Conn()
                 ## Request fields - host, method, path, req_headers, scheme
                 conn.host = uri.host
                 conn.method = verb
@@ -187,7 +188,7 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                     Logger.error() do
                         error_route(verb, path, ex, stackframes)
                     end
-                    result = conn_bad_request(verb, path, ex, stackframes)
+                    result = conn_bad_request(verb, path, ex, stackframes) # 400
                 end
                 if method_exists(after, (C,))
                     after(controller)
@@ -195,11 +196,11 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 pop!(task_storage, task)
                 ## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
                 if isa(result, Conn)
-                    conn.status = result.status
+                    put_status(conn, result.status)
                     conn.resp_headers = result.resp_headers
                     conn.resp_body = result.resp_body
                 else
-                    conn.status = 200 # :ok
+                    put_status(conn, :ok) # 200
                     conn.resp_body = result
                 end
                 return conn
@@ -209,7 +210,7 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
     Logger.warn() do
         debug_verb(verb, path)
     end
-    throw(Bukdu.NoRouteError(path))
+    throw(NoRouteError(conn, path)) # not_found 404
 end
 
 end # module Bukdu.Routing

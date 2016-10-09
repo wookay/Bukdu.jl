@@ -10,7 +10,8 @@ import Bukdu: Routing
 import Bukdu: ApplicationEndpoint, ApplicationError, Endpoint, Router, Conn
 import Bukdu: before, after, post, plug
 import Bukdu: parse_cookie_string
-import Bukdu: conn_not_found, conn_application_error
+import Bukdu: conn_not_found, conn_application_error, conn_internal_server_error
+import Bukdu: NoRouteError
 import Bukdu: Logger
 
 include("form_data.jl")
@@ -44,15 +45,17 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
         end
     catch ex
         stackframes = stacktrace(catch_backtrace())
-        if isa(ex, ApplicationError)
-            conn = conn_application_error(method, req.resource, ex, stackframes)
+        if isa(ex, NoRouteError)
+            conn = conn_not_found(method, req.resource, ex, stackframes) # 404
         else
-            if !isa(ex, Bukdu.NoRouteError)
-                Logger.error() do
-                    Routing.error_route(method, req.resource, ex, stackframes)
-                end
+            Logger.error() do
+                Routing.error_route(method, req.resource, ex, stackframes)
             end
-            conn = conn_not_found(method, req.resource, ex, stackframes)
+            if isa(ex, ApplicationError)
+                conn = conn_application_error(method, req.resource, ex, stackframes)
+            else
+                conn = conn_internal_server_error(method, req.resource, ex, stackframes) # 500
+            end
         end
     end
     for (key,value) in conn.resp_headers
