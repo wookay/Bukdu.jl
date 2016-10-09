@@ -3,54 +3,50 @@
 immutable Session
 end
 
-const bukdu_cookie_id = "bukdu_cookie"
 
 module SessionData
 
-immutable Oven
-    cookies::Dict{String,String}
+import ....Bukdu: Conn
+import HttpCommon: Cookie
+
+immutable CookieOven
+    cookie::Cookie
     expires::DateTime
 end
 
-stores = Dict{String,Oven}()
+ovens = Dict{String,CookieOven}()
 
-function expired_cookies()::Vector{String}
-    t = Dates.now()
+function expired_cookies(t::DateTime)::Vector{String}
     keys = Vector{String}()
-    for (k,oven) in stores
+    for (k,oven) in ovens
         oven.expires < t && push!(keys, k)
     end
     keys
 end
 
-function delete_cookie(cook::String)
-    delete!(stores, cook)
-end
-
 # periodically delete expired cookies
-function delete_expired_cookies!()
-    for k in expired_cookies()
-        delete!(stores, k)
+function delete_expired_cookies!(t::DateTime)
+    for k in expired_cookies(t)
+        delete!(ovens, k)
     end
 end
 
 function has_cookie(cook::String)::Bool
-    haskey(stores, cook)
+    haskey(ovens, cook)
 end
 
-function get_cookie(cook::String)::Dict{String,String}
-    stores[cook].cookies
+function get_cookie(cook::String)::Cookie
+    ovens[cook].cookie
 end
 
-function store_cookies(cookies::Dict{String,String})::String
-    cook = string(Base.Random.uuid1())
-    stores[cook] = Oven(cookies, Dates.now() + Dates.Hour(1))
+function set_cookie(cookie::Cookie)::String
+    cook = cookie.value
+    ovens[cook] = CookieOven(cookie, Dates.now() + Dates.Hour(1))
     cook
 end
 
-end # module Bukdu.Plug.SessionData
-
-import ..Conn
-
-function put_session(conn::Conn, key::Symbol, value)
+function delete_cookie!(cook::String)
+    delete!(ovens, cook)
 end
+
+end # module Bukdu.Plug.SessionData

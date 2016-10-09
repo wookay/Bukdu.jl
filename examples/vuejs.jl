@@ -17,6 +17,6 @@ end
 
 Bukdu.start(8080)
 
-# wait()
+Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()

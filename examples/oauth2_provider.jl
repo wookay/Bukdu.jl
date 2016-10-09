@@ -12,7 +12,8 @@ authorize_uri(P::Type{CustomProvider}) = "http://localhost:8086$(authorize_path(
 access_token_uri(P::Type{CustomProvider}) = "http://localhost:8086$(access_token_path(P))"
 
 function json_error(error, error_description)
-    Conn(400, Dict("Content-Type"=>"application/json"), JSON.json(Dict(
+    # 400
+    Conn(:bad_request, Dict("Content-Type"=>"application/json"), JSON.json(Dict(
         :error => error,
         :error_description => string(error_description)
     )))
@@ -26,6 +27,7 @@ function get_authorize(c::OAuthController{CustomProvider})
             "<h3>Authorize application</h3>",
             form_for(nothing, action=post_authorize, method=post) do f
                 string(
+                    hidden_csrf_token(c),
                     hidden_input(f, :redirect_uri, value=params[:redirect_uri]),
                     hidden_input(f, :state, value=params[:state]),
                     submit("Authorize application")
@@ -80,6 +82,7 @@ end
 
 Endpoint() do
     plug(Plug.Logger)
+    plug(Plug.CSRFProtection)
     plug(Plug.OAuth2.Provider, CustomProvider)
 end
 
@@ -98,6 +101,6 @@ Bukdu.start(8086) #, ssl=(cert,key))
 
 Logger.set_path_padding(60)
 
-wait()
+Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()

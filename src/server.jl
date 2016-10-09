@@ -1,7 +1,7 @@
 # module Bukdu
 
 include("server/handler.jl")
-
+include("server/error.jl")
 
 module Farm
 

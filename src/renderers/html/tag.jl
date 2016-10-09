@@ -3,6 +3,7 @@
 module Tag
 
 export form_for, label, text_input, select, checkbox, radio_button, textarea, file_input, hidden_input, submit
+export uploaded_image, hidden_csrf_token
 
 import ....Bukdu
 import Bukdu.Octo: Changeset, change

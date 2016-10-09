@@ -42,18 +42,10 @@ function (::Type{AR}){AR<:ApplicationRouter}(context::Function)
     nothing
 end
 
-function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, args...; kw...)
-    if !isempty(args) || !isempty(kw)
-        param_data = Assoc(map(vcat(args..., kw...)) do kv
-            (k,v) = kv
-            (k, escape(v))
-        end)
-    else
-        param_data = Assoc()
-    end
-    headers = Assoc()
+function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, headers=Assoc(), cookies=Vector{Cookie}(); kw...)
+    param_data = Assoc([(k, escape(v)) for (k,v) in kw])
     routes = haskey(Routing.router_routes, AR) ? Routing.router_routes[AR] : Vector{Route}()
-    Routing.request(Nullable{Type{Endpoint}}(), routes, Base.function_name(verb), path, headers, param_data) do route
+    Routing.request(Nullable{Type{Endpoint}}(), routes, Base.function_name(verb), path, headers, cookies, param_data) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
 end

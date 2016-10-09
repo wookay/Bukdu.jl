@@ -64,6 +64,11 @@ Base.Test.@testset "router.jl" begin
 end
 
 workspace()
+Base.Test.@testset "plug/session.jl" begin
+    include("plug/session.jl")
+end
+
+workspace()
 Base.Test.@testset "plug/static.jl" begin
     include("plug/static.jl")
 end

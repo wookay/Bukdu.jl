@@ -10,10 +10,10 @@ import Bukdu: Assoc, Conn
 import Bukdu: index, edit, new, show, create, update, delete
 import Bukdu: get, post, delete, patch, put
 import Bukdu: before, after
-import Bukdu: conn_bad_request
+import Bukdu: parse_cookie_string, conn_bad_request
 import Bukdu: Logger
 import URIParser: URI
-import HttpCommon: parsequerystring
+import HttpCommon: Cookie, parsequerystring
 
 const SLASH = '/'
 const COLON = ':'
@@ -110,7 +110,7 @@ function error_route(verb::Symbol, path::String, ex, callstack)
         callstack)
 end
 
-function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, param_data::Assoc)::Conn
+function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
@@ -158,10 +158,7 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 conn.req_headers = headers
                 conn.scheme = uri.scheme
                 ## Fetchable fields - req_cookies, query_params, params
-                if haskey(headers, :Cookie)
-                    parse_cookie_string(s) = Dict(map(x->split(x, "="), split(s, "; ")))
-                    conn.req_cookies = Dict{String,String}(parse_cookie_string(headers[:Cookie]))
-                end
+                conn.req_cookies = cookies
                 conn.query_params = query_params
                 conn.params = params
                 ## Connection fields - assigns, halted, state

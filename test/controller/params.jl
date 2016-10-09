@@ -29,5 +29,5 @@ conn = (Router)(get, "/1?q=Julia")
 @test "1" == conn.params["page"]
 @test "1" == conn.params[:page]
 
-conn = (Router)(post, "/posted", ("user[name]"=>"jack"), q="Julia")
-@test Assoc([(Symbol("user[name]"),"jack"),(:q,"Julia")]) == conn.query_params
+conn = (Router)(post, "/posted", user_name="jack", q="Julia")
+@test Assoc([(:user_name,"jack"),(:q,"Julia")]) == conn.query_params

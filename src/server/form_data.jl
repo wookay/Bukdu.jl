@@ -17,7 +17,7 @@ function empty_carriage_return(s::String)
     replace(s, '\r', "")
 end
 
-function empty_carriage_return(data::Vector{UInt8}, isfile::Bool)
+function empty_carriage_return(data::Vector{UInt8}, isfile::Bool)::Vector{UInt8}
     len = length(data)
     if len > 2
         if isfile
@@ -30,7 +30,7 @@ function empty_carriage_return(data::Vector{UInt8}, isfile::Bool)
     end
 end
 
-function readData(s::FormScanner, len::Int, boundary::String, lf::UInt8, isfile::Bool)
+function readData(s::FormScanner, len::Int, boundary::String, lf::UInt8, isfile::Bool)::Vector{UInt8}
     s.offset = s.pos+1
     offset_begin = s.offset
     len_boundary = length(boundary)
@@ -74,7 +74,7 @@ function scan(s::FormScanner)::Assoc
                 end
             else
                 if isa(content_type, Void)
-                    content_type = chomp(String(s.data[s.offset+length("Content-Type: ")+1:s.pos]))
+                    content_type = String(chomp(String(s.data[s.offset+length("Content-Type: ")+1:s.pos])))
                 else
                     upload = Plug.Upload(filename, content_type, readData(s, len, s.boundary, lf, true))
                     Plug.UploadData.save(upload)

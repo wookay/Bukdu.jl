@@ -127,6 +127,6 @@ cert = MbedTLS.crt_parse_file(rel("keys/server.crt"))
 key = MbedTLS.parse_keyfile(rel("keys/server.key"))
 Bukdu.start(8085, ssl=(cert,key))
 
-wait()
+Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
