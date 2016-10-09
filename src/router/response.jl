@@ -27,7 +27,7 @@ end
 function conn_error_response(code::Int, verb::Symbol, path::String, ex, stackframes::Vector{StackFrame})
     with_color(sym, text) = "<strong>$text</strong>"
     stacks = Logger.inner_stackframes(stackframes, with_color)
-    status = uppercase(String(first(keys(filter((k,v)->v==code, statuses)))))
+    status = uppercase(string(first(keys(filter((k,v)->v==code, statuses)))))
     conn = render(Markdown/ErrorLayout, """
 ### 🌌  $(uppercase(string(verb))) $path
 

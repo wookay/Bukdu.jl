@@ -11,7 +11,7 @@ end
 
 immutable InvalidCSRFTokenError <: ApplicationError
     conn::Conn
-    message
+    message::String
 end
 
 const unprotected_methods = [:head, :get, :options]
@@ -23,7 +23,7 @@ function check_csrf_token(conn::Conn)
         if Plug.SessionData.has_cookie(token)
             cookie = Plug.SessionData.get_cookie(token)
             if cookie.value == token
-                # delete_csrf_token(conn, token)
+                # delete_csrf_token(conn)
                 Plug.SessionData.hourly_cleaning_expired_cookies(Dates.now())
                 return true
             end
@@ -52,7 +52,7 @@ function get_csrf_token(conn::Conn)::String
     conn.assigns[:csrf_token]
 end
 
-function delete_csrf_token(conn::Conn, token::String)
+function delete_csrf_token(conn::Conn)
     delete!(conn.assigns, :csrf_token)
 end
 
