@@ -32,9 +32,9 @@ Bukdu.start(8082)
 resp1 = Requests.get(URI("http://localhost:8082/"))
 token = match(r"value=\"(.*)\"", text(resp1))[1]
 
-@test 404 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), data=Dict("_csrf_token"=>token)))
-@test 200 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token)))
-@test 404 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token)))
+@test 403 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), data=Dict("_csrf_token"=>"")))
+@test 200 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), data=Dict("_csrf_token"=>token)))
+@test 200 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), data=Dict("_csrf_token"=>token)))
 
 sleep(0.1)
 Bukdu.stop()

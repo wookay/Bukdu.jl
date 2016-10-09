@@ -162,7 +162,7 @@ conn = (Router)(post, "/post_result", user_undefined="undefined")
 @test Changeset(user,Assoc()) == conn.resp_body
 
 form = change(default(User), name="jack")
-@test_throws Bukdu.NoRouteError form_for(()->"", form, action=post_result)
+@test_throws Tag.FormBuildError form_for(()->"", form, action=post_result)
 @test """
 <form method="post" action="/post_result" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, method=post, action=post_result)

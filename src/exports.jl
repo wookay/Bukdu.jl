@@ -9,6 +9,7 @@ export ApplicationEndpoint
 export ApplicationController
 export ApplicationLayout
 export ApplicationView
+export ApplicationError
 
 # in octo.jl
 export Assoc

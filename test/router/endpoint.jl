@@ -1,4 +1,5 @@
 importall Bukdu
+import HttpCommon: Cookie
 using Base.Test
 
 Router() do
@@ -149,3 +150,6 @@ end
 
 conn = (Endpoint)("/")
 @test 200 == conn.status
+
+conn = (Endpoint)("/", Assoc(), [Cookie("name","value",Dict{String,String}())])
+@test !isempty(conn.req_cookies)

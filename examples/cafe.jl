@@ -101,12 +101,12 @@ Endpoint() do
     plug(Plug.Logger)
     plug(Plug.Static, at="/", from=normpath(dirname(@__FILE__), "public"), only=["css"])
     plug(Plug.Upload, at="/upload", tmp_dir=normpath(dirname(@__FILE__), "tmp"))
-#    plug(Plug.CSRFProtection)
+    plug(Plug.CSRFProtection)
     plug(Router)
 end
 
 Bukdu.start(8080)
 
-wait() # comment for Juno
+Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()

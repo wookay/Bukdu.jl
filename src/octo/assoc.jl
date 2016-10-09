@@ -139,3 +139,7 @@ function Base.show(stream::IO, mime::MIME"text/html", assoc::Assoc)
         write(stream, "\n")
     end
 end
+
+function Base.copy(assoc::Assoc)
+    Assoc(copy(assoc.vector))
+end

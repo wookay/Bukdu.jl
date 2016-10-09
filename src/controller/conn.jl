@@ -2,9 +2,13 @@
 
 include("status.jl")
 
+const bukdu_cookie_key = "_bukdu_cookie_key"
+
 immutable Pipeline
     block::Function
 end
+
+import HttpCommon: Cookie
 
 type Conn
     ## Request fields
@@ -15,14 +19,14 @@ type Conn
     scheme::Symbol
 
     ## Fetchable fields
-    req_cookies::Dict{String,String}
+    req_cookies::Vector{Cookie}
     query_params::Assoc
     params::Assoc
 
     ## Response fields
     resp_body::Any
     resp_charset::String
-    resp_cookies::Dict{String,String}
+    resp_cookies::Vector{Cookie}
     resp_headers::Dict{String,String}
     status::Int    # 418 :im_a_teapot
     before_send::Function
@@ -54,8 +58,8 @@ type Conn
     function Conn(code::Int, resp_headers::Dict{String,String}, resp_body::Any, params::Assoc, query_params::Assoc, private::Assoc, assigns::Assoc)
         new(
             "", :get, "", Assoc(), :http,   # host, method, path, req_headers, scheme,
-            Dict{String,String}(), query_params, params, # req_cookies, query_params, params,
-            resp_body, "utf-8", Dict{String,String}(), resp_headers, code, identity, # resp_body, resp_charset, resp_cookies, resp_headers, status, before_send,
+            Vector{Cookie}(), query_params, params, # req_cookies, query_params, params,
+            resp_body, "utf-8", Vector{Cookie}(), resp_headers, code, identity, # resp_body, resp_charset, resp_cookies, resp_headers, status, before_send,
             assigns, false, :unset,                      # assigns, halted, state,
             private                                      # private
         )
@@ -86,8 +90,8 @@ end
 
 ## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
 
-function put_resp_cookie(conn::Conn, key::String, value::String)
-    conn.resp_cookies[key] = value
+function put_resp_cookie(conn::Conn, cookie::Cookie)
+    push!(conn.resp_cookies, cookie)
 end
 
 function put_resp_content_type(conn::Conn, content_type::String)
@@ -140,4 +144,12 @@ end
 
 function plug(conn::Conn, func::Function, args...)
     func(conn, args...)
+end
+
+function parse_cookie_string(s)::Vector{Cookie}
+    pairs = map(x->split(x, "="), split(s, "; "))
+    map(pairs) do pair
+        (name, value) = pair
+        Cookie(name, value, Dict{String,String}())
+    end
 end

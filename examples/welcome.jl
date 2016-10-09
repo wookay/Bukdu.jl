@@ -16,6 +16,6 @@ Endpoint() do
     plug(Router)
 end
 
-# wait()
+Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
