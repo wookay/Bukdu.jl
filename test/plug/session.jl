@@ -21,7 +21,7 @@ t = Dates.now() + Dates.Hour(1)
 expired = Plug.SessionData.expired_cookies(t)
 @test !isempty(expired)
 
-Plug.SessionData.delete_expired_cookies!(t)
+Plug.SessionData.delete_expired_cookies(t)
 
 @test isempty(Plug.SessionData.ovens)
 
@@ -88,3 +88,7 @@ resp3 = Requests.post(URI("http://localhost:8082/create"), cookies=resp1.cookies
 
 sleep(0.1)
 Bukdu.stop()
+
+@test !isempty(Plug.SessionData.ovens)
+Plug.SessionData.hourly_cleaning_expired_cookies(Dates.now() + Dates.Hour(2))
+@test isempty(Plug.SessionData.ovens)

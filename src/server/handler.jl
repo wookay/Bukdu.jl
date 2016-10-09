@@ -10,7 +10,7 @@ import Bukdu: Routing
 import Bukdu: ApplicationEndpoint, ApplicationError, Endpoint, Router, Conn
 import Bukdu: before, after, post, plug
 import Bukdu: parse_cookie_string
-import Bukdu: conn_no_content, conn_not_found, conn_application_error
+import Bukdu: conn_not_found, conn_application_error
 import Bukdu: Logger
 
 include("form_data.jl")

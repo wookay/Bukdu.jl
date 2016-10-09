@@ -22,7 +22,11 @@ function check_csrf_token(conn::Conn)
         token = conn.query_params[:_csrf_token]
         if Plug.SessionData.has_cookie(token)
             cookie = Plug.SessionData.get_cookie(token)
-            cookie.value == token && return true
+            if cookie.value == token
+                # delete_csrf_token(conn, token)
+                Plug.SessionData.hourly_cleaning_expired_cookies(Dates.now())
+                return true
+            end
         end
     end
     put_status(conn, :forbidden)
@@ -48,7 +52,7 @@ function get_csrf_token(conn::Conn)::String
     conn.assigns[:csrf_token]
 end
 
-function delete_csrf_token(conn::Conn)
+function delete_csrf_token(conn::Conn, token::String)
     delete!(conn.assigns, :csrf_token)
 end
 

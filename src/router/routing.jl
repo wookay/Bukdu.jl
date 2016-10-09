@@ -162,9 +162,9 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 conn.query_params = query_params
                 conn.params = params
                 ## Connection fields - assigns, halted, state
-                conn.assigns = route.assigns
+                conn.assigns = copy(route.assigns)
                 ## Private fields - private
-                conn.private = route.private
+                conn.private = copy(route.private)
                 conn.private[:action] = route.action
                 conn.private[:controller] = controller
                 conn.private[:endpoint] = isnull(endpoint) ? nothing : endpoint.value
