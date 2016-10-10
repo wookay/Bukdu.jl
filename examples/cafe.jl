@@ -107,6 +107,7 @@ end
 
 Bukdu.start(8080)
 
+(Endpoint)("/")
 Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
