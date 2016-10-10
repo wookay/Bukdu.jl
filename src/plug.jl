@@ -9,12 +9,12 @@ module Plug
 
 import ..plug
 
-include("plug/logger.jl")
 include("plug/static.jl")
 include("plug/upload.jl")
 include("plug/session.jl")
 include("plug/router.jl")
 include("plug/csrf_protection.jl")
 include("plug/oauth2.jl")
+include("plug/logger.jl")
 
 end # module Bukdu.Plug

@@ -1,4 +1,5 @@
 importall Bukdu
+import Bukdu: NoRouteError
 
 type WelcomeController <: ApplicationController
 end
@@ -33,7 +34,7 @@ conn = (Endpoint)("/js/vue.min.js")
 @test "application/javascript" == conn.resp_headers["Content-Type"]
 @test 76807 == sizeof(conn.resp_body)
 
-@test_throws Bukdu.NoRouteError (Endpoint)("/js/not_found")
+@test_throws NoRouteError (Endpoint)("/js/not_found")
 
 @test [1] == loaded
 

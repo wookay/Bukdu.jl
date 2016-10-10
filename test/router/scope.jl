@@ -1,5 +1,5 @@
 importall Bukdu
-
+import Bukdu: NoRouteError
 
 # from phoenix/test/phoenix/router/scope_test.exs
 
@@ -158,8 +158,8 @@ end
     conn = (Router)(get, "http://baz.pang.com/host/users/1")
     @test conn.status == 200
 
-    @test_throws Bukdu.NoRouteError (Router)(get, "http://foobar.com.br/host/users/1")
-    @test_throws Bukdu.NoRouteError (Router)(get, "http://ba.pang.com/host/users/1")
+    @test_throws NoRouteError (Router)(get, "http://foobar.com.br/host/users/1")
+    @test_throws NoRouteError (Router)(get, "http://ba.pang.com/host/users/1")
 end
 
 @testset "private data in scopes" begin
