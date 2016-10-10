@@ -6,7 +6,7 @@ import Bukdu: put_status, get_req_cookie, put_resp_cookie
 import Bukdu: bukdu_cookie_key, bukdu_secret_key
 import Bukdu.RouterScope: pipe_through
 import HttpCommon: Cookie
-import MbedTLS: CIPHER_AES, encrypt, decrypt
+import MbedTLS: MbedException, CIPHER_AES, encrypt, decrypt
 
 immutable CSRFProtection
 end
@@ -25,9 +25,15 @@ function check_csrf_token(conn::Conn)::Bool # throw InvalidCSRFTokenError
         cookie = get_req_cookie(conn, bukdu_cookie_key)
         if isa(cookie, Cookie)
             cipher_text = hex2bytes(cookie.value)
-            plain = String(decrypt(CIPHER_AES, bukdu_secret_key, cipher_text))
-            if token == plain
-                return true
+            try
+                plain = String(decrypt(CIPHER_AES, bukdu_secret_key, cipher_text))
+                if token == plain
+                    return true
+                end
+            catch ex
+                if !isa(ex, MbedException)
+                    throw(ex)
+                end
             end
         end
     end

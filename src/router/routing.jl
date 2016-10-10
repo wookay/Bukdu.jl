@@ -13,6 +13,7 @@ import Bukdu: before, after
 import Bukdu: put_status, parse_cookie_string, conn_bad_request
 import Bukdu: NoRouteError
 import Bukdu: Logger
+import Bukdu.Logger: trail, debug_verb
 import URIParser: URI
 import HttpCommon: Cookie, parsequerystring
 
@@ -85,18 +86,6 @@ function add_route(resource::Resource)
             end
         end
     end
-end
-
-function trail(s::String, n)
-    length(s) > n > 2 ? string(s[1:n-2], "..") : s
-end
-
-function debug_verb(verb::Symbol, path)
-    verb = lpad(uppercase(string(verb)), 4)
-    path_pad = Logger.settings[:path_padding]
-    trailed_path = trail(path, path_pad)
-    rpaded_path = Logger.with_color(:bold, rpad(trailed_path, path_pad))
-    (verb, rpaded_path)
 end
 
 function debug_route{AC<:ApplicationController}(route::Route, verb::Symbol, path::String, ::Type{AC})
@@ -207,10 +196,11 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
             end
         end
     end
+    ex = NoRouteError(conn, string("not found ", path)) # 404
     Logger.warn() do
-        debug_verb(verb, path)
+        debug_verb(verb, path, ex)
     end
-    throw(NoRouteError(conn, path)) # not_found 404
+    throw(ex)
 end
 
 end # module Bukdu.Routing

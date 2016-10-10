@@ -130,4 +130,20 @@ function with_color(color::Symbol, text)::String
     end
 end
 
+function trail(s::String, n)::String
+    length(s) > n > 2 ? string(s[1:n-2], "..") : s
+end
+
+function debug_verb(verb::Symbol, path::String)::Tuple
+    verb = lpad(uppercase(string(verb)), 4)
+    path_pad = settings[:path_padding]
+    trailed_path = trail(path, path_pad)
+    rpaded_path = with_color(:bold, rpad(trailed_path, path_pad))
+    (verb, rpaded_path)
+end
+
+function debug_verb(verb::Symbol, path::String, ex)::Tuple
+    tuple(debug_verb(verb, path)..., ex)
+end
+
 end # module Bukdu.Logger

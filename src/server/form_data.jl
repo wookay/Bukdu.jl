@@ -91,12 +91,14 @@ function scan(s::FormScanner)::Assoc
     assoc
 end
 
-function post_form_data(req::Request)::Assoc
-    if haskey(req.headers, "Content-Type") && startswith(req.headers["Content-Type"], "multipart/form-data")
-        boundary = req.headers["Content-Type"][length("multipart/form-data; boundary=")+1:end]
-        scanner = FormScanner(req.data, string("--",boundary))
-        scan(scanner)
-    else
-        Assoc([(k, empty_carriage_return(v)) for (k,v) in parsequerystring(unescape_form(String(req.data)))])
+function form_data_for_post(headers::Headers, data::Vector{UInt8})::Assoc
+    if haskey(headers, "Content-Type")
+        content_type = headers["Content-Type"]
+        if startswith(content_type, "multipart/form-data")
+            boundary = content_type[length("multipart/form-data; boundary=")+1:end]
+            scanner = FormScanner(data, string("--",boundary))
+            return scan(scanner)
+        end
     end
+    Assoc([(k, empty_carriage_return(v)) for (k,v) in parsequerystring(unescape_form(String(data)))])
 end
