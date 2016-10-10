@@ -17,7 +17,7 @@ include("content_encoding.jl")
 include("form_data.jl")
 
 const commit_short = string(LibGit2.revparseid(LibGit2.GitRepo(Pkg.dir("Bukdu")), "HEAD"))[1:7]
-const info = "Bukdu (commit $commit_short with Julia $VERSION"
+const info = "Bukdu (commit $commit_short) with Julia $VERSION"
 
 function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Response)::Response
     if AE==Endpoint && !haskey(Routing.endpoint_routes, AE)
