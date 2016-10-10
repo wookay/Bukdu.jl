@@ -10,7 +10,7 @@ function FileResponse(filename)
     if isfile(filename)
         s = open(Base.read, filename)
         (_, ext) = splitext(filename)
-        mime = length(ext)>1 && haskey(mimetypes,ext[2:end]) ? mimetypes[ext[2:end]] : "application/octet-stream"
+        mime = length(ext)>1 && haskey(mimetypes, ext[2:end]) ? mimetypes[ext[2:end]] : "application/octet-stream"
         Response(200, Dict{AbstractString,AbstractString}([("Content-Type",mime)]), s)
     else
         Response(404, "Not Found - file $filename could not be found")

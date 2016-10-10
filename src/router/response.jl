@@ -31,7 +31,7 @@ function conn_error_response(code::Int, verb::Symbol, path::String, ex, stackfra
     conn = render(Markdown/ErrorLayout, """
 ### 🌌  $(uppercase(string(verb))) $path
 
-## $status - $code
+## $status | $code
 ### $ex
 """, status, stacks)
     put_status(conn, code)

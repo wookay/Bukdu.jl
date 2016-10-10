@@ -34,27 +34,27 @@ function typed_assoc(T::Type, changes::Assoc)::Assoc
     typ_fieldnames = fieldnames(T)
     Assoc(
         map(filter(kv -> first(kv) in typ_fieldnames, changes)) do kv
-            (name,v) = kv
+            (name, value) = kv
             if name in typ_fieldnames
                 fieldT = fieldtype(T, name)
-                if isa(v, fieldT)
-                    (name, v)
+                if isa(value, fieldT)
+                    (name, value)
                 else
-                    (name, parse(fieldT, v))
+                    (name, parse(fieldT, value))
                 end
             end
         end)
 end
 
-function cutout_brackets(typ::Type, param::Tuple{Symbol,Any})::Tuple{Symbol,Any}
-    t = lowercase(string(typ))
-    (key,value) = param
-    k = string(key)
-    if endswith(k, "]")
-        k = first(split(k, "["))
+function cutout_brackets(T::Type, param::Tuple{Symbol,Any})::Tuple{Symbol,Any}
+    typ = lowercase(string(T))
+    (key, value) = param
+    name = string(key)
+    if endswith(name, "]")
+        name = first(split(name, "["))
     end
-    if startswith(k, "$(t)_")
-        key = Symbol(k[length("$(t)_")+1:end])
+    if startswith(name, "$(typ)_")
+        key = Symbol(name[length("$(typ)_")+1:end])
     end
     (key, value)
 end
@@ -77,7 +77,7 @@ function change(typ::Type; kw...)::Changeset
     change(default(typ); kw...)
 end
 
-function change(typ::Void; kw...)::Changeset
+function change(typ::Void; kw...)::Changeset # throw ArgumentError
     throw(ArgumentError("not allowd for Void model"))
 end
 
@@ -108,7 +108,7 @@ default(T::Type, ::Type{Vector{String}}) = Vector{String}()
 
 function default(T::Type)::T
     # broadcast #
-    # fields = fieldtype.(T,fieldnames(T))
+    # fields = fieldtype.(T, fieldnames(T))
     # T(default.(T, fields)...)
     fields = map(x->fieldtype(T, x), fieldnames(T))
     T(map(x-> default(T, x), fields)...)

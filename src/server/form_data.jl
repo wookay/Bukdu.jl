@@ -3,7 +3,8 @@
 import ..Assoc
 import ..Plug
 import ..Logger
-import HttpCommon: Request
+import HttpCommon: Request, parsequerystring
+import URIParser: unescape_form
 
 type FormScanner
     data::Vector{UInt8}
@@ -21,9 +22,9 @@ function empty_carriage_return(data::Vector{UInt8}, isfile::Bool)::Vector{UInt8}
     len = length(data)
     if len > 2
         if isfile
-            [0x2d,0x2d]==data[end-1:end] ? data[1:end-5] : data[1:end-2]
+            [0x2d,0x2d] == data[end-1:end] ? data[1:end-5] : data[1:end-2]
         else
-            [x for x in ([0x0d,0x0a]==data[1:2] ? data[3:end-4] : data[2:end-2]) if x!=0x0d]
+            [x for x in ([0x0d,0x0a] == data[1:2] ? data[3:end-4] : data[2:end-2]) if x != 0x0d]
         end
     else
         return Vector{UInt8}()

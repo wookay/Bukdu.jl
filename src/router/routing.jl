@@ -96,7 +96,7 @@ function debug_verb(verb::Symbol, path)
     path_pad = Logger.settings[:path_padding]
     trailed_path = trail(path, path_pad)
     rpaded_path = Logger.with_color(:bold, rpad(trailed_path, path_pad))
-    verb, rpaded_path
+    (verb, rpaded_path)
 end
 
 function debug_route{AC<:ApplicationController}(route::Route, verb::Symbol, path::String, ::Type{AC})
@@ -111,7 +111,7 @@ function error_route(verb::Symbol, path::String, ex, callstack)
         callstack)
 end
 
-function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn
+function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn # throw NoRouteError
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
@@ -130,7 +130,7 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
             if :match == route.kind
                 if length_reqsegs == length(rousegs)
                     matched = all(enumerate(rousegs)) do idx_rouseg
-                        (idx,rouseg) = idx_rouseg
+                        (idx, rouseg) = idx_rouseg
                         startswith(rouseg, COLON) ? true : reqsegs[idx]==rouseg
                     end
                 end
@@ -139,12 +139,12 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
             end
             if matched
                 function startswithcolon(idx_rouseg)
-                    (idx,rouseg) = idx_rouseg
+                    (idx, rouseg) = idx_rouseg
                     startswith(rouseg, COLON)
                 end
                 params = Assoc(map(filter(startswithcolon, enumerate(rousegs))) do idx_rouseg
-                    (idx,rouseg) = idx_rouseg
-                    (Symbol(replace(rouseg, r"^:", "")),String(reqsegs[idx]))
+                    (idx, rouseg) = idx_rouseg
+                    (Symbol(replace(rouseg, r"^:", "")), String(reqsegs[idx]))
                 end)
                 C = route.controller
                 controller = C()

@@ -11,7 +11,7 @@ for verb in HTTP_VERBS
         Routing.match($verb, path, AC, action, Dict(kw))
 end
 
-function getindex{AC<:ApplicationController}(C::AC, sym::Symbol)
+function getindex{AC<:ApplicationController}(C::AC, sym::Symbol) # throw ErrorException, KeyError
     task = current_task()
     if haskey(Routing.task_storage, task)
         conn = Routing.task_storage[task]
@@ -41,19 +41,21 @@ end
 
 module Controller
 
-import ..Conn
+import ..ApplicationError, ..Conn
 import ..get_req_header
 
-immutable NotAcceptableError
+immutable NotAcceptableError <: ApplicationError
+    conn::Conn
     message::String
 end
 
-function accepts(conn::Conn, accepted::Vector{String})
+function accepts(conn::Conn, accepted::Vector{String}) # throw NotAcceptableError
     if haskey(conn.query_params, :_format)
         if format in accepted
             put_format(conn, format)
         else
-            throw(NotAcceptableError("unknown format $format, expected one of $accepted"))
+            put_status(conn, :not_acceptable) # 406
+            throw(NotAcceptableError(conn, "unknown format $format, expected one of $accepted"))
         end
     else
         if haskey(conn.req_headers, "Accept")
