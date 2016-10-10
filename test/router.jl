@@ -1,4 +1,5 @@
 importall Bukdu
+import Bukdu: NoRouteError
 
 type PageController <: ApplicationController
 end
@@ -46,11 +47,11 @@ conn = (Router)(get, "/pages/1/users/2")
 conn = (Router)(delete, "/pages/1")
 @test conn.status == 200
 
-@test_throws Bukdu.NoRouteError (Router)(get, "/unknown/1")
+@test_throws NoRouteError (Router)(get, "/unknown/1")
 
 reset(Router)
 
-@test_throws Bukdu.NoRouteError (Router)(get, "/pages")
+@test_throws NoRouteError (Router)(get, "/pages")
 
 Router() do
     resources("/pages", PageController, except=[delete], singleton=true)
@@ -60,9 +61,9 @@ end
 conn = (Router)(get, "/pages")
 @test conn.status == 200
 
-@test_throws Bukdu.NoRouteError (Router)(delete, "/pages/1")
+@test_throws NoRouteError (Router)(delete, "/pages/1")
 
 conn = (Router)(get, "/users")
 @test conn.status == 200
 
-@test_throws Bukdu.NoRouteError (Router)(delete, "/users/1")
+@test_throws NoRouteError (Router)(delete, "/users/1")

@@ -24,10 +24,10 @@ const default_param_key = "id"
 const controller_actions = [index, edit, new, show, create, update, delete]
 
 function build{AC<:ApplicationController}(path::String, ::Type{AC}, options::Dict)
-    path = RouterScope.validate_path(path)
+    path  = RouterScope.validate_path(path)
     alias = Keyword.get(options, :alias, "")
     param = Keyword.get(options, :param, default_param_key)
-    name = Keyword.get(options, :name, Naming.resource_name(AC, "Controller"))
+    name  = Keyword.get(options, :name, Naming.resource_name(AC, "Controller"))
     as      = Keyword.get(options, :as, name)
     private = Keyword.get(options, :private, Assoc())
     assigns = Keyword.get(options, :assigns, Assoc())

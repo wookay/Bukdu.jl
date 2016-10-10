@@ -2,36 +2,6 @@ importall Bukdu
 import HttpCommon: Cookie
 import Requests: URI, text, statuscode
 
-name = Bukdu.bukdu_cookie_key
-value = "blahblah"
-attrs = Dict()
-cookie = Cookie(name, value, attrs)
-
-
-using Base.Test
-@test isempty(Plug.SessionData.ovens)
-
-cook = Plug.SessionData.set_cookie(cookie)
-@test cook == "blahblah"
-
-@test Plug.SessionData.has_cookie(cook)
-@test cookie == Plug.SessionData.get_cookie(cook)
-
-t = Dates.now() + Dates.Hour(1)
-expired = Plug.SessionData.expired_cookies(t)
-@test !isempty(expired)
-
-Plug.SessionData.delete_expired_cookies(t)
-
-@test isempty(Plug.SessionData.ovens)
-
-
-conn = Conn()
-@test isempty(conn.resp_cookies)
-Plug.SessionData.delete_cookie!(cookie.value)
-@test isempty(conn.resp_cookies)
-
-
 type CookieController <: ApplicationController
 end
 
@@ -57,13 +27,15 @@ Endpoint() do
     plug(Router)
 end
 
-Bukdu.start(8082)
 
+using Base.Test
+
+Bukdu.start(8082)
 
 resp1 = Requests.get(URI("http://localhost:8082/"))
 
 resp_cookies = resp1.cookies
-@test isa(resp_cookies, Dict)
+@test !isempty(resp_cookies)
 key = first(keys(resp_cookies))
 cookie = resp_cookies[key]
 @test cookie.name == key
@@ -90,7 +62,3 @@ resp3 = Requests.post(URI("http://localhost:8082/create"), cookies=resp1.cookies
 
 sleep(0.1)
 Bukdu.stop()
-
-@test !isempty(Plug.SessionData.ovens)
-Plug.SessionData.hourly_cleaning_expired_cookies(Dates.now() + Dates.Hour(2))
-@test isempty(Plug.SessionData.ovens)

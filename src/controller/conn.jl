@@ -3,6 +3,7 @@
 include("status.jl")
 
 const bukdu_cookie_key = "_bukdu_cookie_key"
+const bukdu_secret_key = rand(UInt8, 32)
 
 immutable Pipeline
     block::Function
@@ -86,6 +87,12 @@ end
 
 ## Fetchable fields - req_cookies, query_params, params
 
+function get_req_cookie(conn::Conn, name::String)::Union{Cookie,Void}
+    for cookie in conn.req_cookies
+        cookie.name == name && return cookie
+    end
+    return nothing
+end
 
 
 ## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
