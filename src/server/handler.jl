@@ -2,9 +2,8 @@
 
 module Server
 
-import HttpCommon: Request, Response, Cookie, parsequerystring
+import HttpCommon: Request, Response, Cookie
 import HttpServer: setcookie!
-import URIParser: unescape_form
 import ....Bukdu
 import Bukdu: Routing
 import Bukdu: ApplicationEndpoint, ApplicationError, Endpoint, Router, Conn
@@ -19,7 +18,7 @@ include("form_data.jl")
 const commit_short = string(LibGit2.revparseid(LibGit2.GitRepo(Pkg.dir("Bukdu")), "HEAD"))[1:7]
 const info = "Bukdu (commit $commit_short with Julia $VERSION"
 
-function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Response)
+function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Response)::Response
     if AE==Endpoint && !haskey(Routing.endpoint_routes, AE)
         Endpoint() do
             plug(Router)
@@ -58,7 +57,7 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
             end
         end
     end
-    for (key,value) in conn.resp_headers
+    for (key, value) in conn.resp_headers
         res.headers[key] = value
     end
     res.headers["Server"] = Server.info
@@ -77,7 +76,7 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
             res.data = string(conn.resp_body)
         end
     end
-    if method_exists(after, (Request,Response))
+    if method_exists(after, (Request, Response))
         after(req, res)
     end
     res

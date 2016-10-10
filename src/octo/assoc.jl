@@ -18,7 +18,7 @@ type Assoc
     function Assoc(tup::Tuple)
         new([(k,v) for (k,v) in tup])
     end
-    function Assoc(vector)
+    function Assoc(vector::Vector)
         new(vector)
     end
     function Assoc(assoc::Assoc)
@@ -26,7 +26,7 @@ type Assoc
     end
 end
 
-function Base.getindex(assoc::Assoc, key::Symbol)
+function Base.getindex(assoc::Assoc, key::Symbol) # throw KeyError
     for (k,v) in assoc.vector
         k==key && return v
     end

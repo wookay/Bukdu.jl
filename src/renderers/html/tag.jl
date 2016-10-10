@@ -51,7 +51,7 @@ function build(tag::String, changeset::ChangesetOrVoid, field::Symbol, opts; bod
     string(result, isa(body, Void) ? " />" : ">$linefeed$body</$tag>")
 end
 
-function form_for(block::Function, changeset::ChangesetOrVoid, args...; kw...)
+function form_for(block::Function, changeset::ChangesetOrVoid, args...; kw...) # throw FormBuildError
     list = Vector{Tuple{Symbol,Union{Function,String,Bool}}}(vcat(args..., kw...))
     opts = Dict(list)
     if haskey(opts, :method)

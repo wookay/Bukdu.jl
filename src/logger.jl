@@ -57,7 +57,7 @@ julia> Logger.set_level(false)
 false
 ```
 """
-function set_level(lvl::Union{Symbol,Bool})
+function set_level(lvl::Union{Symbol,Bool}) # throw ArgumentError
     if haskey(levels, lvl)
         global level
         settings[:level] = levels[lvl]
