@@ -92,7 +92,7 @@ function resources{AC<:ApplicationController}(context::Function, path::String, :
 end
 
 function pipe_through(pipe::Pipeline)
-    RouterScope.pipe_through(pipe) 
+    RouterScope.pipe_through(pipe)
 end
 
 function redirect_to(url::String; kw...)

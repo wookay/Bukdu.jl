@@ -46,7 +46,7 @@ end
 
 ### Deploy on Heroku
 
-Bukdu can be deploy on Heroku. Visit to look around (https://bukdu.herokuapp.com).
+Bukdu can be deployed on Heroku. Go to the demo site (https://bukdu.herokuapp.com).
 
 
 ### Jupyter notebook

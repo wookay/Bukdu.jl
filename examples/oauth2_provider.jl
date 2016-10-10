@@ -82,7 +82,7 @@ end
 
 Endpoint() do
     plug(Plug.Logger)
-    plug(Plug.CSRFProtection)
+    plug(Plug.CSRFProtection, only=[get_authorize, post_authorize])
     plug(Plug.OAuth2.Provider, CustomProvider)
 end
 

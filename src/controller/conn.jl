@@ -7,6 +7,9 @@ const bukdu_secret_key = rand(UInt8, 32)
 
 immutable Pipeline
     block::Function
+    only::Vector{Function}
+    Pipeline(block::Function) = new(block, Vector{Function}())
+    Pipeline(block::Function, only::Vector{Function}) = new(block, only)
 end
 
 import HttpCommon: Cookie

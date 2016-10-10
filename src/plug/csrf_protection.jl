@@ -41,8 +41,8 @@ function check_csrf_token(conn::Conn)::Bool # throw InvalidCSRFTokenError
     throw(InvalidCSRFTokenError(conn, "Cross Site Request Forgery"))
 end
 
-function plug(::Type{Plug.CSRFProtection}; kw...)
-    pipe_through(Pipeline(check_csrf_token))
+function plug(::Type{Plug.CSRFProtection}; only=Vector{Function}())
+    pipe_through(Pipeline(check_csrf_token, only))
 end
 
 function protect_from_forgery(conn::Conn)

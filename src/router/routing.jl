@@ -161,7 +161,11 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 task = current_task()
                 task_storage[task] = conn
                 for pipe in route.pipes
-                    pipe(conn)
+                    if isempty(pipe.only)
+                        pipe(conn)
+                    else
+                        route.action in pipe.only && pipe(conn)
+                    end
                 end
                 if method_exists(before, (C,))
                     before(controller)
