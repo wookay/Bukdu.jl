@@ -35,7 +35,7 @@ conn = (Router)(get, "/")
 str = wait(reader)
 @test """
 DEBUG  GET /                                   index(::WelcomeController)
-WARN   GET /strange                           
-WARN       /strange                           
+WARN   GET /strange                            NoRouteError("not found /strange")
+WARN       /strange                            NoRouteError("not found /strange")
 """ == str
 end

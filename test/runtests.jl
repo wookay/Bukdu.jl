@@ -139,6 +139,11 @@ Base.Test.@testset "renderers/mustache.jl" begin
 end
 
 workspace()
+Base.Test.@testset "server/content_encoding.jl" begin
+    include("server/content_encoding.jl")
+end
+
+workspace()
 Base.Test.@testset "server/form_data.jl" begin
     include("server/form_data.jl")
 end

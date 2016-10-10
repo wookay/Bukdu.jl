@@ -2,17 +2,18 @@
 
 module Server
 
-import HttpCommon: Request, Response, Cookie
+import HttpCommon: Request, Response, Cookie, Headers
 import HttpServer: setcookie!
 import ....Bukdu
 import Bukdu: Routing
 import Bukdu: ApplicationEndpoint, ApplicationError, Endpoint, Router, Conn
 import Bukdu: before, after, post, plug
 import Bukdu: parse_cookie_string
-import Bukdu: conn_not_found, conn_application_error, conn_internal_server_error
+import Bukdu: conn_error, conn_not_found, conn_application_error, conn_internal_server_error
 import Bukdu: NoRouteError
 import Bukdu: Logger
 
+include("content_encoding.jl")
 include("form_data.jl")
 
 const commit_short = string(LibGit2.revparseid(LibGit2.GitRepo(Pkg.dir("Bukdu")), "HEAD"))[1:7]
@@ -32,30 +33,21 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
     verb = :head == method ? get : getfield(Bukdu, method)
     local conn::Conn
     try
-        param_data = post==verb ? post_form_data(req) : Assoc()
+        path = req.resource
         headers = Assoc(req.headers)
         if haskey(headers, :Cookie)
             cookies = parse_cookie_string(headers[:Cookie])
         else
             cookies = Vector{Cookie}()
         end
-        conn = Routing.request(Nullable{Type{AE}}(AE), routes, method, req.resource, headers, cookies, param_data) do route
+        req_data = req_data_by_content_encoding(req)::Vector{UInt8}
+        param_data = post==verb ? form_data_for_post(req.headers, req_data) : Assoc()
+        conn = Routing.request(Nullable{Type{AE}}(AE), routes, method, path, headers, cookies, param_data) do route
             Base.function_name(route.verb) == Base.function_name(verb)
         end
     catch ex
         stackframes = stacktrace(catch_backtrace())
-        if isa(ex, NoRouteError)
-            conn = conn_not_found(method, req.resource, ex, stackframes) # 404
-        else
-            Logger.error() do
-                Routing.error_route(method, req.resource, ex, stackframes)
-            end
-            if isa(ex, ApplicationError)
-                conn = conn_application_error(method, req.resource, ex, stackframes)
-            else
-                conn = conn_internal_server_error(method, req.resource, ex, stackframes) # 500
-            end
-        end
+        conn = conn_error(method, req.resource, ex, stackframes)
     end
     for (key, value) in conn.resp_headers
         res.headers[key] = value
@@ -68,13 +60,14 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
         end
     end
     if :head == method
-        res.data = UInt8[]
+        res.data = Vector{UInt8}()
     else
         if isa(conn.resp_body, Vector{UInt8}) || isa(conn.resp_body, String)
-            res.data = conn.resp_body
+            res_data = Vector{UInt8}(conn.resp_body)
         else
-            res.data = string(conn.resp_body)
+            res_data = Vector{UInt8}(string(conn.resp_body))
         end
+        res_data_by_accept_encoding!(res, req.headers, res_data)
     end
     if method_exists(after, (Request, Response))
         after(req, res)
