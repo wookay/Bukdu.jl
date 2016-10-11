@@ -25,13 +25,13 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
             plug(Router)
         end
     end
+    local conn = Conn()
     routes = Routing.endpoint_routes[AE]
     if method_exists(before, (Request,Response))
         before(req, res)
     end
     method = Symbol(lowercase(req.method))
     verb = :head == method ? get : getfield(Bukdu, method)
-    local conn::Conn
     try
         path = req.resource
         headers = Assoc(req.headers)
@@ -42,7 +42,7 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
         end
         req_data = req_data_by_content_encoding(req)::Vector{UInt8}
         param_data = post==verb ? form_data_for_post(req.headers, req_data) : Assoc()
-        conn = Routing.request(Nullable{Type{AE}}(AE), routes, method, path, headers, cookies, param_data) do route
+        conn = Routing.request(conn, Nullable{Type{AE}}(AE), routes, method, path, headers, cookies, param_data) do route
             Base.function_name(route.verb) == Base.function_name(verb)
         end
     catch ex

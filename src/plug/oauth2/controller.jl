@@ -4,10 +4,11 @@ export OAuthController
 export authorize_path, access_token_path
 export get_authorize, post_authorize, post_access_token
 
-import ....Bukdu: ApplicationController, ApplicationRouter, plug, get, post
+import ....Bukdu: ApplicationController, ApplicationRouter, Conn, plug, get, post
 import ....Bukdu: Logger
 
 type OAuthController{P<:OAuth2.Provider} <: ApplicationController
+    conn::Conn
 end
 
 function authorize_path

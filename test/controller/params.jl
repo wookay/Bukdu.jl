@@ -1,7 +1,11 @@
+module test_controller_params
+
 importall Bukdu
 import Bukdu.Octo: change
+import Base.Test: @test, @test_throws
 
 type WelcomeController <: ApplicationController
+    conn::Conn
 end
 
 type User
@@ -17,7 +21,6 @@ Router() do
 end
 
 
-using Base.Test
 conn = (Router)(get, "/1?q=Julia")
 @test 200 == conn.status
 @test (Assoc(q="Julia"), Assoc(page="1")) == conn.resp_body
@@ -31,3 +34,5 @@ conn = (Router)(get, "/1?q=Julia")
 
 conn = (Router)(post, "/posted", user_name="jack", q="Julia")
 @test Assoc([(:user_name,"jack"),(:q,"Julia")]) == conn.query_params
+
+end # test_controller_params

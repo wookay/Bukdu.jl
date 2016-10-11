@@ -1,8 +1,14 @@
+module test_renderers_html_form
+
 importall Bukdu
 importall Bukdu.Octo
 importall Bukdu.Tag
+import Requests # Requests.get, Requests.post
+import Requests: URI, statuscode, text
+import Base.Test: @test, @test_throws
 
 type UserController <: ApplicationController
+    conn::Conn
 end
 
 type User
@@ -35,7 +41,7 @@ function test_form(changes::Assoc)
 </div>
 
 <div>
-    Age: $(select(f, :age, 15:30))
+    Age: $(select(f, :age, 18:22))
 </div>
 
 <div>
@@ -67,10 +73,13 @@ $(submit("Submit"))
     end
 end
 
-layout(::Layout, body) = "<div>$body</div>"
+type FormLayout <: ApplicationLayout
+end
+
+layout(::FormLayout, body) = "<div>$body</div>"
 function index(::UserController)
     contents = test_form(Assoc(name="foo bar"))
-    render(HTML/Layout, contents)
+    render(HTML/FormLayout, contents)
 end
 
 
@@ -79,8 +88,6 @@ Router() do
     post("/post_result", UserController, post_result)
 end
 
-
-using Base.Test
 
 contents = test_form(Assoc(name="foo bar"))
 
@@ -96,22 +103,11 @@ contents = test_form(Assoc(name="foo bar"))
 
 <div>
     Age: <select id="user_age" name="user_age">
-    <option value="15">15</option>
-    <option value="16">16</option>
-    <option value="17">17</option>
     <option value="18">18</option>
     <option value="19">19</option>
     <option value="20" selected>20</option>
     <option value="21">21</option>
     <option value="22">22</option>
-    <option value="23">23</option>
-    <option value="24">24</option>
-    <option value="25">25</option>
-    <option value="26">26</option>
-    <option value="27">27</option>
-    <option value="28">28</option>
-    <option value="29">29</option>
-    <option value="30">30</option>
 </select>
 </div>
 
@@ -147,6 +143,7 @@ conn = (Router)(get, "/")
 @test "<div>$contents</div>" == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_name="jack")
+@test isa(conn.resp_body, Changeset)
 @test Changeset(user,Assoc(name="jack")) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_attendance="true")
@@ -176,8 +173,6 @@ form = change(default(User), name="jack")
 <form class="ex" action="/test" method="get" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, class="ex", action="/test")
 
-import Requests: URI, statuscode, text
-
 Bukdu.start(8082)
 resp1 = Requests.get(URI("http://localhost:8082/"))
 @test 200 == statuscode(resp1)
@@ -185,7 +180,9 @@ resp1 = Requests.get(URI("http://localhost:8082/"))
 
 resp2 = Requests.post(URI("http://localhost:8082/post_result"), data=Dict("user_name"=>"foo bar"))
 @test 200 == statuscode(resp2)
-@test """Bukdu.Octo.Changeset(User("foo bar",false,20,String[],"chicken","",0.5,Bukdu.Plug.Upload("","application/octet-stream",UInt8[])),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[]))""" == text(resp2)
+@test """Bukdu.Octo.Changeset(test_renderers_html_form.User("foo bar",false,20,String[],"chicken","",0.5,Bukdu.Plug.Upload("","application/octet-stream",UInt8[])),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[]))""" == text(resp2)
 
 sleep(0.1)
 Bukdu.stop()
+
+end # module test_renderers_html_form

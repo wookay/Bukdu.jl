@@ -1,6 +1,9 @@
+module test_renderers_html_tag
+
 importall Bukdu
 importall Bukdu.Octo
 importall Bukdu.Tag
+import Base.Test: @test, @test_throws
 
 type User
     name::String
@@ -9,8 +12,6 @@ type User
     description::String
 end
 
-
-using Base.Test
 
 form = change(User)
 @test """<label for="user_name" />""" == label(form, :name)
@@ -43,3 +44,5 @@ f = change(user)
 f = nothing
 @test """<input id="description" name="description" type="hidden" />""" == hidden_input(f, :description)
 @test """<input id="description" name="description" type="hidden" value="hello" />""" == hidden_input(f, :description, value="hello")
+
+end # module test_renderers_html_tag

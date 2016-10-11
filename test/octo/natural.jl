@@ -1,6 +1,10 @@
+module test_octo_natural
+
 import Bukdu
 importall Bukdu.Octo
-using Base.Test
+import Base.Test: @test
 
 @test "user" == singularize("users")
 @test "users" == pluralize("user")
+
+end # module test_octo_natural

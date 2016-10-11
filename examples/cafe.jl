@@ -3,6 +3,7 @@ importall Bukdu.Octo
 importall Tag
 
 type CafeController <: ApplicationController
+    conn::Conn
 end
 
 type User

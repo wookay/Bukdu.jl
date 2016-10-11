@@ -1,5 +1,8 @@
+module test_router_scope
+
 importall Bukdu
 import Bukdu: NoRouteError
+import Base.Test: @test, @test_throws, @testset
 
 # from phoenix/test/phoenix/router/scope_test.exs
 
@@ -9,6 +12,7 @@ module V1
 importall Bukdu
 
 type UserController <: ApplicationController
+    conn::Conn
 end
 
 show(::UserController) = "api v1 users show"
@@ -98,47 +102,45 @@ Endpoint() do
 end
 
 
-using Base.Test
-
 @testset "single scope for single routes" begin
     conn = (Router)(get, "/admin/users/1")
     @test conn.status == 200
     @test conn.resp_body == "api v1 users show"
-    @test conn.params["id"] == "1"
+    @test conn.params[:id] == "1"
 
     conn = (Router)(get, "/api/users/13")
     @test conn.status == 200
     @test conn.resp_body == "api v1 users show"
-    @test conn.params["id"] == "13"
+    @test conn.params[:id] == "13"
 end
 
 @testset "double scope for single routes" begin
     conn = (Router)(get, "/api/v1/users/1")
     @test conn.status == 200
     @test conn.resp_body == "api v1 users show"
-    @test conn.params["id"] == "1"
+    @test conn.params[:id] == "1"
 end
 
 @testset "scope for resources" begin
     conn = (Router)(delete, "/api/v1/users/12")
     @test conn.status == 200
     @test conn.resp_body == "api v1 users delete"
-    @test conn.params["id"] == "12"
+    @test conn.params[:id] == "12"
 end
 
 @testset "scope for double nested resources" begin
     conn = (Router)(get, "/api/v1/venues/12/users/13/edit")
     @test conn.status == 200
     @test conn.resp_body == "api v1 users edit"
-    @test conn.params["venue_id"] == "12"
-    @test conn.params["id"] == "13"
+    @test conn.params[:venue_id] == "12"
+    @test conn.params[:id] == "13"
 end
 
 @testset "host scopes routes based on conn.host" begin
     conn = (Router)(get, "http://foobar.com/admin/users/1")
     @test conn.status == 200
     @test conn.resp_body == "foo request from foobar.com"
-    @test conn.params["id"] == "1"
+    @test conn.params[:id] == "1"
 end
 
 @testset "host scopes allows partial host matching" begin
@@ -189,3 +191,5 @@ end
     @test conn.status == 200
     @test conn.assigns[:assigns_token] == "baz"
 end
+
+end # module test_router_scope

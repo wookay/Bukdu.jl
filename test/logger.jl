@@ -1,4 +1,7 @@
+module test_logger
+
 importall Bukdu
+import Base.Test: @test, @test_throws
 
 type WelcomeController <: ApplicationController
 end
@@ -18,19 +21,19 @@ Endpoint() do
 end
 
 
-using Base.Test
-
 Logger.have_color(false)
 let oldout = STDERR
-   rdout, wrout = redirect_stdout()
+    rdout, wrout = redirect_stdout()
 
-conn = (Router)(get, "/")
+    conn = (Router)(get, "/")
 
-   reader = @async readstring(rdout)
-   redirect_stdout(oldout)
-   close(wrout)
+    reader = @async readstring(rdout)
+    redirect_stdout(oldout)
+    close(wrout)
 
-lines = split(wait(reader), '\n')
-@test startswith(lines[1], "DEBUG  GET /")
-@test lines[2] == "INFO  hi"
+    lines = split(wait(reader), '\n')
+    @test startswith(lines[1], "DEBUG  GET /")
+    @test lines[2] == "INFO  hi"
 end
+
+end # module test_logger

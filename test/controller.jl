@@ -1,6 +1,11 @@
-importall Bukdu
+module test_controller
 
-type WelcomeController <: ApplicationController
+importall Bukdu
+import Bukdu: MissingConnError
+import Base.Test: @test, @test_throws
+
+immutable WelcomeController <: ApplicationController
+    conn::Conn
 end
 
 index(::WelcomeController) = "hello world"
@@ -12,7 +17,6 @@ Router() do
 end
 
 
-using Base.Test
 logs = []
 before(::WelcomeController) = push!(logs, :b)
 after(::WelcomeController) = push!(logs, :a)
@@ -24,6 +28,15 @@ conn = (Router)(get, "/foobar")
 @test "bar" == conn.resp_body
 @test [:b, :a, :b, :a] == logs
 
-c = WelcomeController()
-@test_throws ErrorException c[:query_params]
-@test_throws ErrorException c[:invalid_key]
+c = WelcomeController(Conn())
+@test Assoc() == c[:query_params]
+@test_throws KeyError c[:invalid_key]
+
+type SimpleController <: ApplicationController
+end
+
+s = SimpleController()
+@test_throws MissingConnError s[:query_params]
+@test_throws MissingConnError s[:invalid_key]
+
+end # module test_controller

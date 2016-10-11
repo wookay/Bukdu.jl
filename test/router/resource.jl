@@ -1,6 +1,10 @@
+module test_router_resource
+
 importall Bukdu
+import Base.Test: @test, @test_throws
 
 type ArticleController <: ApplicationController
+    conn::Conn
 end
 
 index(::ArticleController)   = (:index,)
@@ -15,8 +19,6 @@ Router() do
     resources("/articles", ArticleController)
 end
 
-
-using Base.Test
 
 conn = (Router)(get, "/articles")
 @test conn.resp_body == (:index,)
@@ -41,3 +43,5 @@ conn = (Router)(patch, "/articles/1")
 
 conn = (Router)(put, "/articles/1")
 @test conn.resp_body == (:update, "1")
+
+end # module test_router_resource

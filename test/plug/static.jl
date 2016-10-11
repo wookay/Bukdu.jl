@@ -1,5 +1,8 @@
+module test_plug_static
+
 importall Bukdu
 import Bukdu: NoRouteError
+import Base.Test: @test, @test_throws
 
 type WelcomeController <: ApplicationController
 end
@@ -18,8 +21,6 @@ Endpoint() do
     plug(Router)
 end
 
-
-using Base.Test
 conn = (Endpoint)("/index.html")
 @test 200 == conn.status
 @test "text/html" == conn.resp_headers["Content-Type"]
@@ -41,3 +42,5 @@ conn = (Endpoint)("/js/vue.min.js")
 reload(Endpoint)
 
 @test [1, 1] == loaded
+
+end # module test_plug_static

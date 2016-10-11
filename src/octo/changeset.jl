@@ -2,6 +2,7 @@
 
 import ..Bukdu
 import Bukdu: ApplicationController
+import Bukdu: Logger
 import Base: ==
 
 type Changeset
@@ -47,7 +48,7 @@ function typed_assoc(T::Type, changes::Assoc)::Assoc
 end
 
 function cutout_brackets(T::Type, param::Tuple{Symbol,Any})::Tuple{Symbol,Any}
-    typ = lowercase(string(T))
+    typ = lowercase(string(T.name.name))
     (key, value) = param
     name = string(key)
     if endswith(name, "]")

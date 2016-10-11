@@ -1,5 +1,8 @@
+module test_pipeline
+
 importall Bukdu
 import Bukdu.Controller: accepts
+import Base.Test: @test, @test_throws
 
 type ContactController <: ApplicationController
 end
@@ -31,8 +34,6 @@ Endpoint() do
 end
 
 
-using Base.Test
-
 conn = (Router)(get, "/api/contacts")
 @test "json" == conn.private[:format]
 @test index == conn.private[:action]
@@ -56,3 +57,5 @@ conn = Conn()
 api(conn)
 
 @test "json" == conn.private[:format]
+
+end # module test_pipeline

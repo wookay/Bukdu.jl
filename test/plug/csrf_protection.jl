@@ -1,7 +1,12 @@
+module test_plug_csrf_protection
+
 importall Bukdu
+import Requests # Requests.get, Requests.post
 import Requests: URI, text, statuscode
+import Base.Test: @test, @test_throws
 
 type UserController <: ApplicationController
+    conn::Conn
 end
 
 function index(c::UserController)
@@ -25,8 +30,6 @@ Endpoint() do
 end
 
 
-using Base.Test
-
 Bukdu.start(8082)
 
 resp1 = Requests.get(URI("http://localhost:8082/"))
@@ -38,3 +41,5 @@ token = match(r"value=\"(.*)\"", text(resp1))[1]
 
 sleep(0.1)
 Bukdu.stop()
+
+end # module test_plug_csrf_protection
