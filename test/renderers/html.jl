@@ -1,4 +1,7 @@
+module test_renderers_html
+
 importall Bukdu
+import Base.Test: @test, @test_throws
 
 type HTMLController <: ApplicationController
 end
@@ -10,7 +13,6 @@ Router() do
 end
 
 
-using Base.Test
 conn = (Router)(get, "/")
 @test 200 == conn.status
 @test "<p>hello</p>" == conn.resp_body
@@ -26,16 +28,18 @@ end
 conn = (Router)(get, "/")
 @test ["b <p>hello</p>", "a <p>hello</p>"] == logs
 
-layout(::Layout, body) = """<div>$body</div>"""
-show(::HTMLController) = render(HTML/Layout, "<p>hello</p>")
+type HtmlLayout <: ApplicationLayout
+end
+layout(::HtmlLayout, body) = """<div>$body</div>"""
+show(::HTMLController) = render(HTML/HtmlLayout, "<p>hello</p>")
 Router() do
     get("/say", HTMLController, show)
 end
 
-before(render, HTML/Layout) do t
+before(render, HTML/HtmlLayout) do t
     push!(logs, "bl $t")
 end
-after(render, HTML/Layout) do t
+after(render, HTML/HtmlLayout) do t
     push!(logs, "al $t")
 end
 
@@ -46,3 +50,5 @@ conn = (Router)(get, "/say")
 @test "<div><p>hello</p></div>" == conn.resp_body
 
 @test ["bl <p>hello</p>","b <p>hello</p>","a <p>hello</p>","al <p>hello</p>"] == logs
+
+end # module test_renderers_html

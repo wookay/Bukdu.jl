@@ -1,18 +1,16 @@
+module test_controller_conn
+
 import Bukdu: Conn
 import Bukdu: put_status
 import Bukdu: halt
 import Bukdu: index, action_name
-#import Bukdu.Plug: put_status
-#import Bukdu.Plug: halt
-#import Bukdu.Plug: index, action_name
+import Base.Test: @test, @test_throws
 
 conn = Conn()
 
-using Base.Test
-
-
 ## Request fields - host, method, path, req_headers, scheme
 @test :get == conn.method
+
 
 ## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
 
@@ -37,3 +35,5 @@ halt(conn)
 
 
 ## Private fields - private
+
+end # module test_controller_conn

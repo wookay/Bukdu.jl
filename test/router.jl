@@ -1,10 +1,15 @@
+module test_router
+
 importall Bukdu
 import Bukdu: NoRouteError
+import Base.Test: @test, @test_throws
 
 type PageController <: ApplicationController
+    conn::Conn
 end
 
 type UserController <: ApplicationController
+    conn::Conn
 end
 
 index(::PageController) = "index page"
@@ -22,7 +27,6 @@ end
 
 
 Logger.set_level(:error)
-using Base.Test
 conn = (Router)(get, "/pages")
 @test conn.status == 200
 @test conn.resp_body == "index page"
@@ -67,3 +71,5 @@ conn = (Router)(get, "/users")
 @test conn.status == 200
 
 @test_throws NoRouteError (Router)(delete, "/users/1")
+
+end # module test_router

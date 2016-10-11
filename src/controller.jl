@@ -11,15 +11,27 @@ for verb in HTTP_VERBS
         Routing.match($verb, path, AC, action, Dict(kw))
 end
 
-function getindex{AC<:ApplicationController}(C::AC, sym::Symbol) # throw ErrorException, KeyError
-    task = current_task()
-    if haskey(Routing.task_storage, task)
-        conn = Routing.task_storage[task]
-        return (:conn == sym) ? conn : getfield(conn, sym)
+function check_controller_has_field_conn{AC<:ApplicationController}(::AC) # throw MissingConnError
+    if :conn in fieldnames(AC) && fieldtype(AC, :conn) == Conn
     else
-        throw(ErrorException("no $task"))
+        conn = Conn()
+        put_status(conn, :internal_server_error)
+        throw(MissingConnError(conn, "type $AC has no field conn::Conn"))
     end
-    throw(KeyError(sym))
+end
+
+function getindex{AC<:ApplicationController}(controller::AC, sym::Symbol) # throw MissingConnError, KeyError
+    if :name == sym
+        AC.name.name
+    else
+        fields = fieldnames(AC)
+        check_controller_has_field_conn(controller) # throw MissingConnError
+        if sym in fieldnames(Conn)
+            getfield(controller.conn, sym)
+        else
+            throw(KeyError(sym))
+        end
+    end
 end
 
 # actions: index, (edit), new, (show),  create, update, delete

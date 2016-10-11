@@ -1,7 +1,9 @@
+module test_router_endpoint
+
 importall Bukdu
 import Bukdu: NoRouteError
 import HttpCommon: Cookie
-using Base.Test
+import Base.Test: @test, @test_throws
 
 Router() do
 end
@@ -154,3 +156,5 @@ conn = (Endpoint)("/")
 
 conn = (Endpoint)("/", Assoc(), [Cookie("name","value",Dict{String,String}())])
 @test !isempty(conn.req_cookies)
+
+end # module test_router_endpoint

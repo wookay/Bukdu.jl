@@ -91,3 +91,16 @@ function stop{AE<:ApplicationEndpoint}(::Type{AE})::Void
     end
     nothing
 end
+
+function reset()
+    for x in [Routing.routes,
+              Routing.router_routes,
+              Routing.endpoint_routes,
+              Routing.endpoint_contexts,
+              RouterScope.stack,
+              RouterScope.pipes,
+              ViewFilter.filters]
+        empty!(x)
+    end
+    Logger.have_color(Base.have_color)
+end

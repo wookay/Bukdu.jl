@@ -20,7 +20,8 @@ end
 
 import ..ApplicationController, ..Conn, ..Routing
 
-immutable StaticController <: ApplicationController
+type StaticController <: ApplicationController
+    conn::Conn
 end
 
 function read(c::StaticController)

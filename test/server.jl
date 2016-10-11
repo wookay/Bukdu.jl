@@ -1,10 +1,19 @@
+module test_server
+
 importall Bukdu
+import Requests # Requests.get, Requests.head
+import Requests: URI, statuscode, text
+import HttpCommon: Request, Response
+import Base.Test: @test, @test_throws
 
 type WelcomeController <: ApplicationController
 end
 
-layout(::Layout, body) = body
-index(::WelcomeController) = render(Text/Layout, "hello world")
+type ALayout <: ApplicationLayout
+end
+
+layout(::ALayout, body) = body
+index(::WelcomeController) = render(Text/ALayout, "hello world")
 show(::WelcomeController) = pi
 
 Router() do
@@ -17,9 +26,6 @@ Endpoint() do
     plug(Router)
 end
 
-
-using Base.Test
-import HttpCommon: Request, Response
 
 req = Request()
 
@@ -45,7 +51,6 @@ req.resource = "/test"
 res = Bukdu.Server.handler(Endpoint, req, Response())
 @test 404 == res.status
 
-import Requests: URI, statuscode, text
 
 Bukdu.start([8082, 8083])
 
@@ -83,7 +88,7 @@ conn = (Router)(get, "/")
 @test [:bc, :ac] == logs
 empty!(logs)
 
-before(render, Text/Layout) do text
+before(render, Text/ALayout) do text
     push!(logs, :bvl)
 end
 before(render, Text) do text
@@ -92,7 +97,7 @@ end
 after(render, Text) do text
     push!(logs, :av)
 end
-after(render, Text/Layout) do text
+after(render, Text/ALayout) do text
     push!(logs, :avl)
 end
 
@@ -104,3 +109,5 @@ resp1 = Requests.get(URI("http://localhost:8082/"))
 @test [:br,:bc,:bvl,:bv,:av,:avl,:ac,:ar] == logs
 sleep(0.1)
 Bukdu.stop()
+
+end # module test_server

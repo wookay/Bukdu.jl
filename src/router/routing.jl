@@ -20,7 +20,6 @@ import HttpCommon: Cookie, parsequerystring
 const SLASH = '/'
 const COLON = ':'
 
-task_storage = Dict{Task,Conn}()
 routes = Vector{Route}()
 router_routes = Dict{Type,Vector{Route}}() # AR => Vector{Route}
 endpoint_routes = Dict{Type,Vector{Route}}() # AE => Vector{Route}
@@ -89,7 +88,8 @@ function add_route(resource::Resource)
 end
 
 function debug_route{AC<:ApplicationController}(route::Route, verb::Symbol, path::String, ::Type{AC})
-    tuple(debug_verb(verb, path)..., "$(Base.function_name(route.action))(::$AC)")
+    controller_name = AC.name.name
+    tuple(debug_verb(verb, path)..., "$(Base.function_name(route.action))(::$controller_name)")
 end
 
 function error_route(verb::Symbol, path::String, ex, callstack)
@@ -100,11 +100,10 @@ function error_route(verb::Symbol, path::String, ex, callstack)
         callstack)
 end
 
-function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn # throw NoRouteError
+function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn # throw NoRouteError
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
-    conn = Conn()
     for route in routes
         if compare(route)
             if !isempty(route.host)
@@ -136,7 +135,6 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                     (Symbol(replace(rouseg, r"^:", "")), String(reqsegs[idx]))
                 end)
                 C = route.controller
-                controller = C()
                 query_params = Assoc(parsequerystring(uri.query))
                 if !isempty(param_data)
                     merge!(query_params, param_data)
@@ -152,14 +150,17 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 conn.query_params = query_params
                 conn.params = params
                 ## Connection fields - assigns, halted, state
-                conn.assigns = copy(route.assigns)
+                conn.assigns = route.assigns
                 ## Private fields - private
-                conn.private = copy(route.private)
+                conn.private = route.private
                 conn.private[:action] = route.action
-                conn.private[:controller] = controller
                 conn.private[:endpoint] = isnull(endpoint) ? nothing : endpoint.value
-                task = current_task()
-                task_storage[task] = conn
+                if :conn in fieldnames(C) && (fieldtype(C, :conn) == Conn)
+                    controller = C(conn)
+                else
+                    controller = C()
+                end
+                conn.private[:controller] = controller
                 for pipe in route.pipes
                     if isempty(pipe.only)
                         pipe(conn)
@@ -186,7 +187,6 @@ function request{AE<:ApplicationEndpoint}(compare::Function, endpoint::Nullable{
                 if method_exists(after, (C,))
                     after(controller)
                 end
-                pop!(task_storage, task)
                 ## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
                 if isa(result, Conn)
                     put_status(conn, result.status)

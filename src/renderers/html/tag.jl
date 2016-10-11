@@ -9,7 +9,7 @@ import ....Bukdu
 import Bukdu.Octo: Changeset, change
 import Bukdu: Assoc, Plug, ApplicationController
 import Bukdu: Conn, ApplicationError
-import Bukdu: put_status
+import Bukdu: put_status, check_controller_has_field_conn
 import Bukdu: Logger
 import Base: select
 
@@ -30,7 +30,7 @@ end
 
 function tag_name(model, field, value)
     typ = typeof(model)
-    name = string(lowercase(string(typ)), '_', field)
+    name = string(lowercase(string(typ.name.name)), '_', field)
     if fieldtype(typ, field) <: Vector
         string(name, "[", value, "]")
     else
@@ -202,7 +202,8 @@ function uploaded_image(changeset::Changeset, field::Symbol)
 end
 
 function hidden_csrf_token{AC<:ApplicationController}(c::AC)
-    hidden_input(nothing, :_csrf_token, value=Plug.csrf_token(c[:conn]))
+    check_controller_has_field_conn(c)
+    hidden_input(nothing, :_csrf_token, value=Plug.csrf_token(c.conn))
 end
 
 end # module Bukdu.Tag

@@ -34,6 +34,7 @@ authorization_callback_uri = "https://localhost:8085$(callback_path(provider))"
 callbacked = []
 
 type TestOAuth2Controller{P<:OAuth2.Provider} <: ApplicationController
+    conn::Conn
 end
 
 function index(::TestOAuth2Controller)

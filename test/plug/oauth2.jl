@@ -1,9 +1,10 @@
+module test_oauth2
+
 importall Bukdu
 importall Bukdu.Octo
 importall Bukdu.Tag
-importall Plug.OAuth2
-
-using Base.Test
+importall Bukdu.Plug.OAuth2
+import Base.Test: @test, @test_throws
 
 # oauth2 provider
 immutable CustomProvider <: OAuth2.Provider
@@ -98,6 +99,7 @@ conn = (ProviderEndpoint)("/login/oauth/authorize", redirect_uri=authorization_c
 
 # oauth2 client
 type TestOAuth2Controller{P<:OAuth2.Provider} <: ApplicationController
+    conn::Conn
 end
 
 provider = CustomProvider
@@ -186,3 +188,5 @@ conn = (Endpoint)("/oauth_authorize")
 sleep(0.1)
 Bukdu.stop(Endpoint)
 Bukdu.stop(ProviderEndpoint)
+
+end # module test_oauth2

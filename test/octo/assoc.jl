@@ -1,6 +1,8 @@
+module test_assoc
+
 importall Bukdu
 importall Bukdu.Octo
-using Base.Test
+import Base.Test: @test, @test_throws
 
 vector = Assoc(Vector([(:name, String)]))
 
@@ -49,3 +51,5 @@ assoc = combine(Vector{Int}, Assoc(a="1", a="2", b="3"), :a)
 
 assoc = combine(Vector{Float64}, Assoc(a="1", a="2", b="3"), :a)
 @test assoc == Assoc(b="3", a=[1.0, 2.0])
+
+end # module test_assoc

@@ -1,11 +1,17 @@
+module test_renderers_text
+
 importall Bukdu
+import Base.Test: @test, @test_throws
 
 type TextController <: ApplicationController
 end
 
-layout(::Layout, body) = """empty layout"""
+type ALayout <: ApplicationLayout
+end
+
+layout(::ALayout, body) = """empty layout"""
 index(::TextController) = render(Text)
-index_with_layout(::TextController) = render(Text/Layout)
+index_with_layout(::TextController) = render(Text/ALayout)
 
 Router() do
     get("/index", TextController, index)
@@ -13,7 +19,6 @@ Router() do
 end
 
 
-using Base.Test
 conn = (Router)(get, "/index")
 @test 200 == conn.status
 @test "text/plain" == conn.resp_headers["Content-Type"]
@@ -40,9 +45,9 @@ conn = (Router)(get, "/index_with_layout")
 empty!(logs)
 
 
-layout(::Layout, body::String) = """layout - $body"""
+layout(::ALayout, body::String) = """layout - $body"""
 index1(::TextController) = render(Text, "hello")
-index_with_layout1(::TextController) = render(Text/Layout, "hello")
+index_with_layout1(::TextController) = render(Text/ALayout, "hello")
 
 Router() do
     get("/index1", TextController, index1)
@@ -73,10 +78,10 @@ conn = (Router)(get, "/index_with_layout1")
 @test ["b hello", "a hello"] == logs
 empty!(logs)
 
-before(render, Text/Layout) do body
+before(render, Text/ALayout) do body
     push!(logs, "bl $body")
 end
-after(render, Text/Layout) do body
+after(render, Text/ALayout) do body
     push!(logs, "al $body")
 end
 
@@ -93,9 +98,9 @@ conn = (Router)(get, "/index_with_layout1")
 empty!(logs)
 
 
-layout(::Layout, body::String, c::TextController) = """layout2 - $body, $c"""
+layout(::ALayout, body::String, c::TextController) = """layout2 - $body, $(c[:name])"""
 index2(c::TextController) = render(Text, "foo", c)
-index_with_layout2(c::TextController) = render(Text/Layout, "foo", c)
+index_with_layout2(c::TextController) = render(Text/ALayout, "foo", c)
 
 Router() do
     get("/index2", TextController, index2)
@@ -109,23 +114,25 @@ conn = (Router)(get, "/index2")
 empty!(logs)
 
 before(render, Text) do body, c
-    push!(logs, "b $body, $c")
+    push!(logs, "B $body $(c[:name])")
 end
 
 after(render, Text) do body, c
-    push!(logs, "a $body, $c")
+    push!(logs, "A $body $(c[:name])")
 end
 
-before(render, Text/Layout) do body, c
+before(render, Text/ALayout) do body, c
     push!(logs, "bl")
 end
 
-after(render, Text/Layout) do body, c
+after(render, Text/ALayout) do body, c
     push!(logs, "al")
 end
 
 conn = (Router)(get, "/index_with_layout2")
 @test "text/plain" == conn.resp_headers["Content-Type"]
-@test "layout2 - foo, TextController()" == conn.resp_body
-@test ["bl","b foo, TextController()","a foo, TextController()","al"] == logs
+@test "layout2 - foo, TextController" == conn.resp_body
+@test ["bl","B foo TextController","A foo TextController","al"] == logs
 empty!(logs)
+
+end # module test_renderers_text

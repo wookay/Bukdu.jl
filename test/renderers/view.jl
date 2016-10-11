@@ -1,13 +1,19 @@
+module test_renderers_view
+
 importall Bukdu
+import Base.Test: @test, @test_throws
 
 type ViewController <: ApplicationController
 end
 
-layout(::Layout, body) = "<html><body>$body<body></html>"
+type ALayout <: ApplicationLayout
+end
+
+layout(::ALayout, body) = "<html><body>$body<body></html>"
 
 show(::ViewController) = render(View; path="renderers/page.tpl", contents="hello")
-index(::ViewController) = render(View/Layout; path="renderers/page.tpl", contents="hello")
-mark(::ViewController) = render(Markdown/Layout, "# hello")
+index(::ViewController) = render(View/ALayout; path="renderers/page.tpl", contents="hello")
+mark(::ViewController) = render(Markdown/ALayout, "# hello")
 
 Router() do
     get("/hey", ViewController, show)
@@ -20,7 +26,6 @@ Endpoint() do
 end
 
 
-using Base.Test
 conn = (Router)(get, "/hey")
 @test 200 == conn.status
 @test "<div>hello</div>" == conn.resp_body
@@ -35,7 +40,7 @@ conn = (Router)(get, "/mark")
 
 logs = []
 
-before(render, View/Layout) do
+before(render, View/ALayout) do
     push!(logs, :bvl)
 end
 
@@ -43,7 +48,7 @@ before(render, View) do
     push!(logs, :bv)
 end
 
-after(render, View/Layout) do
+after(render, View/ALayout) do
     push!(logs, :avl)
 end
 
@@ -58,12 +63,13 @@ conn = (Router)(get, "/")
 @test [:bvl,:bv,:av,:avl, :bvl,:bv,:av,:avl] == logs
 
 @test "<div>hello</div>" == render(View; path="renderers/page.tpl", contents="hello").resp_body
-@test "<html><body><div>hello</div><body></html>" == render(View/Layout; path="renderers/page.tpl", contents="hello").resp_body
+@test "<html><body><div>hello</div><body></html>" == render(View/ALayout; path="renderers/page.tpl", contents="hello").resp_body
 
 
 Logger.have_color(false)
+Logger.set_level(:info)
 
-before(render, Markdown/Layout) do md
+before(render, Markdown/ALayout) do md
     Logger.info("mark layout")
 end
 
@@ -72,26 +78,24 @@ before(render, Markdown) do md
 end
 
 let oldout = STDERR
-   rdout, wrout = redirect_stdout()
+    rdout, wrout = redirect_stdout()
 
-   conn = (Router)(get, "/mark")
+    conn = (Router)(get, "/mark")
 
-   reader = @async readstring(rdout)
-   redirect_stdout(oldout)
-   close(wrout)
+    reader = @async readstring(rdout)
+    redirect_stdout(oldout)
+    close(wrout)
 
-   @test "INFO  mark layout\nINFO  mark\n" == wait(reader)
+    @test "INFO  mark layout\nINFO  mark\n" == wait(reader)
 end
 
-
-before(render, View/Layout) do
+before(render, View/ALayout) do
     Logger.info("view layout")
 end
 
 before(render, View) do
     Logger.info("view")
 end
-
 
 let oldout = STDERR
     rdout, wrout = redirect_stdout()
@@ -104,3 +108,5 @@ let oldout = STDERR
 
     @test "INFO  view layout\nINFO  view\n" == wait(reader)
 end
+
+end # module test_renderers_view

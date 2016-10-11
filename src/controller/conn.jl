@@ -2,6 +2,8 @@
 
 include("status.jl")
 
+import HttpCommon: Cookie
+
 const bukdu_cookie_key = "_bukdu_cookie_key"
 const bukdu_secret_key = rand(UInt8, 32)
 
@@ -11,8 +13,6 @@ immutable Pipeline
     Pipeline(block::Function) = new(block, Vector{Function}())
     Pipeline(block::Function, only::Vector{Function}) = new(block, only)
 end
-
-import HttpCommon: Cookie
 
 type Conn
     ## Request fields
@@ -68,6 +68,11 @@ type Conn
             private                                      # private
         )
     end
+end
+
+immutable MissingConnError <: ApplicationError
+    conn::Conn
+    message::String
 end
 
 

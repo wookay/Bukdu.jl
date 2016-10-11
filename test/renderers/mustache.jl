@@ -1,4 +1,7 @@
+module test_renderers_mustache
+
 importall Bukdu
+import Base.Test: @test, @test_throws
 
 type PageController <: ApplicationController
 end
@@ -10,15 +13,17 @@ Router() do
 end
 
 
-using Base.Test
 conn = (Router)(get, "/1")
 @test 200 == conn.status
 @test "<div>hello</div>" == conn.resp_body
 @test "1" == conn.params["page"]
 @test "1" == conn.params[:page]
 
-layout(::Layout, body) = """<html><body>$body<body></html>"""
-index(c::PageController) = render(View/Layout; path="renderers/page.tpl", contents="hello")
+type ALayout <: ApplicationLayout
+end
+
+layout(::ALayout, body) = """<html><body>$body<body></html>"""
+index(c::PageController) = render(View/ALayout; path="renderers/page.tpl", contents="hello")
 
 Router() do
     get("/", PageController, index)
@@ -42,9 +47,9 @@ conn = (Router)(get, "/")
 empty!(logs)
 
 
-layout(::Layout, body, c::PageController, kwd) = """layout2 - $body, $c, $(kwd[:path])"""
+layout(::ALayout, body, c::PageController, kwd) = """layout2 - $body, $(c[:name]), $(kwd[:path])"""
 index2(c::PageController) = render(View, c; path="renderers/page.tpl", contents="hello")
-index_with_layout2(c::PageController) = render(View/Layout, c; path="renderers/page.tpl", contents="hello")
+index_with_layout2(c::PageController) = render(View/ALayout, c; path="renderers/page.tpl", contents="hello")
 
 Router() do
     get("/index2", PageController, index2)
@@ -57,32 +62,34 @@ conn = (Router)(get, "/index2")
 empty!(logs)
 
 before(render, View) do c
-    push!(logs, "before $c")
+    push!(logs, "before $(c[:name])")
 end
 
 after(render, View) do c
-    push!(logs, "after $c")
+    push!(logs, "after $(c[:name])")
 end
 
 conn = (Router)(get, "/index2")
 @test "<div>hello</div>" == conn.resp_body
-@test ["before PageController()","after PageController()"] == logs
+@test ["before PageController","after PageController"] == logs
 empty!(logs)
 
 conn = (Router)(get, "/index_with_layout2")
-@test "layout2 - <div>hello</div>, PageController(), renderers/page.tpl" == conn.resp_body
-@test ["before PageController()","after PageController()"] == logs
+@test "layout2 - <div>hello</div>, PageController, renderers/page.tpl" == conn.resp_body
+@test ["before PageController","after PageController"] == logs
 empty!(logs)
 
-before(render, View/Layout) do c
+before(render, View/ALayout) do c
     push!(logs, "bl")
 end
 
-after(render, View/Layout) do c
+after(render, View/ALayout) do c
     push!(logs, "al")
 end
 
 conn = (Router)(get, "/index_with_layout2")
-@test "layout2 - <div>hello</div>, PageController(), renderers/page.tpl" == conn.resp_body
-@test ["bl", "before PageController()","after PageController()", "al"] == logs
+@test "layout2 - <div>hello</div>, PageController, renderers/page.tpl" == conn.resp_body
+@test ["bl", "before PageController","after PageController", "al"] == logs
 empty!(logs)
+
+end # module test_renderers_mustache

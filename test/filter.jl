@@ -1,6 +1,10 @@
+module test_filter
+
 importall Bukdu
+import Base.Test: @test, @test_throws
 
 type WelcomeController <: ApplicationController
+    conn::Conn
 end
 
 show(::WelcomeController) = nothing
@@ -13,8 +17,6 @@ Router() do
     patch("/", WelcomeController, secret)
 end
 
-
-using Base.Test
 
 logs = []
 function before(c::WelcomeController)
@@ -32,3 +34,5 @@ conn = (Router)(post, "/")
 conn = (Router)(patch, "/")
 @test 200 == conn.status
 @test [show, create, secret] == logs
+
+end # module test_filter

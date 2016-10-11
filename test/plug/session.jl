@@ -1,8 +1,13 @@
+module test_plug_session
+
 importall Bukdu
 import HttpCommon: Cookie
+import Requests # Requests.get, Requests.post
 import Requests: URI, text, statuscode
+import Base.Test: @test, @test_throws
 
 type CookieController <: ApplicationController
+    conn::Conn
 end
 
 show(c::CookieController) =
@@ -27,8 +32,6 @@ Endpoint() do
     plug(Router)
 end
 
-
-using Base.Test
 
 Bukdu.start(8082)
 
@@ -62,3 +65,5 @@ resp3 = Requests.post(URI("http://localhost:8082/create"), cookies=resp1.cookies
 
 sleep(0.1)
 Bukdu.stop()
+
+end # module test_plug_session
