@@ -1,6 +1,6 @@
-module Bukdu
-
 __precompile__(true)
+
+module Bukdu
 
 include("exports.jl")
 
