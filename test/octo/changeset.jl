@@ -1,4 +1,4 @@
-module test_changeset
+module test_octo_changeset
 
 importall Bukdu
 importall Bukdu.Octo
@@ -39,4 +39,4 @@ changeset = change(model)
 @test model == changeset.model
 @test isempty(changeset.changes)
 
-end # module test_changeset
+end # module test_octo_changeset

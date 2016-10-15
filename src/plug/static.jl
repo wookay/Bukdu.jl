@@ -60,7 +60,7 @@ function plug(::Type{Plug.Static}; kw...)
             if root == from && "index.html" == filename
                 Routing.match(get, "/", StaticController, read, opts)
             end
-            reqpath = filepath[length(from)+1:end]
+            reqpath = joinpath(at, filepath[length(from)+2:end])
             Routing.match(get, reqpath, StaticController, read, opts)
         end
     end
