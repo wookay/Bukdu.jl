@@ -1,12 +1,12 @@
 importall Bukdu
 
-type VueController <: ApplicationController
+type D3Controller <: ApplicationController
 end
 
-index(::VueController) = redirect_to("/vuejs-index.html")
+index(::D3Controller) = redirect_to("/d3js-index.html")
 
 Router() do
-    get("/", VueController, index)
+    get("/", D3Controller, index)
 end
 
 Endpoint() do
