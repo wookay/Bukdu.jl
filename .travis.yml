@@ -10,7 +10,7 @@ notifications:
   email: false
 # uncomment the following lines to override the default test script
 script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia --color=yes -e 'Pkg.clone(pwd()); Pkg.build("Bukdu"); Pkg.test("Bukdu"; coverage=true)'
 after_success:
   # push coverage results to Coveralls

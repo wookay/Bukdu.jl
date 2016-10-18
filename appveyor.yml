@@ -26,7 +26,7 @@ install:
 
 build_script:
 # Need to convert from shallow to complete for Pkg.clone to work
-  - IF EXIST .git\shallow (git fetch --unshallow)
+  # - IF EXIST .git\shallow (git fetch --unshallow)
   - C:\projects\julia\bin\julia --color=yes -e "versioninfo();
       Pkg.clone(pwd(), \"Bukdu\"); Pkg.build(\"Bukdu\")"
 
