@@ -27,7 +27,7 @@ const levels = Dict{Union{Bool,Symbol},Int}(
 
 settings = Dict(
     :level => level_info,
-    :have_color => Base.have_color,
+    :have_color => 1==Base.JLOptions().color || Base.have_color,
     :have_datetime => false,
     :info_prefix => "INFO",
     :info_sub => "",
@@ -135,7 +135,11 @@ function trail(s::String, n)::String
 end
 
 function debug_verb(verb::Symbol, path::String)::Tuple
-    verb = lpad(uppercase(string(verb)), 4)
+    verb_color = :post==verb ? :yellow :
+                 :delete==verb ? :red :
+                 verb in (:patch, :put) ? :magenta :
+                 :normal
+    verb = with_color(verb_color, lpad(uppercase(string(verb)), 4))
     path_pad = settings[:path_padding]
     trailed_path = trail(path, path_pad)
     rpaded_path = with_color(:bold, rpad(trailed_path, path_pad))

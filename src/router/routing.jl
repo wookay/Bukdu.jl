@@ -184,9 +184,6 @@ function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoin
                     end
                     result = conn_bad_request(verb, path, ex, stackframes) # 400
                 end
-                if method_exists(after, (C,))
-                    after(controller)
-                end
                 ## Response fields - resp_body, resp_charset, resp_cookies, resp_headers, status, before_send
                 if isa(result, Conn)
                     put_status(conn, result.status)
@@ -195,6 +192,9 @@ function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoin
                 else
                     put_status(conn, :ok) # 200
                     conn.resp_body = result
+                end
+                if method_exists(after, (C,))
+                    after(controller)
                 end
                 return conn
             end
