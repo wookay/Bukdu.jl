@@ -7,7 +7,7 @@ import Base.Test: @test, @test_throws
 type WelcomeController <: ApplicationController
 end
 
-index(::WelcomeController) = "hello world"
+index(::WelcomeController) = redirect_to("/vuejs-index.html")
 
 Router() do
     get("/", WelcomeController, index)
@@ -21,14 +21,13 @@ Endpoint() do
     plug(Router)
 end
 
-conn = (Endpoint)("/index.html")
-@test 200 == conn.status
-@test "text/html" == conn.resp_headers["Content-Type"]
-@test startswith(String(conn.resp_body), "<!DOCTYPE html>")
-
 conn = (Endpoint)("/")
+@test 302 == conn.status
+@test "/vuejs-index.html" == conn.resp_headers["Location"]
+@test nothing == conn.resp_body
+
+conn = (Endpoint)("/vuejs-index.html")
 @test 200 == conn.status
-@test startswith(String(conn.resp_body), "<!DOCTYPE html>")
 
 conn = (Endpoint)("/js/vue.min.js")
 @test 200 == conn.status
@@ -55,14 +54,14 @@ end
 
 reload(Endpoint)
 
-@test 200 == (Router)(get, "/").status
-@test_throws NoRouteError (Router)(get, "/index.html")
+@test 302 == (Router)(get, "/").status
+@test_throws NoRouteError (Router)(get, "/vuejs-index.html")
 @test_throws NoRouteError (Router)(get, "/js/vue.min.js")
 @test_throws NoRouteError (Router)(get, "/css/style.css")
 @test_throws NoRouteError (Router)(get, "/data/vue.min.js")
 
-@test 200 == (Endpoint)("/").status
-@test_throws NoRouteError (Endpoint)("/index.html")
+@test 302 == (Endpoint)("/").status
+@test_throws NoRouteError (Endpoint)("/vuejs-index.html")
 @test_throws NoRouteError (Endpoint)("/js/vue.min.js")
 @test 200 == (Endpoint)("/css/style.css").status
 @test 200 == (Endpoint)("/data/vue.min.js").status
