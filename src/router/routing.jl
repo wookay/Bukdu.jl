@@ -16,6 +16,7 @@ import Bukdu: Logger
 import Bukdu.Logger: trail, debug_verb
 import URIParser: URI
 import HttpCommon: Cookie, parsequerystring
+isdefined(Base, :Iterators) && import Base.Iterators: filter
 
 const SLASH = '/'
 const COLON = ':'

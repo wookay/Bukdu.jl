@@ -4,6 +4,7 @@ import ..Bukdu
 import Bukdu: ApplicationController
 import Bukdu: Logger
 import Base: ==
+isdefined(Base, :Iterators) && import Base.Iterators: filter
 
 type Changeset
     model
