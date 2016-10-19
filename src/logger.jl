@@ -31,7 +31,7 @@ settings = Dict(
     :have_datetime => false,
     :info_prefix => "INFO",
     :info_sub => "",
-    :path_padding => 35
+    :path_padding => 39
 )
 
 fatal(block::Function) = settings[:level] >= level_fatal && fatal(block())
@@ -122,9 +122,24 @@ function set_path_padding(padding::Int)
     settings[:path_padding] = padding
 end
 
-function with_color(color::Symbol, text)::String
+function with_color(name::Symbol, text)::String
     if settings[:have_color]
-        string(Base.text_colors[color], text, Base.color_normal)
+        local dict = Dict(:color => Base.color_normal)
+        function set_color(c)
+            dict[:color] = c
+        end
+        if name in [:olive]
+            if haskey(Base.text_colors, 64)
+                :olive==name && set_color(Base.text_colors[64])
+            end
+        else
+            haskey(Base.text_colors, name) && set_color(Base.text_colors[name])
+        end
+        if Base.color_normal == dict[:color]
+            text
+        else
+            string(dict[:color], text, Base.color_normal)
+        end
     else
         string(text)
     end
@@ -134,13 +149,20 @@ function trail(s::String, n)::String
     length(s) > n > 2 ? string(s[1:n-2], "..") : s
 end
 
+const verb_colors = Dict(
+    :post => :yellow,
+    :delete => :red,
+    :head => :olive,
+    :options => :olive,
+    :patch => :magenta,
+    :put => :magenta
+)
+
 function debug_verb(verb::Symbol, path::String)::Tuple
-    verb_color = :post==verb ? :yellow :
-                 :delete==verb ? :red :
-                 verb in (:patch, :put) ? :magenta :
-                 :normal
-    verb = with_color(verb_color, lpad(uppercase(string(verb)), 4))
-    path_pad = settings[:path_padding]
+    verb_color = verb in keys(verb_colors) ? verb_colors[verb] : :normal
+    method = lpad(uppercase(string(verb)), 4)
+    verb = with_color(verb_color, method)
+    path_pad = settings[:path_padding] - length(method)
     trailed_path = trail(path, path_pad)
     rpaded_path = with_color(:bold, rpad(trailed_path, path_pad))
     (verb, rpaded_path)

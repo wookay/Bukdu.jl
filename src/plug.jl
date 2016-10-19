@@ -14,6 +14,7 @@ include("plug/upload.jl")
 include("plug/session.jl")
 include("plug/router.jl")
 include("plug/csrf_protection.jl")
+include("plug/cors.jl")
 include("plug/oauth2.jl")
 include("plug/logger.jl")
 

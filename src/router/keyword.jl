@@ -2,7 +2,9 @@
 
 module Keyword
 
-function get(dict::Dict, key::Symbol, default::Any)
+import ..Assoc
+
+function get(dict::Union{Dict,Assoc}, key::Union{Symbol,String}, default::Any)
     haskey(dict, key) ? dict[key] : default
 end
 
