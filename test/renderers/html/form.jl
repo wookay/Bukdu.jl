@@ -173,6 +173,9 @@ form = change(default(User), name="jack")
 <form class="ex" action="/test" method="get" accept-charset="utf-8">
 </form>""" == form_for((f)->"", form, class="ex", action="/test")
 
+
+Logger.set_level(:error)
+
 Bukdu.start(8082)
 resp1 = Requests.get(URI("http://localhost:8082/"))
 @test 200 == statuscode(resp1)

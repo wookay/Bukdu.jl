@@ -8,6 +8,9 @@ import Base.Test: @test, @test_throws
 Router() do
 end
 
+
+Logger.set_level(:error)
+
 Bukdu.start(8082)
 
 immutable Endpoint2 <: ApplicationEndpoint

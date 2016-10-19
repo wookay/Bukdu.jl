@@ -21,6 +21,8 @@ Endpoint() do
 end
 
 
+Logger.set_level(:error)
+
 Bukdu.start(8082)
 
 @test Requests.head(URI("http://localhost:8082/")).status == 200
@@ -35,6 +37,7 @@ reload(Endpoint)
 
 @test Requests.head(URI("http://localhost:8082/")).status == 200
 @test Requests.options(URI("http://localhost:8082/"), headers=Dict("Origin" => "http://localhost")).status == 405 # :method_not_allowed
+@test Requests.options(URI("http://localhost:8082/"), headers=Dict("Origin" => "http://github.com")).status == 204 # :no_content
 
 sleep(0.1)
 Bukdu.stop()
