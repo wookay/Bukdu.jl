@@ -180,6 +180,9 @@ Endpoint() do
     plug(Router)
 end
 
+
+Logger.set_level(:error)
+
 Bukdu.start(Endpoint, 8088)
 
 conn = (Endpoint)("/oauth_authorize")

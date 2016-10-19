@@ -150,9 +150,9 @@ function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoin
                 conn.query_params = query_params
                 conn.params = params
                 ## Connection fields - assigns, halted, state
-                conn.assigns = route.assigns
+                conn.assigns = copy(route.assigns)
                 ## Private fields - private
-                conn.private = route.private
+                conn.private = copy(route.private)
                 conn.private[:action] = route.action
                 conn.private[:endpoint] = isnull(endpoint) ? nothing : endpoint.value
                 if :conn in fieldnames(C) && (fieldtype(C, :conn) == Conn)
@@ -168,9 +168,7 @@ function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoin
                         route.action in pipe.only && pipe(conn)
                     end
                 end
-                if method_exists(before, (C,))
-                    before(controller)
-                end
+                applicable(before, controller) && before(controller)
                 result = nothing
                 try
                     Logger.debug() do
@@ -190,12 +188,10 @@ function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoin
                     conn.resp_headers = result.resp_headers
                     conn.resp_body = result.resp_body
                 else
-                    put_status(conn, :ok) # 200
+                    418 == conn.status && put_status(conn, :ok) # :im_a_teapot 418 => :ok 200
                     conn.resp_body = result
                 end
-                if method_exists(after, (C,))
-                    after(controller)
-                end
+                applicable(after, controller) && after(controller)
                 return conn
             end
         end

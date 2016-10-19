@@ -19,8 +19,10 @@ immutable Endpoint <: ApplicationEndpoint
 end
 
 function reload{AE<:ApplicationEndpoint}(::Type{AE})
-    context = Routing.endpoint_contexts[AE]
+    empty!(RouterScope.stack)
+    empty!(RouterScope.pipes)
     empty!(Routing.routes)
+    context = Routing.endpoint_contexts[AE]
     context()
     Routing.endpoint_routes[AE] = copy(Routing.routes)
     nothing

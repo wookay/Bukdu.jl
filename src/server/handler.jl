@@ -10,7 +10,7 @@ import Bukdu: ApplicationEndpoint, ApplicationError, Endpoint, Router, Conn
 import Bukdu: before, after, post, plug
 import Bukdu: parse_cookie_string
 import Bukdu: conn_error, conn_not_found, conn_application_error, conn_internal_server_error
-import Bukdu: NoRouteError
+import Bukdu: NoRouteError, HTTP_VERBS, put_status
 import Bukdu: Logger
 
 include("content_encoding.jl")
@@ -27,11 +27,19 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
     end
     local conn = Conn()
     routes = Routing.endpoint_routes[AE]
-    if method_exists(before, (Request,Response))
-        before(req, res)
-    end
+    applicable(before, req, res) && before(req, res)
     method = Symbol(lowercase(req.method))
-    verb = :head == method ? get : getfield(Bukdu, method)
+    if method in vcat(HTTP_VERBS, :head)
+        verb = :head == method ? get : getfield(Bukdu, method)
+        compare = (route) -> Base.function_name(route.verb) == Base.function_name(verb)
+    else
+        # options, trace, connect
+        function special_method
+        end
+        verb = special_method
+        compare = (route) -> true
+        put_status(conn, :method_not_allowed)
+    end
     try
         path = req.resource
         headers = Assoc(req.headers)
@@ -41,10 +49,8 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
             cookies = Vector{Cookie}()
         end
         req_data = req_data_by_content_encoding(req)::Vector{UInt8}
-        param_data = post==verb ? form_data_for_post(req.headers, req_data) : Assoc()
-        conn = Routing.request(conn, Nullable{Type{AE}}(AE), routes, method, path, headers, cookies, param_data) do route
-            Base.function_name(route.verb) == Base.function_name(verb)
-        end
+        param_data = :post==method ? form_data_for_post(req.headers, req_data) : Assoc()
+        conn = Routing.request(compare, conn, Nullable{Type{AE}}(AE), routes, method, path, headers, cookies, param_data)
     catch ex
         stackframes = stacktrace(catch_backtrace())
         conn = conn_error(method, req.resource, ex, stackframes)
@@ -59,19 +65,17 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
             setcookie!(res, cookie)
         end
     end
-    if :head == method
-        res.data = Vector{UInt8}()
-    else
+    if method in HTTP_VERBS
         if isa(conn.resp_body, Vector{UInt8}) || isa(conn.resp_body, String)
             res_data = Vector{UInt8}(conn.resp_body)
         else
             res_data = Vector{UInt8}(string(conn.resp_body))
         end
         res_data_by_accept_encoding!(res, req.headers, res_data)
+    else
+        res.data = Vector{UInt8}()
     end
-    if method_exists(after, (Request, Response))
-        after(req, res)
-    end
+    applicable(after, req, res) && after(req, res)
     res
 end
 

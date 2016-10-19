@@ -1,5 +1,4 @@
 """
-```
 
 # get a feed
 \$ curl http://localhost:8080/v2.8/me/feed
@@ -19,14 +18,18 @@
 # publishing : message is empty
 \$ curl -X POST http://localhost:8080/v2.8/me/feed
 
-```
 """
 module V28
 
 importall Bukdu
 import JSON
+import Base.Docs: meta, @var, parsedoc
 
 type UserController <: ApplicationController
+    conn::Conn
+end
+
+type PostController <: ApplicationController
     conn::Conn
 end
 
@@ -35,6 +38,8 @@ posts = [
     Dict("message" => "chord tracker", "created_time" => "2016-10-11T11:46:16+0000", "id" => "10152089774156129_1015392390403111"),
     Dict("message" => "yak shaving", "created_time" => "2016-10-12T11:46:16+0000", "id" => "10152089774156129_1015392390403112")
 ]
+
+index(::UserController) = render(HTML, parsedoc(meta(V28)[@var(V28)].docs[Union{}]))
 
 feed(::UserController) = render(JSON,
     Dict(
@@ -45,11 +50,8 @@ feed(::UserController) = render(JSON,
         )
     )
 )
-after(c::UserController) = Logger.info(c.conn.resp_headers["Content-Type"])
 
-type PostController <: ApplicationController
-    conn::Conn
-end
+after(c::Union{UserController,PostController}) = Logger.info(c[:path], " content_type:", c.conn.resp_headers["Content-Type"])
 
 function publishing(c::PostController)
     params = c[:query_params]
@@ -118,6 +120,7 @@ function updating(c::PostController)
 end
 
 function routes()
+    get("/", UserController, index)
     scope("/v2.8") do
         get("/me/feed", UserController, feed)
         post("/me/feed", PostController, publishing)
