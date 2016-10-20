@@ -10,10 +10,22 @@ import Base.Test: @test, @test_throws
 immutable CustomProvider <: OAuth2.Provider
 end
 
+immutable ProviderEndpoint <: ApplicationEndpoint
+end
+
 authorize_path(::Type{CustomProvider}) = "/login/oauth/authorize"
 access_token_path(::Type{CustomProvider}) = "/login/oauth/access_token"
-authorize_uri(P::Type{CustomProvider}) = "http://localhost:8089$(authorize_path(P))"
-access_token_uri(P::Type{CustomProvider}) = "http://localhost:8089$(access_token_path(P))"
+authorize_uri(P::Type{CustomProvider}) = "http://localhost:$port$(authorize_path(P))"
+access_token_uri(P::Type{CustomProvider}) = "http://localhost:$port$(access_token_path(P))"
+
+ProviderEndpoint() do
+    plug(Plug.Logger, level=:info)
+    plug(Plug.OAuth2.Provider, CustomProvider)
+end
+
+Logger.set_level(:error)
+
+port = Bukdu.start(ProviderEndpoint, :any)
 
 function json_error(error, error_description)
     # 400
@@ -44,7 +56,9 @@ function get_authorize(c::OAuthController{CustomProvider})
     json_error("access_denied", error_description)
 end
 
-authorization_callback_url = "http://localhost:8088/oauth2/custom/callback"
+clientport = Bukdu.start(Endpoint, :any)
+
+authorization_callback_url = "http://localhost:$clientport/oauth2/custom/callback"
 authorization_code = nothing
 state_for_csrf = string(Base.Random.uuid1())
 
@@ -84,15 +98,6 @@ function post_access_token(c::OAuthController{CustomProvider})
     json_error("access_denied", error_description)
 end
 
-immutable ProviderEndpoint <: ApplicationEndpoint
-end
-
-ProviderEndpoint() do
-    plug(Plug.Logger, level=:info)
-    plug(Plug.OAuth2.Provider, CustomProvider)
-end
-
-Bukdu.start(ProviderEndpoint, 8089)
 
 conn = (ProviderEndpoint)("/login/oauth/authorize", redirect_uri=authorization_callback_url, state=state_for_csrf)
 @test 200 == conn.status
@@ -110,7 +115,7 @@ oauth_scopes(::Type{CustomProvider}) = "public_repo"
 auth_scope = oauth_scopes(provider)
 
 authorization_code = nothing
-authorization_callback_uri = "https://localhost:8088$(callback_path(provider))"
+authorization_callback_uri = "https://localhost:$clientport$(callback_path(provider))"
 
 client_id = "client id"
 client_secret = "client secret"
@@ -179,11 +184,6 @@ end
 Endpoint() do
     plug(Router)
 end
-
-
-Logger.set_level(:error)
-
-Bukdu.start(Endpoint, 8088)
 
 conn = (Endpoint)("/oauth_authorize")
 @test 302 == conn.status

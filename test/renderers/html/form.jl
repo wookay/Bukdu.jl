@@ -176,12 +176,12 @@ form = change(default(User), name="jack")
 
 Logger.set_level(:error)
 
-Bukdu.start(8082)
-resp1 = Requests.get(URI("http://localhost:8082/"))
+port = Bukdu.start(:any)
+resp1 = Requests.get(URI("http://localhost:$port/"))
 @test 200 == statuscode(resp1)
 @test "<div>$contents</div>" == text(resp1)
 
-resp2 = Requests.post(URI("http://localhost:8082/post_result"), data=Dict("user_name"=>"foo bar"))
+resp2 = Requests.post(URI("http://localhost:$port/post_result"), data=Dict("user_name"=>"foo bar"))
 @test 200 == statuscode(resp2)
 @test """Bukdu.Octo.Changeset(test_renderers_html_form.User("foo bar",false,20,String[],"chicken","",0.5,Bukdu.Plug.Upload("","application/octet-stream",UInt8[])),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[]))""" == text(resp2)
 

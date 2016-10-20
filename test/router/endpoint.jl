@@ -11,12 +11,12 @@ end
 
 Logger.set_level(:error)
 
-Bukdu.start(8082)
+Bukdu.start(:any)
 
 immutable Endpoint2 <: ApplicationEndpoint
 end
 
-Bukdu.start(Endpoint2, 8083)
+Bukdu.start(Endpoint2, :any)
 
 sleep(0.1)
 Bukdu.stop()

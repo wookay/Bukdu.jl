@@ -22,7 +22,7 @@ Router() do
 end
 
 Endpoint() do
-    plug(Plug.Logger, level=:fatal)
+    plug(Plug.Logger, level=:error)
     plug(Router)
 end
 
@@ -52,8 +52,9 @@ res = Bukdu.Server.handler(Endpoint, req, Response())
 @test 404 == res.status
 
 
-Bukdu.start([8082, 8083])
+try
 
+Bukdu.start([8082, 8083])
 resp1 = Requests.get(URI("http://localhost:8082/"))
 resp2 = Requests.get(URI("http://localhost:8083/"))
 @test 200 == statuscode(resp1)
@@ -76,6 +77,9 @@ req.resource = "/"
 
 sleep(0.1)
 Bukdu.stop()
+
+end # try
+
 
 logs = []
 
@@ -101,9 +105,8 @@ after(render, Text/ALayout) do text
     push!(logs, :avl)
 end
 
-Bukdu.start(8082)
-resp1 = Requests.get(URI("http://localhost:8082/"))
-@test_throws Base.UVError Requests.get(URI("http://localhost:8083/"))
+port = Bukdu.start(:any)
+resp1 = Requests.get(URI("http://localhost:$port/"))
 @test 200 == statuscode(resp1)
 @test "hello world" == text(resp1)
 @test [:br,:bc,:bvl,:bv,:av,:avl,:ac,:ar] == logs
