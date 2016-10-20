@@ -18,22 +18,22 @@ end
 
 const unprotected_methods = [:head, :get, :options]
 
+function cookie_key(conn::Conn)::String
+    string(bukdu_cookie_key, '_', conn.port)
+end
+
 function check_csrf_token(conn::Conn)::Bool # throw InvalidCSRFTokenError
     conn.method in unprotected_methods && return false
     if haskey(conn.query_params, :_csrf_token)
         token = conn.query_params[:_csrf_token]
-        cookie = get_req_cookie(conn, bukdu_cookie_key)
+        cookie = get_req_cookie(conn, cookie_key(conn))
         if isa(cookie, Cookie)
             cipher_text = hex2bytes(cookie.value)
             try
                 plain = String(decrypt(CIPHER_AES, bukdu_secret_key, cipher_text))
-                if token == plain
-                    return true
-                end
+                token == plain && return true
             catch ex
-                if !isa(ex, MbedException)
-                    throw(ex)
-                end
+                !isa(ex, MbedException) && throw(ex)
             end
         end
     end
@@ -55,13 +55,13 @@ function generate_token()::Tuple{String,String}
     (token, cipher_text)
 end
 
-function get_csrf_token(conn::Conn)::Tuple{String,String}
+function get_csrf_token()::Tuple{String,String}
     (token, cipher_text) = generate_token()
 end
 
 function csrf_token(conn::Conn)
-    (token, cipher_text) = get_csrf_token(conn)
-    cookie = Cookie(bukdu_cookie_key, cipher_text, Dict{String,String}(
+    (token, cipher_text) = get_csrf_token()
+    cookie = Cookie(cookie_key(conn), cipher_text, Dict{String,String}(
         "expires" => Dates.format(Dates.now() + Dates.Hour(1), Dates.RFC1123Format)
     ))
     put_resp_cookie(conn, cookie)

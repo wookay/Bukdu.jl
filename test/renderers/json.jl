@@ -25,7 +25,7 @@ conn = (Router)(get, "/api/users")
 req = Request()
 req.method = "GET"
 req.resource = "/api/users"
-res = Bukdu.Server.handler(Endpoint, req, Response())
+res = Bukdu.Server.handler(Endpoint, 0, req, Response())
 @test 200 == res.status
 @test "application/json" == res.headers["Content-Type"]
 @test """\"hello\"""" == String(res.data)
@@ -55,7 +55,7 @@ end
 empty!(logs)
 req.method = "GET"
 req.resource = "/api/users/1"
-res = Bukdu.Server.handler(Endpoint, req, Response())
+res = Bukdu.Server.handler(Endpoint, 0, req, Response())
 @test 200 == res.status
 @test "application/json" == res.headers["Content-Type"]
 @test "[\"hello\"]" == String(res.data)

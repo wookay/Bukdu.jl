@@ -31,7 +31,8 @@ settings = Dict(
     :have_datetime => false,
     :info_prefix => "INFO",
     :info_sub => "",
-    :path_padding => 39
+    :path_padding => 39,
+    :hide => []
 )
 
 fatal(block::Function) = settings[:level] >= level_fatal && fatal(block())
@@ -39,6 +40,12 @@ error(block::Function) = settings[:level] >= level_error && error(block())
 warn(block::Function)  = settings[:level] >= level_warn && warn(block())
 info(block::Function)  = settings[:level] >= level_info && info(block())
 debug(block::Function) = settings[:level] >= level_debug && debug(block())
+
+fatal(block::Function, condition::Function) = settings[:level] >= level_fatal && condition() && fatal(block())
+error(block::Function, condition::Function) = settings[:level] >= level_error && condition() && error(block())
+warn(block::Function, condition::Function)  = settings[:level] >= level_warn && condition() && warn(block())
+info(block::Function, condition::Function)  = settings[:level] >= level_info && condition() && info(block())
+debug(block::Function, condition::Function) = settings[:level] >= level_debug && condition() && debug(block())
 
 fatal(args...; kw...) = settings[:level] >= level_fatal && print_log(:magenta, "FATAL", "", args...; kw...)
 error(args...; kw...) = settings[:level] >= level_error && print_log(:red, "ERROR", "", args...; kw...)
@@ -66,6 +73,10 @@ function set_level(lvl::Union{Symbol,Bool}) # throw ArgumentError
         valids = join(map(repr, keys(levels)), ", ")
         throw(ArgumentError("invalid argument for level"))
     end
+end
+
+function hide(T::Type)
+    push!(settings[:hide], T)
 end
 
 function inner_stackframes(stackframes::Vector{StackFrame}, with_color::Function)

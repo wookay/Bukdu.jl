@@ -1,10 +1,5 @@
 # module Bukdu.Plug
 
-import ..Bukdu
-
-immutable Logger
-end
-
 """
 plug `Plug.Logger` to write the event logs.
 
@@ -14,9 +9,9 @@ Endpoint() do
 end
 ```
 """
-function plug(::Type{Plug.Logger}; kw...)
+function plug(::Type{Val{:Logger}}; kw...)
     # level::Union{Symbol,Bool}
     opts = Dict(kw)
     level = haskey(opts, :level) ? opts[:level] : :debug
-    Bukdu.Logger.set_level(level)
+    Logger.set_level(level)
 end
