@@ -21,12 +21,12 @@ Router() do
 end
 
 
-Bukdu.start(8082)
+port = Bukdu.start(:any)
 
 content_type = "multipart/form-data; boundary=----WebKitFormBoundaryByeRpvTh1ib1g6pK"
 
 resp1 = Requests.post(
-    URI("http://localhost:8082/create");
+    URI("http://localhost:$port/create");
     headers=Dict(
         "Content-Encoding" => "gzip, deflate",
         "Content-Type"=>content_type
@@ -36,7 +36,7 @@ resp1 = Requests.post(
 @test "foo bar" == text(resp1)
 
 resp2 = Requests.post(
-    URI("http://localhost:8082/create");
+    URI("http://localhost:$port/create");
     gzip_data=true,
     headers=Dict("Content-Type" => content_type),
     data=inflate(deflated_data))

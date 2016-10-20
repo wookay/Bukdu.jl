@@ -30,14 +30,14 @@ Endpoint() do
 end
 
 
-Bukdu.start(8082)
+port = Bukdu.start(:any)
 
-resp1 = Requests.get(URI("http://localhost:8082/"))
+resp1 = Requests.get(URI("http://localhost:$port/"))
 token = match(r"value=\"(.*)\"", text(resp1))[1]
 
-@test 403 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>"")))
-@test 200 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token)))
-@test 200 == statuscode(Requests.post(URI("http://localhost:8082/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token)))
+@test 403 == statuscode(Requests.post(URI("http://localhost:$port/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>"")))
+@test 200 == statuscode(Requests.post(URI("http://localhost:$port/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token)))
+@test 200 == statuscode(Requests.post(URI("http://localhost:$port/post_result"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token)))
 
 sleep(0.1)
 Bukdu.stop()

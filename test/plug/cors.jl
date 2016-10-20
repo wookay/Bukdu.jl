@@ -23,10 +23,10 @@ end
 
 Logger.set_level(:error)
 
-Bukdu.start(8082)
+port = Bukdu.start(:any)
 
-@test Requests.head(URI("http://localhost:8082/")).status == 200
-@test Requests.options(URI("http://localhost:8082/"), headers=Dict("Origin" => "http://localhost")).status == 204 # :no_content
+@test Requests.head(URI("http://localhost:$port/")).status == 200
+@test Requests.options(URI("http://localhost:$port/"), headers=Dict("Origin" => "http://localhost")).status == 204 # :no_content
 
 Endpoint() do
     plug(Plug.CORS, allow_origin=["http://github.com"])
@@ -35,9 +35,9 @@ end
 
 reload(Endpoint)
 
-@test Requests.head(URI("http://localhost:8082/")).status == 200
-@test Requests.options(URI("http://localhost:8082/"), headers=Dict("Origin" => "http://localhost")).status == 405 # :method_not_allowed
-@test Requests.options(URI("http://localhost:8082/"), headers=Dict("Origin" => "http://github.com")).status == 204 # :no_content
+@test Requests.head(URI("http://localhost:$port/")).status == 200
+@test Requests.options(URI("http://localhost:$port/"), headers=Dict("Origin" => "http://localhost")).status == 405 # :method_not_allowed
+@test Requests.options(URI("http://localhost:$port/"), headers=Dict("Origin" => "http://github.com")).status == 204 # :no_content
 
 sleep(0.1)
 Bukdu.stop()
