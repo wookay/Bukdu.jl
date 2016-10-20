@@ -8,6 +8,7 @@ end
 module Plug
 
 import ..plug
+import ..Logger
 
 include("plug/static.jl")
 include("plug/upload.jl")

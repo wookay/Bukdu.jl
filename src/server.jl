@@ -6,7 +6,7 @@ include("server/handler.jl")
 module Farm
 
 import HttpServer
-servers = Dict{Type,Vector{Tuple{HttpServer.Server,Task}}}()
+servers = Dict{Type,Vector{HttpServer.Server}}()
 
 end # module Bukdu.Farm
 
@@ -79,13 +79,17 @@ else
 end
 
 function start_server{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getaddrinfo("localhost"); any_port=false, kw...)::Int
-    handler = (req::Request, res::Response) -> Server.handler(AE, req, res)
-    server = HttpServer.Server(handler)
     function listening(addr)
         addr_port = Logger.with_color(:bold, addr)
         Logger.info("Listening on $addr_port..."; LF=!isdefined(:Juno))
     end
-    server.http.events["listen"] = listening
+    function http_server(port::Int)::HttpServer.Server
+        handler = (req::Request, res::Response) -> Server.handler(AE, port, req, res)
+        server = HttpServer.Server(handler)
+        server.http.events["listen"] = listening
+        server
+    end
+    local server = nothing
     tc = Condition()
     task = @async begin
         if any_port
@@ -95,6 +99,7 @@ function start_server{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getad
                 if bind(sock, addr) && trylisten(sock) == 0
                     close(sock)
                     port = Int(addr.port)
+                    server = http_server(port)
                     notify(tc)
                     HttpServer.run(server, host=host, port=port; kw...)
                     break
@@ -104,15 +109,17 @@ function start_server{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getad
                 end
             end
         else
+            server = http_server(port)
+            notify(tc)
             HttpServer.run(server, host=host, port=port; kw...)
         end
     end
-    any_port && wait(tc)
+    wait(tc)
     if task.state in [:queued, :runnable]
         if !haskey(Farm.servers, AE)
-            Farm.servers[AE] = Vector{Tuple{HttpServer.Server,Task}}()
+            Farm.servers[AE] = Vector{HttpServer.Server}()
         end
-        push!(Farm.servers[AE], (server, task))
+        push!(Farm.servers[AE], server)
     end
     port
 end
@@ -130,13 +137,13 @@ end
 function stop{AE<:ApplicationEndpoint}(::Type{AE})::Void
     if haskey(Farm.servers, AE)
         stopped = 0
-        for (server, task) in Farm.servers[AE]
+        for server in Farm.servers[AE]
             try
                 if Base.StatusActive == server.http.sock.status
                     stopped += 1
                     close(server)
                 end
-            catch e
+            catch ex
             end
         end
         if stopped >= 1

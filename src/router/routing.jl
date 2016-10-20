@@ -101,7 +101,7 @@ function error_route(verb::Symbol, path::String, ex, callstack)
         callstack)
 end
 
-function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn # throw NoRouteError
+function route_request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn # throw NoRouteError
     uri = URI(path)
     reqsegs = split(uri.path, SLASH)
     length_reqsegs = length(reqsegs)
@@ -140,7 +140,7 @@ function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoin
                 if !isempty(param_data)
                     merge!(query_params, param_data)
                 end
-                ## Request fields - host, method, path, req_headers, scheme
+                ## Request fields - host, port, method, path, req_headers, scheme
                 conn.host = uri.host
                 conn.method = verb
                 conn.path = path
@@ -172,7 +172,7 @@ function request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoin
                 applicable(before, controller) && before(controller)
                 result = nothing
                 try
-                    Logger.debug() do
+                    Logger.debug(() -> !in(C, Logger.settings[:hide])) do
                         debug_route(route, verb, path, C)
                     end
                     result = route.action(controller)

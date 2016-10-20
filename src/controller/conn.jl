@@ -17,6 +17,7 @@ end
 type Conn
     ## Request fields
     host::String
+    port::Int
     method::Symbol
     path::String
     req_headers::Assoc
@@ -61,11 +62,11 @@ type Conn
 
     function Conn(code::Int, resp_headers::Dict{String,String}, resp_body::Any, params::Assoc, query_params::Assoc, private::Assoc, assigns::Assoc)
         new(
-            "", :get, "", Assoc(), :http,   # host, method, path, req_headers, scheme,
-            Vector{Cookie}(), query_params, params, # req_cookies, query_params, params,
+            "", 0, :get, "", Assoc(), :http,                                    # host, port, method, path, req_headers, scheme,
+            Vector{Cookie}(), query_params, params,                             # req_cookies, query_params, params,
             resp_body, "utf-8", Vector{Cookie}(), resp_headers, code, identity, # resp_body, resp_charset, resp_cookies, resp_headers, status, before_send,
-            assigns, false, :unset,                      # assigns, halted, state,
-            private                                      # private
+            assigns, false, :unset,                                             # assigns, halted, state,
+            private                                                             # private
         )
     end
 end
@@ -76,7 +77,7 @@ immutable MissingConnError <: ApplicationError
 end
 
 
-## Request fields - host, method, path, req_headers, scheme
+## Request fields - host, port, method, path, req_headers, scheme
 
 function get_req_header(conn::Conn, key::String)
     k = Symbol(key)

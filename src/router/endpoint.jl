@@ -40,7 +40,7 @@ function (::Type{AE}){AE<:ApplicationEndpoint}(path::String, headers=Assoc(), co
     conn = Conn()
     routes = haskey(Routing.endpoint_routes, AE) ? Routing.endpoint_routes[AE] : Vector{Route}()
     param_data = Assoc([(k, escape(v)) for (k,v) in kw])
-    Routing.request(conn, Nullable{Type{AE}}(AE), routes, :get, path, headers, cookies, param_data) do route
+    Routing.route_request(conn, Nullable{Type{AE}}(AE), routes, :get, path, headers, cookies, param_data) do route
         true
     end
 end

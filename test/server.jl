@@ -31,24 +31,24 @@ req = Request()
 
 req.method = "GET"
 req.resource = "/"
-res = Bukdu.Server.handler(Endpoint, req, Response())
+res = Bukdu.Server.handler(Endpoint, 0, req, Response())
 @test 200 == res.status
 @test "hello world" == String(res.data)
 
 req.method = "GET"
 req.resource = "/pi"
-res = Bukdu.Server.handler(Endpoint, req, Response())
+res = Bukdu.Server.handler(Endpoint, 0, req, Response())
 @test 200 == res.status
 @test "π = 3.1415926535897..." == String(res.data)
 
 req.method = "POST"
 req.resource = "/"
-res = Bukdu.Server.handler(Endpoint, req, Response())
+res = Bukdu.Server.handler(Endpoint, 0, req, Response())
 @test 404 == res.status
 
 req.method = "GET"
 req.resource = "/test"
-res = Bukdu.Server.handler(Endpoint, req, Response())
+res = Bukdu.Server.handler(Endpoint, 0, req, Response())
 @test 404 == res.status
 
 

@@ -1,6 +1,8 @@
+module Cafe
+
 importall Bukdu
 importall Bukdu.Octo
-importall Tag
+importall Bukdu.Tag
 
 type CafeController <: ApplicationController
     conn::Conn
@@ -108,7 +110,11 @@ end
 
 Bukdu.start(8080)
 
+Logger.hide(Plug.StaticController)
+
 (Endpoint)("/")
 Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
+
+end # module Cafe

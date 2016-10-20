@@ -19,13 +19,14 @@ include("form_data.jl")
 const commit_short = string(LibGit2.revparseid(LibGit2.GitRepo(Pkg.dir("Bukdu")), "HEAD"))[1:7]
 const info = "Bukdu (commit $commit_short) with Julia $VERSION"
 
-function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Response)::Response
+function handler{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, req::Request, res::Response)::Response
     if AE==Endpoint && !haskey(Routing.endpoint_routes, AE)
         Endpoint() do
             plug(Router)
         end
     end
     local conn = Conn()
+    conn.port = port
     routes = Routing.endpoint_routes[AE]
     applicable(before, req, res) && before(req, res)
     method = Symbol(lowercase(req.method))
@@ -50,7 +51,7 @@ function handler{AE<:ApplicationEndpoint}(::Type{AE}, req::Request, res::Respons
         end
         req_data = req_data_by_content_encoding(req)::Vector{UInt8}
         param_data = :post==method ? form_data_for_post(req.headers, req_data) : Assoc()
-        conn = Routing.request(compare, conn, Nullable{Type{AE}}(AE), routes, method, path, headers, cookies, param_data)
+        conn = Routing.route_request(compare, conn, Nullable{Type{AE}}(AE), routes, method, path, headers, cookies, param_data)
     catch ex
         stackframes = stacktrace(catch_backtrace())
         conn = conn_error(method, req.resource, ex, stackframes)
