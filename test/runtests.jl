@@ -3,7 +3,7 @@ for (root, dirs, files) in walkdir(".")
     for filename in files
         !endswith(filename, ".jl") && continue
         "runtests.jl" == filename && continue
-        filepath = replace(joinpath(root, filename), "./", "")
+        filepath = joinpath(root, filename)[3:end]
         push!(all_tests, filepath)
     end
 end

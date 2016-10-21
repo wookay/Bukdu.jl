@@ -61,6 +61,9 @@ function plug(::Type{Plug.Static}; kw...)
                 Routing.match(get, "/", StaticController, read, opts)
             end
             reqpath = joinpath(at, filepath[length(from)+2:end])
+            if is_windows()
+                reqpath = replace(reqpath, '\\', '/')
+            end
             Routing.match(get, reqpath, StaticController, read, opts)
         end
     end
