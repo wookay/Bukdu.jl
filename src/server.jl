@@ -6,7 +6,7 @@ include("server/handler.jl")
 module Farm
 
 import HttpServer
-servers = Dict{Type,Vector{HttpServer.Server}}()
+servers = Vector{Tuple{Type,Int,HttpServer.Server}}()
 
 end # module Bukdu.Farm
 
@@ -28,10 +28,6 @@ function start(port::Int, host=getaddrinfo("localhost"); kw...)::Void
     Bukdu.start([port], host; kw...)
 end
 
-function start{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getaddrinfo("localhost"); kw...)::Void
-    Bukdu.start(AE, [port], host; kw...)
-end
-
 """
     Bukdu.start(ports::Vector{Int}; host=getaddrinfo("localhost"))
 
@@ -44,6 +40,10 @@ Listening on 127.0.0.1:8080...
 """
 function start(ports::Vector{Int}, host=getaddrinfo("localhost"); kw...)::Void
     Bukdu.start(Endpoint, ports, host; kw...)
+end
+
+function start{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getaddrinfo("localhost"); kw...)::Void
+    Bukdu.start(AE, [port], host; kw...)
 end
 
 function start{AE<:ApplicationEndpoint}(::Type{AE}, ports::Vector{Int}, host=getaddrinfo("localhost"); kw...)::Void
@@ -80,8 +80,9 @@ end
 
 function start_server{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getaddrinfo("localhost"); any_port=false, kw...)::Int
     function listening(addr)
-        addr_port = Logger.with_color(:bold, addr)
-        Logger.info("Listening on $addr_port..."; LF=!isdefined(:Juno))
+        use_https = haskey(Dict(kw), :ssl)
+        address = Logger.with_color(:bold, string(use_https ? "https" : "http", "://", addr))
+        Logger.info("Listening on $address"; LF=!isdefined(:Juno))
     end
     function http_server(port::Int)::HttpServer.Server
         handler = (req::Request, res::Response) -> Server.handler(AE, port, req, res)
@@ -116,14 +117,10 @@ function start_server{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getad
     end
     wait(tc)
     if task.state in [:queued, :runnable]
-        if !haskey(Farm.servers, AE)
-            Farm.servers[AE] = Vector{HttpServer.Server}()
-        end
-        push!(Farm.servers[AE], server)
+        push!(Farm.servers, (AE, port, server))
     end
     port
 end
-
 
 """
     Bukdu.stop()
@@ -131,26 +128,33 @@ end
 Stop the Bukdu server.
 """
 function stop()::Void
-    Bukdu.stop(Endpoint)
+    stop_servers([port for (E,port,server) in Farm.servers])
+end
+
+function stop(port::Int)::Void
+    stop_servers([port])
 end
 
 function stop{AE<:ApplicationEndpoint}(::Type{AE})::Void
-    if haskey(Farm.servers, AE)
-        stopped = 0
-        for server in Farm.servers[AE]
-            try
-                if Base.StatusActive == server.http.sock.status
-                    stopped += 1
-                    close(server)
-                end
-            catch ex
+    stop_servers([port for (E,port,server) in Farm.servers if AE==E])
+end
+
+function stop_servers(ports::Vector{Int})::Void
+    inds = []
+    stopped = []
+    for (idx, (E,port,server)) in enumerate(Farm.servers)
+        try
+            if port in ports && Base.StatusActive == server.http.sock.status
+                push!(inds, idx)
+                push!(stopped, port)
+                close(server)
             end
+        catch ex
         end
-        if stopped >= 1
-            Logger.info("Stopped.")
-            empty!(Farm.servers[AE])
-            delete!(Farm.servers, AE)
-        end
+    end
+    if !isempty(inds)
+        deleteat!(Farm.servers, inds)
+        Logger.info(string("Stopped ", "(", join(stopped, ", "), ")"))
     end
     nothing
 end
