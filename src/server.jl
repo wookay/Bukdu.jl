@@ -166,7 +166,10 @@ function reset()
               Routing.endpoint_contexts,
               RouterScope.stack,
               RouterScope.pipes,
-              ViewFilter.filters]
+              ViewFilter.filters,
+              Octo.Repo.models,
+              Octo.Repo.relations,
+              Octo.Query.models]
         empty!(x)
     end
     Logger.have_color(Base.have_color)

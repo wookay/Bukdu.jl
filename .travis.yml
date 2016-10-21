@@ -13,7 +13,4 @@ script:
   # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia --color=yes -e 'Pkg.clone(pwd()); Pkg.build("Bukdu"); Pkg.test("Bukdu"; coverage=true)'
 after_success:
-  # push coverage results to Coveralls
-  - julia --color=yes -e 'cd(Pkg.dir("Bukdu")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
-  # push coverage results to Codecov
-  - julia --color=yes -e 'cd(Pkg.dir("Bukdu")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
+  - julia --color=yes -e 'cd(Pkg.dir("Bukdu")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(Codecov.process_folder())'
