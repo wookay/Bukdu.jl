@@ -14,6 +14,7 @@ include("octo/natural.jl")
 
 export Repo
 export schema, has_many
+include("octo/database.jl")
 include("octo/repo.jl")
 include("octo/query.jl")
 
