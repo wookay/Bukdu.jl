@@ -65,5 +65,6 @@ reload(Endpoint)
 @test_throws NoRouteError (Endpoint)("/js/vue.min.js")
 @test 200 == (Endpoint)("/css/style.css").status
 @test 200 == (Endpoint)("/data/vue.min.js").status
+@test 200 == (Endpoint)("//data/vue.min.js").status
 
 end # module test_plug_static

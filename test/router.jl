@@ -20,6 +20,7 @@ index(::UserController) = "index user"
 show(c::UserController) = c[:params]
 
 Router() do
+    get("/", PageController, index)
     resources("/pages", PageController) do
         resources("/users", UserController)
     end
@@ -27,6 +28,7 @@ end
 
 
 Logger.set_level(:error)
+
 conn = (Router)(get, "/pages")
 @test conn.status == 200
 @test conn.resp_body == "index page"
@@ -52,6 +54,31 @@ conn = (Router)(delete, "/pages/1")
 @test conn.status == 200
 
 @test_throws NoRouteError (Router)(get, "/unknown/1")
+
+
+# issue 28
+
+conn = (Router)(get, "//")
+@test conn.status == 200
+
+Endpoint() do
+    plug(Router)
+end
+
+conn = (Endpoint)("//")
+@test conn.status == 200
+
+conn = (Endpoint)("///")
+@test conn.status == 200
+
+conn = (Endpoint)("/////////////")
+@test conn.status == 200
+
+conn = (Endpoint)("//pages//1")
+@test conn.status == 200
+@test conn.resp_body == 1
+@test conn.params["id"] == "1"
+
 
 reset(Router)
 
