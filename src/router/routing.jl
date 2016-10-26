@@ -101,9 +101,14 @@ function error_route(verb::Symbol, path::String, ex, callstack)
         callstack)
 end
 
+function squeeze_multiple_slashes(path::String)::String
+    replace(path, r"/+", "/")
+end
+
 function route_request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn # throw NoRouteError
     uri = URI(path)
-    reqsegs = split(uri.path, SLASH)
+    uri_path = squeeze_multiple_slashes(uri.path)
+    reqsegs = split(uri_path, SLASH)
     length_reqsegs = length(reqsegs)
     for route in routes
         if compare(route)
@@ -124,7 +129,7 @@ function route_request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, e
                     end
                 end
             elseif :matchall == route.kind
-                matched = startswith(path, route.path)
+                matched = startswith(uri_path, route.path)
             end
             if matched
                 function startswithcolon(idx_rouseg)
@@ -143,7 +148,7 @@ function route_request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, e
                 ## Request fields - host, port, method, path, req_headers, scheme
                 conn.host = uri.host
                 conn.method = verb
-                conn.path = path
+                conn.path = uri_path
                 conn.req_headers = headers
                 conn.scheme = uri.scheme
                 ## Fetchable fields - req_cookies, query_params, params
