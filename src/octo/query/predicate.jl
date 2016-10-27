@@ -1,5 +1,5 @@
+# module Bukdu.Octo.Query
 
-# Predicate
 type Predicate
     iden::Function
     f::Function
@@ -10,19 +10,19 @@ type Predicate
 end
 
 function isless(n::Int64, field::Field)::Predicate
-    Predicate(<, n, field.name)
+    Predicate(<, n, field)
 end
 
 function isless(field::Field, n::Int64)::Predicate
-    Predicate(>, n, field.name)
+    Predicate(>, n, field)
 end
 
 function ==(n::Int, field::Field)::Predicate
-    Predicate(==, n, field.name)
+    Predicate(==, n, field)
 end
 
 function ==(field::Field, n::Int)::Predicate
-    Predicate(==, n, field.name)
+    Predicate(==, n, field)
 end
 
 function !(pred::Predicate)::Predicate
@@ -34,7 +34,7 @@ function ==(lhs::Predicate, rhs::Predicate)::Bool
 end
 
 function in(field::Field, vec::Vector{Int})::Predicate
-    Predicate(in, field.name, vec)
+    Predicate(in, field, vec)
 end
 
 # and
@@ -47,3 +47,10 @@ function (|)(lhs::Predicate, rhs::Predicate)::Predicate
     Predicate(|, lhs, rhs)
 end
 
+function tables(pred::Predicate)::Vector{Type}
+    set = Set()
+    for x in [pred.first, pred.second]
+        isa(x, Field) && push!(set, x.typ)
+    end
+    Vector(collect(set))
+end

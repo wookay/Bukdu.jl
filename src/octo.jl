@@ -12,10 +12,15 @@ include("octo/changeset.jl")
 export singularize, pluralize
 include("octo/natural.jl")
 
-export Repo
-export schema, has_many
+export Database, Adapter
 include("octo/database.jl")
+
+export Repo
 include("octo/repo.jl")
+
+export Schema, PrimaryKey, Field, schema, has_many
+include("octo/schema.jl")
+
 include("octo/query.jl")
 
 end # module Bukdu.Octo

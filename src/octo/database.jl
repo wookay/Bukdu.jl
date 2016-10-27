@@ -12,10 +12,12 @@ type NoAdapterError
     message::String
 end
 
-type Adapter{T}
+type NotImplementedError
+    message
 end
 
-include("adapters/dict.jl")
+type Adapter{T}
+end
 
 function get_adapter() # throw NoAdapterError
     adapter = settings[:adapter]
@@ -25,7 +27,17 @@ end
 
 function set_adapter(T::Type)
     settings[:adapter] = Adapter{T}
-    include(normpath(dirname(@__FILE__), "adapters/dict.jl"))
+    enable(settings[:adapter])
+end
+
+function enable{A<:Adapter}(::Type{A})
+    !applicable(get, A, Any, 0) &&
+        include(normpath(dirname(@__FILE__), "adapters/dict.jl"))
+end
+
+function reset
 end
 
 end # module Bukdu.Octo.Database
+
+import .Database: Adapter
