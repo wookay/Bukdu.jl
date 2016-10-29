@@ -24,6 +24,7 @@ end
 
 @test isdefined(Schema.A, :User)
 
+#=
 @test_throws NoAdapterError Repo.insert(User, name="foo bar", age=20)
 
 Repo.set_adapter(Dict)
@@ -50,5 +51,6 @@ comments = user.comments
 Database.reset(Adapter{Dict})
 #@test 2 == length(collect(comments))
 #@test [Comment(PrimaryKey(1), "1"),Comment(PrimaryKey(2), "2")] == collect(comments)
-#
+
+=#
 end # module test_octo_repo

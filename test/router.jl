@@ -80,7 +80,7 @@ conn = (Endpoint)("//pages//1")
 @test conn.params["id"] == "1"
 
 
-reset(Router)
+Bukdu.reset(Router)
 
 @test_throws NoRouteError (Router)(get, "/pages")
 

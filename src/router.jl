@@ -1,6 +1,5 @@
 # module Bukdu
 
-import Base: reset
 import URIParser: URI, escape
 
 """

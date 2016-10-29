@@ -18,10 +18,14 @@ include("octo/database.jl")
 export Repo
 include("octo/repo.jl")
 
-export Schema, PrimaryKey, Field, schema, has_many
+export Schema, PrimaryKey, Field, schema, field, has_many, has_one, belongs_to
 include("octo/schema.jl")
-
 include("octo/query.jl")
+
+export SQL
+include("octo/sql.jl")
+
+include("octo/adapters/base.jl")
 
 end # module Bukdu.Octo
 

@@ -9,16 +9,16 @@ type Predicate
     Predicate(iden::Function, f::Function, first::Any, second::Any) = new(iden, f, first, second)
 end
 
-function isless(n::Int64, field::Field)::Predicate
-    Predicate(<, n, field)
+function isless(a::Any, field::Field)::Predicate
+    Predicate(<, a, field)
 end
 
-function isless(field::Field, n::Int64)::Predicate
-    Predicate(>, n, field)
+function isless(field::Field, a::Any)::Predicate
+    Predicate(>, a, field)
 end
 
-function ==(n::Int, field::Field)::Predicate
-    Predicate(==, n, field)
+function ==(a::Any, field::Field)::Predicate
+    Predicate(==, a, field)
 end
 
 function ==(field::Field, n::Int)::Predicate
@@ -33,24 +33,32 @@ function ==(lhs::Predicate, rhs::Predicate)::Bool
     ==(lhs.iden, rhs.iden) && ==(lhs.f, rhs.f) && ==(lhs.first, rhs.first) && ==(lhs.second, rhs.second)
 end
 
-function in(field::Field, vec::Vector{Int})::Predicate
-    Predicate(in, field, vec)
+function and(lhs::Predicate, rhs::Predicate)::Predicate
+    Predicate(and, lhs, rhs)
 end
 
-# and
 function (&)(lhs::Predicate, rhs::Predicate)::Predicate
-    Predicate(&, lhs, rhs)
+    and(lhs, rhs)
 end
 
-# or
+function or(lhs::Predicate, rhs::Predicate)::Predicate
+    Predicate(or, lhs, rhs)
+end
+
 function (|)(lhs::Predicate, rhs::Predicate)::Predicate
-    Predicate(|, lhs, rhs)
+    or(lhs, rhs)
 end
 
-function tables(pred::Predicate)::Vector{Type}
-    set = Set()
-    for x in [pred.first, pred.second]
-        isa(x, Field) && push!(set, x.typ)
-    end
-    Vector(collect(set))
-end
+in(field::Field, vec::Vector)::Predicate = Predicate(in, field, vec)
+in(field::Field, range::UnitRange)::Predicate = Predicate(in, field, collect(range))
+not_in(field::Field, vec::Vector)::Predicate = Predicate(!, in, field, vec)
+not_in(field::Field, range::UnitRange)::Predicate = Predicate(!, in, field, collect(range))
+
+is_null(field::Field)::Predicate = Predicate(is_null, field, nothing)
+is_not_null(field::Field)::Predicate = Predicate(!, is_null, field, nothing)
+
+between(field::Field, range::UnitRange) = Predicate(between, field, range)
+between(field::Field, start::Int, stop::Int) = between(field, start:stop)
+
+like(field::Field, s::String) = Predicate(like, field, s)
+not_like(field::Field, s::String) = Predicate(!, like, field, s)

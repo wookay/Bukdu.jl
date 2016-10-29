@@ -4,7 +4,11 @@ import .Bukdu.Octo
 import .Octo.Database: Adapter, reset
 import .Octo.Repo: insert
 import .Octo.Query
-import .Octo.Query: From, Predicate, SubQuery, in, statement
+import .Octo.Query: From, Select, Predicate, SubQuery, Parameter, statement
+import .Octo.Query: and, or, between
+import .Octo.Query: in, is_null, like
+import .Octo.Query: not_in, is_not_null, not_like
+import .Octo.Schema
 isdefined(Base, :Iterators) && import Base.Iterators: Filter
 
 dict = Dict()
@@ -39,49 +43,4 @@ function insert(::Type{Adapter{Dict}}, T::Type; kw...)
         end
     end
     dict[T][id] = typ(fields...)
-end
-
-function select_clause(select)::String
-    string("select", " ", select)
-end
-
-function from_clause(from::From)::String
-    tables = from.tables
-    list = Vector{String}()
-    for table in tables
-        table_name = Query.table_name(table)
-        alias = Query.table_alias_name(tables, table)
-        push!(list, string(table_name, " as ", alias))
-    end
-    string("from", " ", join(list, ", "))
-end
-
-function normalize(from::From, field::Field)::String
-    alias = Query.table_alias_name(from.tables, field.typ)
-    string(alias, '.', field.name)
-end
-
-function normalize(from::From, value::Any)::String
-    string(value)
-end
-
-function normalize(from::From, pred::Predicate)::String
-    l = normalize(from, pred.first)
-    r = normalize(from, pred.second)
-    string(l, ' ', pred.f, ' ', r)
-end
-
-function where_clause(from::From, pred::Predicate)::String
-    string("where", " ", normalize(from, pred))
-end
-
-function statement(::Type{Adapter{Dict}}, sub::SubQuery)::String
-    select = select_clause(sub.select)
-    from = from_clause(sub.from)
-    where = where_clause(sub.from, sub.where)
-    clauses = Vector{String}()
-    for x in [select, from, where]
-        !isempty(x) && push!(clauses, x)
-    end
-    join(clauses, ' ')
 end

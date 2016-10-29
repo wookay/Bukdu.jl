@@ -2,42 +2,43 @@
 
 module Database
 
-export Adapter, NoAdapterError
+export Adapter
+import Base: reset
+
+include("adapters.jl")
+
+import .Adapter: DatabaseAdapter, NoAdapter, NoAdapterError
 
 settings = Dict{Symbol,Any}(
-    :adapter => nothing
+    :adapter => Adapter.NoAdapter(),
+    :automatically_install_packages => false
 )
 
-type NoAdapterError
-    message::String
-end
-
-type NotImplementedError
-    message
-end
-
-type Adapter{T}
-end
-
-function get_adapter() # throw NoAdapterError
+function get_adapter()::DatabaseAdapter # <: DatabaseAdapter
+                             # throw NoAdapterError
     adapter = settings[:adapter]
-    isa(adapter, Void) && throw(NoAdapterError(""))
+    isa(adapter, NoAdapter) && throw(NoAdapterError(""))
     adapter
 end
 
-function set_adapter(T::Type)
-    settings[:adapter] = Adapter{T}
-    enable(settings[:adapter])
+function set_adapter{A<:DatabaseAdapter}(adapter::A)
+    settings[:adapter] = adapter
 end
 
-function enable{A<:Adapter}(::Type{A})
-    !applicable(get, A, Any, 0) &&
-        include(normpath(dirname(@__FILE__), "adapters/dict.jl"))
+function setup{A<:DatabaseAdapter}(block::Function, ::Type{A})::A
+    name = lowercase(string(A.name.name))
+    adapter = A()
+    !applicable(connect, adapter) &&
+        include(normpath(dirname(@__FILE__), "adapters/$name.jl"))
+    block(adapter)
+    set_adapter(adapter)
+    adapter
 end
 
-function reset
+function reset()
+    reset(get_adapter())
 end
 
 end # module Bukdu.Octo.Database
 
-import .Database: Adapter
+import .Database: Adapter, reset
