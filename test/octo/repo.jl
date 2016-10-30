@@ -2,7 +2,9 @@ module test_octo_repo
 
 importall Bukdu
 importall Bukdu.Octo
+importall Bukdu.Octo.Query
 importall Bukdu.Octo.Repo
+import Bukdu.Octo.Adapter: NoAdapterError
 import Base.Test: @test, @test_throws
 
 type User
@@ -16,7 +18,7 @@ type Comment
     body::String
 end
 
-#@test !isdefined(Schema.A, :User)
+#Logger.set_level(:debug)
 
 schema(User) do user
     has_many(user, :comments, Comment)
@@ -24,33 +26,79 @@ end
 
 @test isdefined(Schema.A, :User)
 
-#=
-@test_throws NoAdapterError Repo.insert(User, name="foo bar", age=20)
+user = User(0, "foo bar", 20)
+insertquery = Query.insert(user)
+@test isa(insertquery, InsertQuery)
 
-Repo.set_adapter(Dict)
+@test_throws NoAdapterError Query.statement(Query.insert(User, name="foo bar", age=20))
 
-user = Repo.insert(User, name="foo bar", age=20)
-@test isa(user, Schema.A.User)
+adapter = Database.setup(Adapter.MySQL) do adapter
+    connect(adapter, host="127.0.0.1", user="root", pass="", db="")
+end
 
-comment = Repo.insert(Comment, user_id=user.id, body="1")
-@test isa(comment, Schema.A.Comment)
+function init_test()
+    SQL.execute("DROP DATABASE IF EXISTS mysqltest;")
+    SQL.execute("GRANT USAGE ON *.* TO 'test'@'127.0.0.1';")
+    SQL.execute("DROP USER 'test'@'127.0.0.1';")
+end
 
-comment = Repo.insert(Comment, user_id=user.id, body="2")
+function create_test_database()
+    SQL.execute("CREATE DATABASE mysqltest;")
+    SQL.execute("CREATE USER test@127.0.0.1 IDENTIFIED BY 'test';")
+    SQL.execute("GRANT ALL ON mysqltest.* TO test@127.0.0.1;")
+end
 
-user = Repo.get(User, 1)
-@test isa(user, Schema.A.User)
-@test isa(user.id, Int)
-@test isa(user.name, String)
-@test 1 == user.id
-@test "foo bar" == user.name
+init_test()
+create_test_database()
+disconnect(adapter)
 
-@test isa(user.comments, Base.Generator)
+connect(adapter, host="127.0.0.1", user="test", pass="test", db="mysqltest")
 
-comments = user.comments
+SQL.execute("""CREATE TABLE users
+                 (
+                     ID INT NOT NULL AUTO_INCREMENT,
+                     name VARCHAR(255),
+                     age INT,
+                     Salary FLOAT(7,2),
+                     PRIMARY KEY (ID)
+                 );""")
 
-Database.reset(Adapter{Dict})
-#@test 2 == length(collect(comments))
-#@test [Comment(PrimaryKey(1), "1"),Comment(PrimaryKey(2), "2")] == collect(comments)
+@test "INSERT INTO users (name, age) VALUES ('foo bar', 20)" == Query.statement(Query.insert(User, name="foo bar", age=20))
+@test "INSERT INTO users (name, age) VALUES (?, ?)" == Query.statement(Query.insert(User, name=?, age=?))
 
-=#
+# insert
+SQL.insert(Query.insert(User, name="foo bar", age=20))
+Repo.insert(User, name="bar", age=20)
+
+hey = User(0, "hey", 30)
+Repo.insert(hey)
+
+# SQL.all(from(User))
+
+if !isa(adapter.handle, Void)
+
+    user1 = Repo.get(User, 1)
+    @test isa(user1, User)
+    @test "foo bar" == user1.name
+    
+    user2 = Repo.get(User, 2)
+    @test isa(user2, User)
+    @test "bar" == user2.name
+    
+    user1000 = Repo.get(User, 1000)
+    @test isa(user1000, Void)
+    
+    u = in(User)
+    users = Repo.get(Vector{User}, where= u.age == 20)
+    @test isa(users, Vector{User})
+    @test 2 == length(users)
+    
+    users = Repo.get(Vector{User}, where= or(u.age == 20, u.name == "hey"))
+    @test 3 == length(users)
+
+    disconnect(adapter)
+end
+
+Database.reset()
+
 end # module test_octo_repo

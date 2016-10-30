@@ -32,6 +32,7 @@ end # module Bukdu.Octo.Schema.A
 
 Base.convert{T}(::Type{PrimaryKey{T}}, id::T) = PrimaryKey{T}(id)
 Base.convert(::Type{PrimaryKey}, id::Int) = PrimaryKey{Int}(id)
+Base.convert(::Type{PrimaryKey}, id::Int32) = PrimaryKey{Int}(id)
 
 ==(lhs::PrimaryKey, rhs::PrimaryKey) = ==(lhs.id, rhs.id)
 

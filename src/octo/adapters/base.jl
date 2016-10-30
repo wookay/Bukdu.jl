@@ -4,8 +4,8 @@ module LoadAdapterBase
 
 import ..Database.Adapter: AdapterBase
 import ..Query
-import .Query: From, Select, Predicate, SubQuery, statement
-import .Query: and, or, between
+import .Query: From, Select, Predicate, SubQuery, InsertQuery
+import .Query: statement, and, or, between
 import .Query: in, is_null, like, exists
 import .Query: not_in, is_not_null, not_like, not_exists
 import .Query: order_not_specified, asc, desc
@@ -43,7 +43,12 @@ end
 
 function select_clause(adapter::AdapterBase, sub::SubQuery)::String
     name = uppercase(replace(string(sub.select.name), '_', ' '))
-    string(name, ' ', normalize(adapter, sub, sub.select.value))
+    if isa(sub.select.value, Vector{Symbol})
+        fields = join(sub.select.value, ", ")
+    else
+        fields = normalize(adapter, sub, sub.select.value)
+    end
+    string(name, ' ', fields)
 end
 
 function from_clause(adapter::AdapterBase, sub::SubQuery)::String
@@ -51,10 +56,10 @@ function from_clause(adapter::AdapterBase, sub::SubQuery)::String
     list = Vector{String}()
     for table in tables
         table_name = Query.table_name(table)
-        alias = Query.table_alias_name(tables, table)
-        push!(list, string(table_name, " ", uppercase("as"), " ", alias))
+        alias = Query.table_alias_name(collect(tables), table)
+        push!(list, string(table_name, ' ', uppercase("as"), ' ', alias))
     end
-    string(uppercase("from"), " ", join(list, ", "))
+    string(uppercase("from"), ' ', join(list, ", "))
 end
 
 function where_clause(adapter::AdapterBase, sub::SubQuery)::String
@@ -63,7 +68,7 @@ function where_clause(adapter::AdapterBase, sub::SubQuery)::String
         ""
     else
         pred = predicate.value
-        string(uppercase("where"), " ", normalize(adapter, sub, pred))
+        string(uppercase("where"), ' ', normalize(adapter, sub, pred))
     end
 end
 
@@ -75,37 +80,31 @@ function order_by_clause(adapter::AdapterBase, sub::SubQuery)::String
         orders = map(order.value.fields) do pred
             normalize(adapter, sub, pred)
         end
-        string(uppercase("order by"), " ", join(orders, ", "))
+        string(uppercase("order by"), ' ', join(orders, ", "))
     end
 end
 
 function limit_clause(adapter::AdapterBase, sub::SubQuery)::String
-    predicate = sub.limit
-    if isnull(predicate)
+    n = sub.limit
+    if isnull(n)
         ""
     else
-        pred = predicate.value
-        string(uppercase("limit"), " ", normalize(adapter, sub, pred))
+        string(uppercase("limit"), ' ', normalize(adapter, sub, n.value))
     end
 end
 
 function offset_clause(adapter::AdapterBase, sub::SubQuery)::String
-    predicate = sub.offset
-    if isnull(predicate)
+    n = sub.offset
+    if isnull(n)
         ""
     else
-        pred = predicate.value
-        string(uppercase("offset"), " ", normalize(adapter, sub, pred))
+        string(uppercase("offset"), ' ', normalize(adapter, sub, n.value))
     end
 end
 
 function normalize(adapter::AdapterBase, sub::SubQuery, field::Field)::String
-    alias = Query.table_alias_name(sub.from.tables, field.typ)
+    alias = Query.table_alias_name(collect(sub.from.tables), field.typ)
     string(alias, '.', field.name)
-end
-
-function normalize(adapter::AdapterBase, sub::SubQuery, param::Type{Query.?})
-    "?"
 end
 
 function normalize(adapter::AdapterBase, sub::SubQuery, vec::Vector{Field})::String
@@ -122,8 +121,16 @@ function normalize(adapter::AdapterBase, sub::SubQuery, s::SubQuery)::String
     statement(adapter, s)
 end
 
-function normalize(adapter::AdapterBase, sub::SubQuery, value::Any)::Union{Void,String}
+function normalize(adapter::AdapterBase, sub::SubQuery, param::Type{Query.?})::String
+    normalize(param)
+end
+
+function normalize(adapter::AdapterBase, sub::Union{SubQuery,InsertQuery}, value::Any)::Union{Void,String}
     normalize(value)
+end
+
+function normalize(param::Type{Query.?})::String
+    "?"
 end
 
 function normalize(s::String)::String
@@ -151,9 +158,9 @@ function normalize(adapter::AdapterBase, sub::SubQuery, pred::Predicate)::String
         elseif pred.f in [in, exists]
             f = uppercase(string(Base.function_name(pred.f)))
             if isa(pred.second, SubQuery)
-                r = string('(', normalize(adapter, sub, pred.second), ')')
+                r = enclosed(adapter, normalize(adapter, sub, pred.second))
             else
-                r = string('(', join(normalize.(pred.second), ", "), ')')
+                r = enclosed(adapter, normalize.(pred.second))
             end
         elseif is_null == pred.f
             f = uppercase("is null")
@@ -176,7 +183,7 @@ function normalize(adapter::AdapterBase, sub::SubQuery, pred::Predicate)::String
         elseif (<) == pred.f
             f = >=
         elseif (==) == pred.f
-            f = string(pred.iden, "=")
+            f = string(pred.iden, '=')
         elseif (in) == pred.f
             f = string(uppercase("not"), ' ', f)
         elseif is_null == pred.f
@@ -189,7 +196,22 @@ function normalize(adapter::AdapterBase, sub::SubQuery, pred::Predicate)::String
             f = string(pred.iden, pred.f)
         end
     end
-    join((x for x in (l, f, r) if !isa(x, Void)), " ")
+    join((x for x in (l, f, r) if !isa(x, Void)), ' ')
+end
+
+function enclosed(adapter::AdapterBase, vec::Vector)::String
+    enclosed(adapter, join(vec, ", "))
+end
+
+function enclosed(adapter::AdapterBase, s::String)::String
+    string('(', s, ')')
+end
+
+# InsertQuery
+function statement(adapter::AdapterBase, ins::InsertQuery)::String
+    names = enclosed(adapter, keys(ins.fields))
+    vals = enclosed(adapter, normalize.(values(ins.fields)))
+    string(uppercase("insert"), ' ', uppercase("into"), ' ', ins.table, ' ', names, ' ', uppercase("values"), ' ', vals)
 end
 
 end # module LoadAdapterBase

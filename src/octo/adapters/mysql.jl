@@ -14,14 +14,17 @@ import Base: connect, all
 module Mock
     MYSQL_OPT_RECONNECT = UInt32(20)
     function mysql_connect(h,u,p,d;kw...)
-        true
-    end
-    function mysql_query(h,s)
+        nothing
     end
     function mysql_disconnect(h)
     end
+    function mysql_query(h,s)
+    end
+    type Itr
+        rowsleft
+    end
     function MySQLRowIterator(h, s)
-        []
+        Itr(0)
     end
 end
 
@@ -48,15 +51,19 @@ function disconnect(adapter::Adapter.MySQL)
     mysql_disconnect(adapter.handle)
 end
 
-function all(adapter::Adapter.MySQL, statement::String)
-    for row in MySQLRowIterator(adapter.handle, statement)
-#        Logger.info(row)
+function all(adapter::Adapter.MySQL, statement::String)::Base.Generator
+    itr = MySQLRowIterator(adapter.handle, statement)
+    Logger.debug("all", statement, itr.rowsleft)
+    function f(i)
+        Base.next(itr, true)
     end
+    Base.Generator(f, 1:itr.rowsleft)
 end
 
-function execute(adapter::Adapter.MySQL, statement::String)
+function execute(adapter::Adapter.MySQL, statement::String)::Bool
     result = mysql_query(adapter.handle, statement)
-#    Logger.info(result)
+    Logger.debug("execute", statement, result)
+    0 == result
 end
 
 end # Bukdu.Octo.Database.Adapter.LoadMySQL
