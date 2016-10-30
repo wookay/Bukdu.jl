@@ -11,7 +11,7 @@ type Changeset
     changes::Assoc
     function Changeset(model, changes::Assoc)
         T = typeof(model)
-        lhs = Assoc(map(x->(x, getfield(model, x)), fieldnames(T)))
+        lhs = Assoc(map(i->(fieldname(T, i), getfield(model, i)), 1:nfields(T)))
         rhs = typed_assoc(T, changes)
         new(model, setdiff(rhs, lhs))
     end
@@ -20,8 +20,8 @@ end
 function ==(lhs::Changeset, rhs::Changeset)
     T = typeof(lhs.model)
     !isa(rhs.model, T) && return false
-    all(x -> ==(getfield(lhs.model, x), getfield(rhs.model, x)), fieldnames(T)) &&
-             ==(lhs.changes, rhs.changes)
+    ==(lhs.changes, rhs.changes) &&
+        all(i -> ==(getfield(lhs.model, i), getfield(rhs.model, i)), 1:nfields(T))
 end
 
 function |>(changeset::Changeset, func::Function)
@@ -112,7 +112,7 @@ function default(T::Type)::T
     # broadcast #
     # fields = fieldtype.(T, fieldnames(T))
     # T(default.(T, fields)...)
-    fields = map(x->fieldtype(T, x), fieldnames(T))
+    fields = [fieldtype(T, i) for i in 1:nfields(T)]
     T(map(x-> default(T, x), fields)...)
 end
 

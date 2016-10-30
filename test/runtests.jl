@@ -4,6 +4,7 @@ for (root, dirs, files) in walkdir(".")
         !endswith(filename, ".jl") && continue
         "runtests.jl" == filename && continue
         filepath = joinpath(root, filename)[3:end]
+        !isempty(ARGS) && !any(x->startswith(filepath, x), ARGS) && continue
         push!(all_tests, filepath)
     end
 end
