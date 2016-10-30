@@ -3,11 +3,10 @@
 module Database
 
 export Adapter
-import Base: reset
-
 include("adapters.jl")
 
-import .Adapter: DatabaseAdapter, NoAdapter, NoAdapterError
+import .Adapter: DatabaseAdapter, NoAdapter, NoAdapterError, disconnect
+import Base: reset
 
 settings = Dict{Symbol,Any}(
     :adapter => Adapter.NoAdapter(),
@@ -41,4 +40,4 @@ end
 
 end # module Bukdu.Octo.Database
 
-import .Database: Adapter, reset
+import .Database: Adapter, disconnect

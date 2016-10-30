@@ -1,12 +1,14 @@
 # module Bukdu.Octo.Database.Adapter
 
+import Bukdu.Octo: Logger
+
 module LoadMySQL
 
 import ..Database
-import ..Logger
 import ..Adapter
 import .Adapter: disconnect
 import ..SQL: execute
+import ..Logger
 import Base: connect, all
 
 module Mock

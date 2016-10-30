@@ -12,7 +12,7 @@ include("octo/changeset.jl")
 export singularize, pluralize
 include("octo/natural.jl")
 
-export Database, Adapter
+export Database, Adapter, disconnect
 include("octo/database.jl")
 
 export Repo
@@ -20,6 +20,8 @@ include("octo/repo.jl")
 
 export Schema, PrimaryKey, Field, schema, field, has_many, has_one, belongs_to
 include("octo/schema.jl")
+
+export Query
 include("octo/query.jl")
 
 export SQL

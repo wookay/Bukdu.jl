@@ -4,12 +4,10 @@ module Adapter
 
 abstract DatabaseAdapter
 
-
 type MySQL <: DatabaseAdapter
     handle
     MySQL() = new(nothing)
 end
-
 
 typealias AdapterBase Union{Adapter.MySQL}
 
@@ -28,5 +26,3 @@ type NoAdapterError
 end
 
 end # Bukdu.Octo.Database.Adapter
-
-import .Adapter: disconnect

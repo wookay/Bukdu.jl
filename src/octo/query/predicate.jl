@@ -62,3 +62,9 @@ between(field::Field, start::Int, stop::Int) = between(field, start:stop)
 
 like(field::Field, s::String) = Predicate(like, field, s)
 not_like(field::Field, s::String) = Predicate(!, like, field, s)
+
+# order by
+function order_not_specified
+end
+asc(field::Field) = Predicate(asc, field, nothing)
+desc(field::Field) = Predicate(desc, field, nothing)

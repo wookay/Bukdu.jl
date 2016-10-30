@@ -4,26 +4,25 @@ import ..Database: Adapter, get_adapter
 import ..pluralize
 
 type From
-    tables::Vector{Type} # <: Query.Model
+    tables::Vector{Type}
 end
 
 type Select
-    name::Symbol
+    name::Symbol # :select, :select_distinct
     value::Any
 end
 
-type Parameter
-    index::Int
-    params::Tuple
+type OrderBy
+    fields::Vector{Predicate}
 end
-
-Parameter() = Parameter(0, tuple())
 
 type SubQuery
     from::From
     select::Select
     where::Nullable{Predicate}
-    parameter::Parameter
+    order_by::Nullable{OrderBy}
+    limit::Nullable{Int}
+    offset::Nullable{Int}
 end
 
 type SubQueryError
@@ -51,10 +50,40 @@ function subquery(from::From; kw...)::SubQuery # throw SubQueryError
     for table in Query.tables(where)
         !in(table, from.tables) && push!(from.tables, table)
     end
+    if haskey(opts, :order_by)
+        order = opts[:order_by] 
+        fields = Vector{Predicate}()
+        if isa(order, Tuple)
+            order_tup = order
+        else
+            order_tup = tuple(order)
+        end
+        order_fields = Vector{Type}()
+        map(order_tup) do field
+            if isa(field, Field)
+                pred = Predicate(order_not_specified, field, nothing)
+                push!(order_fields, field.typ)
+            elseif isa(field, Predicate)
+                pred = field
+                push!(order_fields, field.first.typ)
+            else
+                Logger.info("order_by", field)
+            end
+            push!(fields, pred)
+        end
+        for table in order_fields
+            !in(table, from.tables) && push!(from.tables, table)
+        end
+        order_by = Nullable(OrderBy(fields))
+    else
+        order_by = Nullable{OrderBy}()
+    end
+    limit = haskey(opts, :limit) ? Nullable(opts[:limit]) : Nullable{Int}()
+    offset = haskey(opts, :offset) ? Nullable(opts[:offset]) : Nullable{Int}()
     if isempty(from.tables)
         throw(SubQueryError(""))
     else
-        SubQuery(from, select, where, Parameter())
+        SubQuery(from, select, where, order_by, limit, offset)
     end
 end
 
@@ -94,8 +123,8 @@ function tables(predicate::Nullable{Predicate})::Vector{Type}
 end
 
 function table_alias_name(tables::Vector{Type}, T::Type)::String
-    table_name_chars = first.(Query.table_name.(tables))
-    table_name_char = first(Query.table_name(T))
+    table_name_chars = first.(Schema.table_name.(tables))
+    table_name_char = first(Schema.table_name(T))
     if length(findin(table_name_chars, table_name_char)) > 1
         ind = findfirst(tables, T)
         string(table_name_char, ind)
@@ -105,3 +134,7 @@ function table_alias_name(tables::Vector{Type}, T::Type)::String
 end
 
 in(field::Field, sub::SubQuery)::Predicate = Predicate(in, field, sub)
+not_in(field::Field, sub::SubQuery)::Predicate = Predicate(!, in, field, sub)
+
+exists(sub::SubQuery)::Predicate = Predicate(exists, nothing, sub)
+not_exists(sub::SubQuery)::Predicate = Predicate(!, exists, nothing, sub)

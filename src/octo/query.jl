@@ -3,9 +3,10 @@
 module Query
 
 export Predicate, SubQuery
-export ?
 export from
-export and, or, not_in, is_null, is_not_null, like, not_like, between
+export and, or, not_in, is_null, is_not_null, like, not_like, between, exists, not_exists
+export asc, desc
+export ?
 
 import ..Repo
 import ..Schema
@@ -29,6 +30,8 @@ end
 include("query/predicate.jl")
 include("query/subquery.jl")
 
+models = Dict{Type, Type}() # {Query.Model, Type}
+
 function from(; kw...)::SubQuery
     subquery(From([]); kw...)
 end
@@ -38,8 +41,7 @@ function from{M<:Query.Model}(::M; kw...)::SubQuery
 end
 
 function from(T::Type; kw...)::SubQuery
-    m = in(T)
-    subquery(From([typeof(m)]); kw...)
+    from(in(T); kw...)
 end
 
 function type_generate(T::Type)::Type # <: Query.Model
@@ -67,26 +69,32 @@ function type_generate(T::Type)::Type # <: Query.Model
     end
     push!(lines, "end")
     code = join(lines, "\n")
-    # Logger.info("code", code)
-    eval(A, parse(code))
-    table_name = Schema.table_name(T)
-    code = "Query.table_name(::Type{$type_name_uuid}) = $(repr(table_name))"
+    #Logger.info("code", code)
     eval(A, parse(code))
     eval(A, parse("$type_name = $type_name_uuid"))
-    getfield(A, type_name)
+    model = getfield(A, type_name)
+    models[model] = T
+    model
 end
 
-function table_name
+function table_name{M<:Query.Model}(::Type{M})::String
+    Schema.table_name(models[M])
 end
 
-function pooling_type(T::Type)::Type # <: Query.Model
+function table_name(T::Type)::String
+    Schema.table_name(T)
+end
+
+function pooling_model(T::Type)::Type # <: Query.Model
     type_name = T.name.name
     isdefined(A, type_name) ? getfield(A, type_name) : type_generate(T)
 end
 
 function in(T::Type)::Query.Model
-    typ = pooling_type(T)
-    typ([Field(typ, name) for name in fieldnames(typ)]...)
+    model = pooling_model(T)
+    model(map(fieldnames(model)) do name
+        Field(T, name)
+    end...)
 end
 
 end # module Bukdu.Octo.Query
