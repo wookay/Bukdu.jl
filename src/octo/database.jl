@@ -14,7 +14,7 @@ settings = Dict{Symbol,Any}(
 )
 
 function get_adapter()::DatabaseAdapter # <: DatabaseAdapter
-                             # throw NoAdapterError
+                                        # throw NoAdapterError
     adapter = settings[:adapter]
     isa(adapter, NoAdapter) && throw(NoAdapterError(""))
     adapter
@@ -36,6 +36,7 @@ end
 
 function reset()
     reset(get_adapter())
+    set_adapter(Adapter.NoAdapter())
 end
 
 end # module Bukdu.Octo.Database

@@ -118,4 +118,6 @@ query = from(select= ?, where= u.age > ?)
 query = from(where= c.user_id in [1,2], select= c.text)
 @test isa(query, SubQuery)
 
+Database.reset()
+
 end # module test_octo_query

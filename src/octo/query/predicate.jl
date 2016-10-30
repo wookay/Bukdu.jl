@@ -1,5 +1,7 @@
 # module Bukdu.Octo.Query
 
+import Base: isapprox
+
 type Predicate
     iden::Function
     f::Function
@@ -21,16 +23,20 @@ function ==(a::Any, field::Field)::Predicate
     Predicate(==, a, field)
 end
 
-function ==(field::Field, n::Int)::Predicate
-    Predicate(==, n, field)
+function ==(field::Field, a::Any)::Predicate
+    Predicate(==, a, field)
+end
+
+function ==(lhs::Field, rhs::Field)::Predicate
+    Predicate(==, lhs, rhs)
+end
+
+function ==(lhs::Predicate, rhs::Predicate)::Predicate
+    Predicate(==, lhs, rhs)
 end
 
 function !(pred::Predicate)::Predicate
     Predicate(identity==pred.iden ? (!) : identity, pred.f, pred.first, pred.second)
-end
-
-function ==(lhs::Predicate, rhs::Predicate)::Bool
-    ==(lhs.iden, rhs.iden) && ==(lhs.f, rhs.f) && ==(lhs.first, rhs.first) && ==(lhs.second, rhs.second)
 end
 
 function and(lhs::Predicate, rhs::Predicate)::Predicate
@@ -47,6 +53,22 @@ end
 
 function (|)(lhs::Predicate, rhs::Predicate)::Predicate
     or(lhs, rhs)
+end
+
+function isapprox(lhs::Predicate, rhs::Predicate)::Bool
+    ==(lhs.iden, rhs.iden) && ==(lhs.f, rhs.f) && isapprox(lhs.first, rhs.first) && isapprox(lhs.second, rhs.second)
+end
+
+function isapprox(lhs::Field, rhs::Field)::Bool
+    ==(lhs.typ, rhs.typ) && ==(lhs.name, rhs.name)
+end
+
+function isapprox(a::Any, field::Field)::Bool
+    false
+end
+
+function isapprox(field::Field, a::Any)::Bool
+    false
 end
 
 in(field::Field, vec::Vector)::Predicate = Predicate(in, field, vec)

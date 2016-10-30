@@ -2,13 +2,12 @@
 
 module Query
 
-export Predicate, SubQuery
+export Predicate, SubQuery, InsertQuery
 export from
 export and, or, not_in, is_null, is_not_null, like, not_like, between, exists, not_exists
 export asc, desc
 export ?
 
-import ..Repo
 import ..Schema
 import ..Assoc
 import ..Logger
@@ -29,15 +28,16 @@ end
 
 include("query/predicate.jl")
 include("query/subquery.jl")
+include("query/insertquery.jl")
 
 models = Dict{Type, Type}() # {Query.Model, Type}
 
 function from(; kw...)::SubQuery
-    subquery(From([]); kw...)
+    subquery(From(Set{Type}([])); kw...)
 end
 
 function from{M<:Query.Model}(::M; kw...)::SubQuery
-    subquery(From([M]); kw...)
+    subquery(From(Set{Type}([M])); kw...)
 end
 
 function from(T::Type; kw...)::SubQuery

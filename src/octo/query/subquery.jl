@@ -4,7 +4,7 @@ import ..Database: Adapter, get_adapter
 import ..pluralize
 
 type From
-    tables::Vector{Type}
+    tables::Set{Type}
 end
 
 type Select
@@ -40,7 +40,7 @@ function subquery(from::From; kw...)::SubQuery # throw SubQueryError
            isa(value, Tuple) ||
            isa(value, Vector{Field})
             for table in Query.tables(value)
-                !in(table, from.tables) && push!(from.tables, table)
+                push!(from.tables, table)
             end
         end
     else
@@ -48,7 +48,7 @@ function subquery(from::From; kw...)::SubQuery # throw SubQueryError
     end
     where = haskey(opts, :where) ? Nullable(opts[:where]) : Nullable{Predicate}()
     for table in Query.tables(where)
-        !in(table, from.tables) && push!(from.tables, table)
+        push!(from.tables, table)
     end
     if haskey(opts, :order_by)
         order = opts[:order_by] 
@@ -92,10 +92,6 @@ function statement(subquery::SubQuery, args...)::String # throw NoAdapterError
     statement(adapter, subquery, args...)
 end
 
-function tables(field::Field)::Vector{Type}
-    [field.typ]
-end
-
 function tables(tup::Tuple)::Vector{Type}
     collect(map(field -> field.typ, tup))
 end
@@ -104,21 +100,29 @@ function tables(vec::Vector{Field})::Vector{Type}
     map(field -> field.typ, vec)
 end
 
+function tables(field::Field)::Vector{Type}
+    [field.typ]
+end
+
 function tables(predicate::Nullable{Predicate})::Vector{Type}
     if isnull(predicate)
         Vector{Type}()
     else
         pred = predicate.value
-        set = Set()
+        dict = Dict{Symbol,Type}()
         for x in [pred.first, pred.second]
-            isa(x, Field) && push!(set, x.typ)
+            if isa(x, Field)
+                dict[x.typ.name.name] = x.typ
+            end
             if isa(x, Predicate)
                 for y in [x.first, x.second]
-                    isa(y, Field) && push!(set, y.typ)
+                    if isa(y, Field)
+                        dict[y.typ.name.name] = y.typ
+                    end
                 end
             end
         end
-        Vector(collect(set))
+        collect(values(dict))
     end
 end
 
