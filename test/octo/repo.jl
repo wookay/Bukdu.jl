@@ -75,26 +75,30 @@ Repo.insert(hey)
 
 # SQL.all(from(User))
 
-user1 = Repo.get(User, 1)
-@test isa(user1, User)
-@test "foo bar" == user1.name
+if !isa(adapter.handle, Void)
 
-user2 = Repo.get(User, 2)
-@test isa(user2, User)
-@test "bar" == user2.name
+    user1 = Repo.get(User, 1)
+    @test isa(user1, User)
+    @test "foo bar" == user1.name
+    
+    user2 = Repo.get(User, 2)
+    @test isa(user2, User)
+    @test "bar" == user2.name
+    
+    user1000 = Repo.get(User, 1000)
+    @test isa(user1000, Void)
+    
+    u = in(User)
+    users = Repo.get(Vector{User}, where= u.age == 20)
+    @test isa(users, Vector{User})
+    @test 2 == length(users)
+    
+    users = Repo.get(Vector{User}, where= or(u.age == 20, u.name == "hey"))
+    @test 3 == length(users)
 
-user1000 = Repo.get(User, 1000)
-@test isa(user1000, Void)
+    disconnect(adapter)
+end
 
-u = in(User)
-users = Repo.get(Vector{User}, where= u.age == 20)
-@test isa(users, Vector{User})
-@test 2 == length(users)
-
-users = Repo.get(Vector{User}, where= or(u.age == 20, u.name == "hey"))
-@test 3 == length(users)
-
-disconnect(adapter)
 Database.reset()
 
 end # module test_octo_repo

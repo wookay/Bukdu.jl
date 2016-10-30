@@ -14,14 +14,17 @@ import Base: connect, all
 module Mock
     MYSQL_OPT_RECONNECT = UInt32(20)
     function mysql_connect(h,u,p,d;kw...)
-        true
+        nothing
     end
     function mysql_disconnect(h)
     end
     function mysql_query(h,s)
     end
+    type Itr
+        rowsleft
+    end
     function MySQLRowIterator(h, s)
-        []
+        Itr(0)
     end
 end
 
