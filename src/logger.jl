@@ -49,7 +49,7 @@ debug(block::Function, condition::Function) = settings[:level] >= level_debug &&
 
 fatal(args...; kw...) = settings[:level] >= level_fatal && print_log(:magenta, "FATAL", "", args...; kw...)
 error(args...; kw...) = settings[:level] >= level_error && print_log(:red, "ERROR", "", args...; kw...)
-warn(args...; kw...)  = settings[:level] >= level_warn && print_log(:gray, "WARN ", "", args...; kw...)
+warn(args...; kw...)  = settings[:level] >= level_warn && print_log(:yellow, "WARN ", "", args...; kw...)
 info(args...; kw...)  = settings[:level] >= level_info && print_info(args...; kw...)
 debug(args...; kw...) = settings[:level] >= level_debug && print_log(:cyan, "DEBUG", "", args...; kw...)
 
@@ -139,9 +139,8 @@ function with_color(name::Symbol, text)::String
         function set_color(c)
             dict[:color] = c
         end
-        if name in [:gray, :olive]
-            if haskey(Base.text_colors, 8)
-                :gray==name && set_color(Base.text_colors[8])
+        if name in [:olive]
+            if haskey(Base.text_colors, 64)
                 :olive==name && set_color(Base.text_colors[64])
             end
         else

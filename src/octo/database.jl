@@ -5,7 +5,7 @@ module Database
 export Adapter
 include("adapters.jl")
 
-import .Adapter: DatabaseAdapter, NoAdapter, NoAdapterError, disconnect
+import .Adapter: DatabaseAdapter, NoAdapter, NoAdapterError
 import Base: reset
 
 settings = Dict{Symbol,Any}(
@@ -27,7 +27,7 @@ end
 function setup{A<:DatabaseAdapter}(block::Function, ::Type{A})::A
     name = lowercase(string(A.name.name))
     adapter = A()
-    !applicable(connect, adapter) &&
+    !applicable(Adapter.execute, adapter, "") &&
         include(normpath(dirname(@__FILE__), "adapters/$name.jl"))
     block(adapter)
     set_adapter(adapter)
@@ -41,4 +41,4 @@ end
 
 end # module Bukdu.Octo.Database
 
-import .Database: Adapter, disconnect
+import .Database: Adapter

@@ -6,63 +6,68 @@ module LoadMySQL
 
 import ..Database
 import ..Adapter
-import .Adapter: disconnect
-import ..SQL: execute
 import ..Logger
-import Base: connect, all
+
+# Logger.info("LoadMySQL")
 
 module Mock
-    MYSQL_OPT_RECONNECT = UInt32(20)
-    function mysql_connect(h,u,p,d;kw...)
-        nothing
-    end
-    function mysql_disconnect(h)
-    end
-    function mysql_query(h,s)
-    end
-    type Itr
-        rowsleft
-    end
-    function MySQLRowIterator(h, s)
-        Itr(0)
-    end
+module MySQL
+MYSQL_OPT_RECONNECT = UInt32(20)
+function mysql_connect(h,u,p,d;kw...)
+    nothing
 end
+function mysql_disconnect(h)
+end
+function mysql_query(h,s)
+end
+type MySQLRowIterator
+    h
+    s
+    rowsleft
+    MySQLRowIterator(h,s) = new(h,s,0)
+end
+Base.start(::MySQLRowIterator) = 1
+Base.next(::MySQLRowIterator, ::Int) = false
+Base.done(::MySQLRowIterator, ::Int) = true
+end # LoadMySQL.Mock.MySQL
+end # LoadMySQL.Mock
 
+const adapter_name = "MySQL"
 try
-    Pkg.installed("MySQL")
-    import MySQL: mysql_connect, mysql_disconnect, mysql_query, MySQLRowIterator, MYSQL_OPT_RECONNECT
+    Pkg.installed(adapter_name)
+    import MySQL
 catch
     if Database.settings[:automatically_install_packages]
-        Logger.info("Installing MySQL...")
-        Pkg.add("MySQL")
-        import MySQL: mysql_connect, mysql_disconnect, mysql_query, MySQLRowIterator, MYSQL_OPT_RECONNECT
+        Logger.info("Installing $adapter_name...")
+        Pkg.add(adapter_name)
+        import MySQL
     else
-        import .Mock: mysql_connect, mysql_disconnect, mysql_query, MySQLRowIterator, MYSQL_OPT_RECONNECT
+        Logger.warn(string("Please install $adapter_name with ", Logger.with_color(:bold, """Pkg.add("$adapter_name")""")))
+        import .Mock: MySQL
     end
 end
 
-function connect(adapter::Adapter.MySQL; kw...)
+function Adapter.connect(adapter::Adapter.MySQL; kw...)
     info = Dict(kw)
     (host, user, pass, db) = map(x->info[x], (:host, :user, :pass, :db))
-    adapter.handle = mysql_connect(host, user, pass, db; opts=Dict(MYSQL_OPT_RECONNECT => 1))
+    adapter.handle = MySQL.mysql_connect(host, user, pass, db; opts=Dict(MySQL.MYSQL_OPT_RECONNECT => 1))
 end
 
-function disconnect(adapter::Adapter.MySQL)
-    mysql_disconnect(adapter.handle)
+function Adapter.disconnect(adapter::Adapter.MySQL)
+    MySQL.mysql_disconnect(adapter.handle)
 end
 
-function all(adapter::Adapter.MySQL, statement::String)::Base.Generator
-    itr = MySQLRowIterator(adapter.handle, statement)
+Base.length(itr::MySQL.MySQLRowIterator) = itr.rowsleft
+
+function Adapter.all(adapter::Adapter.MySQL, statement::String)::Base.Generator
+    itr = MySQL.MySQLRowIterator(adapter.handle, statement)
     Logger.debug("all    ", statement, " |", Logger.with_color(:bold, itr.rowsleft))
-    function f(i)
-        Base.next(itr, true)
-    end
-    Base.Generator(f, 1:itr.rowsleft)
+    Base.Generator(identity, collect(itr))
 end
 
-function execute(adapter::Adapter.MySQL, statement::String)::Bool
-    result = mysql_query(adapter.handle, statement)
+function Adapter.execute(adapter::Adapter.MySQL, statement::String)::Bool
     Logger.debug("execute", statement)
+    result = MySQL.mysql_query(adapter.handle, statement)
     0 == result
 end
 
