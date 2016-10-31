@@ -5,7 +5,7 @@ module Repo
 import ..SQL
 import ..Query
 import .Query: Predicate
-import ..Assoc
+import ..Octo: Assoc, Changeset, default
 import ..Logger
 import Base: get
 
@@ -51,6 +51,17 @@ end
 
 function insert(T::Type; kw...)::Bool # throw NoAdapterError
     SQL.insert(Query.insert(T; kw...))
+end
+
+function update(changeset::Changeset)::Bool # throw NoAdapterError
+    T = typeof(changeset.model)
+    model = in(T)
+    pred = getfield(model, :id) == changeset.model.id.id
+    SQL.update(Query.update(changeset; where= pred))
+end
+
+function delete(T::Type, id)::Bool # throw NoAdapterError
+    SQL.delete(Query.delete(T; id=id))
 end
 
 end # module Bukdu.Octo.Repo

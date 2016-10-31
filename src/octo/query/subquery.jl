@@ -108,22 +108,25 @@ function tables(predicate::Nullable{Predicate})::Vector{Type}
     if isnull(predicate)
         Vector{Type}()
     else
-        pred = predicate.value
-        dict = Dict{Symbol,Type}()
-        for x in [pred.first, pred.second]
-            if isa(x, Field)
-                dict[x.typ.name.name] = x.typ
-            end
-            if isa(x, Predicate)
-                for y in [x.first, x.second]
-                    if isa(y, Field)
-                        dict[y.typ.name.name] = y.typ
-                    end
+        tables(predicate.value)
+    end
+end
+
+function tables(pred::Predicate)::Vector{Type}
+    dict = Dict{Symbol,Type}()
+    for x in [pred.first, pred.second]
+        if isa(x, Field)
+            dict[x.typ.name.name] = x.typ
+        end
+        if isa(x, Predicate)
+            for y in [x.first, x.second]
+                if isa(y, Field)
+                    dict[y.typ.name.name] = y.typ
                 end
             end
         end
-        collect(values(dict))
     end
+    collect(values(dict))
 end
 
 function table_alias_name(tables::Vector{Type}, T::Type)::String

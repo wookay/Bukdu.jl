@@ -28,7 +28,7 @@ end
 
 include("query/predicate.jl")
 include("query/subquery.jl")
-include("query/insertquery.jl")
+include("query/changequery.jl")
 
 models = Dict{Type, Type}() # {Query.Model, Type}
 

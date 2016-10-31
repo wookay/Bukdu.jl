@@ -4,7 +4,7 @@ module LoadAdapterBase
 
 import ..Database.Adapter: AdapterBase
 import ..Query
-import .Query: From, Select, Predicate, SubQuery, InsertQuery
+import .Query: From, Select, Predicate, SubQuery, InsertQuery, UpdateQuery, DeleteQuery
 import .Query: statement, and, or, between
 import .Query: in, is_null, like, exists
 import .Query: not_in, is_not_null, not_like, not_exists
@@ -26,11 +26,11 @@ function reset(::AdapterBase)
     empty!(Query.models)
 end
 
-# Query
+# SubQuery
 function statement(adapter::AdapterBase, sub::SubQuery)::String
-    select = select_clause(adapter, sub)
-    from = from_clause(adapter, sub)
-    where = where_clause(adapter, sub)
+    select = select_clause(adapter, sub.from, sub.select)
+    from = from_clause(adapter, sub.from)
+    where = where_clause(adapter, sub.from, sub.where)
     order_by = order_by_clause(adapter, sub)
     limit = limit_clause(adapter, sub)
     offset = offset_clause(adapter, sub)
@@ -41,35 +41,41 @@ function statement(adapter::AdapterBase, sub::SubQuery)::String
     join(clauses, ' ')
 end
 
-function select_clause(adapter::AdapterBase, sub::SubQuery)::String
-    name = uppercase(replace(string(sub.select.name), '_', ' '))
-    if isa(sub.select.value, Vector{Symbol})
-        fields = join(sub.select.value, ", ")
+function select_clause(adapter::AdapterBase, from::From, select::Select)::String
+    name = uppercase(replace(string(select.name), '_', ' '))
+    if isa(select.value, Vector{Symbol})
+        fields = join(select.value, ", ")
     else
-        fields = normalize(adapter, sub, sub.select.value)
+        fields = normalize(adapter, from, select.value)
     end
     string(name, ' ', fields)
 end
 
-function from_clause(adapter::AdapterBase, sub::SubQuery)::String
-    tables = sub.from.tables
+function table_as_clause(adapter::AdapterBase, from::From)::String
+    tables = from.tables
     list = Vector{String}()
     for table in tables
         table_name = Query.table_name(table)
         alias = Query.table_alias_name(collect(tables), table)
         push!(list, string(table_name, ' ', uppercase("as"), ' ', alias))
     end
-    string(uppercase("from"), ' ', join(list, ", "))
+    join(list, ", ")
 end
 
-function where_clause(adapter::AdapterBase, sub::SubQuery)::String
-    predicate = sub.where
-    if isnull(predicate)
+function from_clause(adapter::AdapterBase, from::From)::String
+    string(uppercase("from"), ' ', table_as_clause(adapter, from))
+end
+
+function where_clause(adapter::AdapterBase, from::From, where::Nullable{Predicate})::String
+    if isnull(where)
         ""
     else
-        pred = predicate.value
-        string(uppercase("where"), ' ', normalize(adapter, sub, pred))
+        where_clause(adapter, from, where.value)
     end
+end
+
+function where_clause(adapter::AdapterBase, from::From, pred::Predicate)::String
+    string(uppercase("where"), ' ', normalize(adapter, from, pred))
 end
 
 function order_by_clause(adapter::AdapterBase, sub::SubQuery)::String
@@ -78,7 +84,7 @@ function order_by_clause(adapter::AdapterBase, sub::SubQuery)::String
         ""
     else
         orders = map(order.value.fields) do pred
-            normalize(adapter, sub, pred)
+            normalize(adapter, sub.from, pred)
         end
         string(uppercase("order by"), ' ', join(orders, ", "))
     end
@@ -89,7 +95,7 @@ function limit_clause(adapter::AdapterBase, sub::SubQuery)::String
     if isnull(n)
         ""
     else
-        string(uppercase("limit"), ' ', normalize(adapter, sub, n.value))
+        string(uppercase("limit"), ' ', normalize(adapter, sub.from, n.value))
     end
 end
 
@@ -98,34 +104,34 @@ function offset_clause(adapter::AdapterBase, sub::SubQuery)::String
     if isnull(n)
         ""
     else
-        string(uppercase("offset"), ' ', normalize(adapter, sub, n.value))
+        string(uppercase("offset"), ' ', normalize(adapter, sub.from, n.value))
     end
 end
 
-function normalize(adapter::AdapterBase, sub::SubQuery, field::Field)::String
-    alias = Query.table_alias_name(collect(sub.from.tables), field.typ)
+function normalize(adapter::AdapterBase, from::From, field::Field)::String
+    alias = Query.table_alias_name(collect(from.tables), field.typ)
     string(alias, '.', field.name)
 end
 
-function normalize(adapter::AdapterBase, sub::SubQuery, vec::Vector{Field})::String
-    join(map(field -> normalize(adapter, sub, field), vec), ", ")
+function normalize(adapter::AdapterBase, from::From, vec::Vector{Field})::String
+    join(map(field -> normalize(adapter, from, field), vec), ", ")
 end
 
-function normalize(adapter::AdapterBase, sub::SubQuery, tup::Tuple)::String
-    join(map(field -> normalize(adapter, sub, field), tup), ", ")
+function normalize(adapter::AdapterBase, from::From, tup::Tuple)::String
+    join(map(field -> normalize(adapter, from, field), tup), ", ")
 end
 
-function normalize(adapter::AdapterBase, sub::SubQuery, s::SubQuery)::String
-    second_tables = s.from.tables
-    s.from.tables = setdiff(second_tables, sub.from.tables)
-    statement(adapter, s)
+function normalize(adapter::AdapterBase, from::From, sub::SubQuery)::String
+    second_tables = sub.from.tables
+    sub.from.tables = setdiff(second_tables, from.tables)
+    statement(adapter, sub)
 end
 
-function normalize(adapter::AdapterBase, sub::SubQuery, param::Type{Query.?})::String
+function normalize(adapter::AdapterBase, from::From, param::Type{Query.?})::String
     normalize(param)
 end
 
-function normalize(adapter::AdapterBase, sub::Union{SubQuery,InsertQuery}, value::Any)::Union{Void,String}
+function normalize(adapter::AdapterBase, from::From, value::Any)::Union{Void,String}
     normalize(value)
 end
 
@@ -145,10 +151,10 @@ function normalize(::Void)::Void
     nothing
 end
 
-function normalize(adapter::AdapterBase, sub::SubQuery, pred::Predicate)::String
-    function manipulize(sub, pred)
-        l = normalize(adapter, sub, pred.first)
-        r = isa(pred.second, Void) ? nothing : normalize(adapter, sub, pred.second)
+function normalize(adapter::AdapterBase, from::From, pred::Predicate)::String
+    function manipulize(from, pred)
+        l = normalize(adapter, from, pred.first)
+        r = isa(pred.second, Void) ? nothing : normalize(adapter, from, pred.second)
         if (==) == pred.f
             f = "="
         elseif and == pred.f
@@ -158,7 +164,7 @@ function normalize(adapter::AdapterBase, sub::SubQuery, pred::Predicate)::String
         elseif pred.f in [in, exists]
             f = uppercase(string(Base.function_name(pred.f)))
             if isa(pred.second, SubQuery)
-                r = enclosed(adapter, normalize(adapter, sub, pred.second))
+                r = enclosed(adapter, normalize(adapter, from, pred.second))
             else
                 r = enclosed(adapter, normalize.(pred.second))
             end
@@ -176,7 +182,7 @@ function normalize(adapter::AdapterBase, sub::SubQuery, pred::Predicate)::String
         end
         (l, f, r)
     end
-    (l, f, r) = manipulize(sub, pred)
+    (l, f, r) = manipulize(from, pred)
     if (!) == pred.iden
         if (>) == pred.f
             f = <=
@@ -212,6 +218,41 @@ function statement(adapter::AdapterBase, ins::InsertQuery)::String
     names = enclosed(adapter, keys(ins.fields))
     vals = enclosed(adapter, normalize.(values(ins.fields)))
     string(uppercase("insert"), ' ', uppercase("into"), ' ', ins.table, ' ', names, ' ', uppercase("values"), ' ', vals)
+end
+
+# UpdateQuery
+function statement(adapter::AdapterBase, up::UpdateQuery)::String
+    table_as = table_as_clause(adapter, up.from)
+    update = string(uppercase("update"), ' ', table_as, ' ', uppercase("set"))
+    vals = join(map(up.fields) do field
+        (name, value) = field
+        string(name, "=", normalize(value))
+    end, ", ")
+    where = where_clause(adapter, up.from, up.where)
+    clauses = Vector{String}()
+    for clause in [update, vals, where]
+        !isempty(clause) && push!(clauses, clause)
+    end
+    join(clauses, ' ')
+end
+
+# DeleteQuery
+function statement(adapter::AdapterBase, del::DeleteQuery)::String
+    delete = string(uppercase("delete"))
+    table = string(uppercase("from"), ' ', join(del.table))
+    if isempty(del.fields)
+        where = ""
+    else
+        where = string(uppercase("where"), ' ', join(map(del.fields) do field
+            (name, value) = field
+            string(name, "=", normalize(value))
+        end, ", "))
+    end
+    clauses = Vector{String}()
+    for clause in [delete, table, where]
+        !isempty(clause) && push!(clauses, clause)
+    end
+    join(clauses, ' ')
 end
 
 end # module LoadAdapterBase

@@ -18,7 +18,7 @@ type Comment
     body::String
 end
 
-#Logger.set_level(:debug)
+# Logger.set_level(:debug)
 
 schema(User) do user
     has_many(user, :comments, Comment)
@@ -76,25 +76,28 @@ Repo.insert(hey)
 # SQL.all(from(User))
 
 if !isa(adapter.handle, Void)
-
     user1 = Repo.get(User, 1)
     @test isa(user1, User)
     @test "foo bar" == user1.name
-    
+
     user2 = Repo.get(User, 2)
     @test isa(user2, User)
     @test "bar" == user2.name
-    
+
     user1000 = Repo.get(User, 1000)
     @test isa(user1000, Void)
-    
+    change1 = Changeset(user1, Assoc(name="change1"))
+    Repo.update(change1)
+
     u = in(User)
     users = Repo.get(Vector{User}, where= u.age == 20)
     @test isa(users, Vector{User})
     @test 2 == length(users)
-    
+
     users = Repo.get(Vector{User}, where= or(u.age == 20, u.name == "hey"))
     @test 3 == length(users)
+
+    Repo.delete(User, 1)
 
     disconnect(adapter)
 end
