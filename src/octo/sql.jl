@@ -3,31 +3,34 @@
 module SQL
 
 import ..Database
+import .Database: Adapter
+import .Adapter: AdapterBase
 import ..Query
 import ..Query: SubQuery, InsertQuery, UpdateQuery, DeleteQuery
 import ..Logger
-import Base: all
 
-function execute(statement::String)::Bool
-    adapter = Database.get_adapter()
-    execute(adapter, statement)
+function all(adapter::AdapterBase, statement::String)::Base.Generator
+    Adapter.all(adapter, statement)
 end
 
-function all(sub::SubQuery)::Base.Generator
-    adapter = Database.get_adapter()
+function execute(adapter::AdapterBase, statement::String)::Bool
+    Adapter.execute(adapter, statement)
+end
+
+function all(adapter::AdapterBase, sub::SubQuery)::Base.Generator
     all(adapter, Query.statement(sub))
 end
 
-function insert(ins::InsertQuery)::Bool
-    execute(Query.statement(ins))
+function insert(adapter::AdapterBase, ins::InsertQuery)::Bool
+    execute(adapter, Query.statement(ins))
 end
 
-function update(up::UpdateQuery)::Bool
-    execute(Query.statement(up))
+function update(adapter::AdapterBase, up::UpdateQuery)::Bool
+    execute(adapter, Query.statement(up))
 end
 
-function delete(del::DeleteQuery)::Bool
-    execute(Query.statement(del))
+function delete(adapter::AdapterBase, del::DeleteQuery)::Bool
+    execute(adapter, Query.statement(del))
 end
 
 end # module Bukdu.Octo.SQL

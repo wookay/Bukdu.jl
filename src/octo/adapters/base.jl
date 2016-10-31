@@ -2,7 +2,8 @@
 
 module LoadAdapterBase
 
-import ..Database.Adapter: AdapterBase
+import ..Database: Adapter
+import .Adapter: AdapterBase
 import ..Query
 import .Query: From, Select, Predicate, SubQuery, InsertQuery, UpdateQuery, DeleteQuery
 import .Query: statement, and, or, between
@@ -12,7 +13,7 @@ import .Query: order_not_specified, asc, desc
 import ..Schema
 import .Schema: Field
 import ..Logger
-import Base: reset, connect, all
+import Base: reset
 
 type AdapterHandleError
     message
@@ -51,13 +52,17 @@ function select_clause(adapter::AdapterBase, from::From, select::Select)::String
     string(name, ' ', fields)
 end
 
+function table_as_clause(adapter::AdapterBase, table::String, alias::String)::String
+    string(table, ' ', uppercase("as"), ' ', alias)
+end
+
 function table_as_clause(adapter::AdapterBase, from::From)::String
     tables = from.tables
     list = Vector{String}()
     for table in tables
         table_name = Query.table_name(table)
         alias = Query.table_alias_name(collect(tables), table)
-        push!(list, string(table_name, ' ', uppercase("as"), ' ', alias))
+        push!(list, table_as_clause(adapter, table_name, alias))
     end
     join(list, ", ")
 end
@@ -255,6 +260,15 @@ function statement(adapter::AdapterBase, del::DeleteQuery)::String
     join(clauses, ' ')
 end
 
-end # module LoadAdapterBase
+## SQLite: normalize, table_as_clause
+function normalize(adapter::Adapter.SQLite, from::From, field::Field)::String
+    string(field.name)
+end
 
-import .LoadAdapterBase: statement
+function table_as_clause(adapter::Adapter.SQLite, table::String, alias::String)::String
+    table
+end
+
+end # module Bukdu.Octo.LoadAdapterBase
+
+import .LoadAdapterBase: statement, normalize, table_as_clause

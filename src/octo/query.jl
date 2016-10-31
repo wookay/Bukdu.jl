@@ -87,7 +87,12 @@ end
 
 function pooling_model(T::Type)::Type # <: Query.Model
     type_name = T.name.name
-    isdefined(A, type_name) ? getfield(A, type_name) : type_generate(T)
+    if isdefined(A, type_name)
+        model = getfield(A, type_name)
+        haskey(models, model) ? model : type_generate(T)
+    else
+        type_generate(T)
+    end 
 end
 
 function in(T::Type)::Query.Model

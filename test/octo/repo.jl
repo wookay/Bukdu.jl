@@ -2,10 +2,12 @@ module test_octo_repo
 
 importall Bukdu
 importall Bukdu.Octo
-importall Bukdu.Octo.Query
-importall Bukdu.Octo.Repo
-import Bukdu.Octo.Adapter: NoAdapterError
+importall .Octo.Query
+importall .Octo.Repo
+import .Adapter: NoAdapterError
 import Base.Test: @test, @test_throws
+
+# Logger.set_level(:debug)
 
 type User
     id::PrimaryKey
@@ -17,8 +19,6 @@ type Comment
     id::PrimaryKey
     body::String
 end
-
-# Logger.set_level(:debug)
 
 schema(User) do user
     has_many(user, :comments, Comment)
@@ -33,29 +33,28 @@ insertquery = Query.insert(user)
 @test_throws NoAdapterError Query.statement(Query.insert(User, name="foo bar", age=20))
 
 adapter = Database.setup(Adapter.MySQL) do adapter
-    connect(adapter, host="127.0.0.1", user="root", pass="", db="")
+    Adapter.connect(adapter, host="127.0.0.1", user="root", pass="", db="")
 end
 
 function init_test()
-    SQL.execute("DROP DATABASE IF EXISTS mysqltest;")
-    SQL.execute("GRANT USAGE ON *.* TO 'test'@'127.0.0.1';")
-    SQL.execute("DROP USER 'test'@'127.0.0.1';")
+    SQL.execute(adapter, "DROP DATABASE IF EXISTS mysqltest;")
+    SQL.execute(adapter, "GRANT USAGE ON *.* TO 'test'@'127.0.0.1';")
+    SQL.execute(adapter, "DROP USER 'test'@'127.0.0.1';")
 end
 
 function create_test_database()
-    SQL.execute("CREATE DATABASE mysqltest;")
-    SQL.execute("CREATE USER test@127.0.0.1 IDENTIFIED BY 'test';")
-    SQL.execute("GRANT ALL ON mysqltest.* TO test@127.0.0.1;")
+    SQL.execute(adapter, "CREATE DATABASE mysqltest;")
+    SQL.execute(adapter, "CREATE USER test@127.0.0.1 IDENTIFIED BY 'test';")
+    SQL.execute(adapter, "GRANT ALL ON mysqltest.* TO test@127.0.0.1;")
 end
 
 init_test()
 create_test_database()
-disconnect(adapter)
+Adapter.disconnect(adapter)
 
-connect(adapter, host="127.0.0.1", user="test", pass="test", db="mysqltest")
+Adapter.connect(adapter, host="127.0.0.1", user="test", pass="test", db="mysqltest")
 
-SQL.execute("""CREATE TABLE users
-                 (
+SQL.execute(adapter, """CREATE TABLE users (
                      ID INT NOT NULL AUTO_INCREMENT,
                      name VARCHAR(255),
                      age INT,
@@ -67,13 +66,13 @@ SQL.execute("""CREATE TABLE users
 @test "INSERT INTO users (name, age) VALUES (?, ?)" == Query.statement(Query.insert(User, name=?, age=?))
 
 # insert
-SQL.insert(Query.insert(User, name="foo bar", age=20))
+SQL.insert(adapter, Query.insert(User, name="foo bar", age=20))
 Repo.insert(User, name="bar", age=20)
 
 hey = User(0, "hey", 30)
 Repo.insert(hey)
 
-# SQL.all(from(User))
+SQL.all(adapter, from(User))
 
 if !isa(adapter.handle, Void)
     user1 = Repo.get(User, 1)
@@ -99,7 +98,7 @@ if !isa(adapter.handle, Void)
 
     Repo.delete(User, 1)
 
-    disconnect(adapter)
+    Adapter.disconnect(adapter)
 end
 
 Database.reset()
