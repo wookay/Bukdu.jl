@@ -54,8 +54,6 @@ SQL.execute(adapter, """INSERT INTO Employee (Name, Salary, JoinDate, LastLogin,
                  ('Jim', 30000.00, '2015-6-2', '2015-9-5 10:05:10', '12:30:00', 45, 'Management', b'0', 1567)
               ;""")
 
-SQL.all(adapter, "show tables from mysqltest")
-
 type Employee
     name
 end
@@ -65,6 +63,10 @@ e = in(Employee)
 @test isa(e, Query.A.Employee)
 
 if !isa(adapter.handle, Void)
+
+    r = SQL.all(adapter, "show tables from mysqltest")
+    @test [("Employee",)] == collect(r)
+
     r = SQL.all(adapter, from(select= e.name))
     @test isa(r, Base.Generator)
     @test 3 == length(r)

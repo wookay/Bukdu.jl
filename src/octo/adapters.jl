@@ -10,10 +10,10 @@ type MySQL <: DatabaseAdapter
     MySQL() = new(nothing)
 end
 
-function connect
-end
-
-function disconnect
+# Adapter.PostgreSQL
+type PostgreSQL <: DatabaseAdapter
+    handle
+    PostgreSQL() = new(nothing)
 end
 
 # Adapter.SQLite
@@ -22,20 +22,25 @@ type SQLite <: DatabaseAdapter
     SQLite() = new(nothing)
 end
 
-function open
-end
-
-function close
-end
-
-
-typealias AdapterBase Union{Adapter.MySQL, Adapter.SQLite}
+typealias AdapterBase Union{Adapter.MySQL, Adapter.PostgreSQL, Adapter.SQLite}
 
 
 function execute
 end
 
 function all
+end
+
+function connect
+end
+
+function disconnect
+end
+
+function open
+end
+
+function close
 end
 
 type NoAdapter <: DatabaseAdapter
