@@ -6,6 +6,7 @@ export Adapter
 include("adapters.jl")
 
 import .Adapter: DatabaseAdapter, NoAdapter, NoAdapterError
+import ..Logger
 import Base: reset
 
 settings = Dict{Symbol,Any}(
@@ -37,6 +38,17 @@ end
 function reset()
     reset(get_adapter())
     set_adapter(Adapter.NoAdapter())
+end
+
+function install_guide(adapter_name::String)::Bool
+    automatically_install_packages = settings[:automatically_install_packages]
+    if automatically_install_packages
+        Logger.info("Installing $adapter_name...")
+        Pkg.add(adapter_name)
+    else
+        Logger.warn(string("Run ", Logger.with_color(:bold, """Pkg.add("$adapter_name")"""), " to install $adapter_name"))
+    end 
+    automatically_install_packages
 end
 
 end # module Bukdu.Octo.Database
