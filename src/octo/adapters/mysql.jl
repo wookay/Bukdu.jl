@@ -53,7 +53,7 @@ end
 
 function all(adapter::Adapter.MySQL, statement::String)::Base.Generator
     itr = MySQLRowIterator(adapter.handle, statement)
-    Logger.debug("all", statement, itr.rowsleft)
+    Logger.debug("all    ", statement, " |", Logger.with_color(:bold, itr.rowsleft))
     function f(i)
         Base.next(itr, true)
     end
@@ -62,7 +62,7 @@ end
 
 function execute(adapter::Adapter.MySQL, statement::String)::Bool
     result = mysql_query(adapter.handle, statement)
-    Logger.debug("execute", statement, result)
+    Logger.debug("execute", statement)
     0 == result
 end
 

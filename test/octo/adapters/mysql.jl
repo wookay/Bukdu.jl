@@ -53,7 +53,7 @@ SQL.execute("""INSERT INTO Employee (Name, Salary, JoinDate, LastLogin, LunchTim
                  ('Jim', 30000.00, '2015-6-2', '2015-9-5 10:05:10', '12:30:00', 45, 'Management', b'0', 1567),
                  ('Tim', 15000.50, '2015-7-25', '2015-10-10 12:12:25', '12:30:00', 56, 'Accounts', b'1', 3200);
               """)
-SQL.all("show tables from mysqltest")
+SQL.all(adapter, "show tables from mysqltest")
 
 type Employee
     name
