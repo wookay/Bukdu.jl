@@ -92,7 +92,7 @@ function pooling_model(T::Type)::Type # <: Query.Model
         haskey(models, model) ? model : type_generate(T)
     else
         type_generate(T)
-    end 
+    end
 end
 
 function in(T::Type)::Query.Model
