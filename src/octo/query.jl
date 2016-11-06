@@ -2,19 +2,23 @@
 
 module Query
 
-export Predicate, SubQuery, InsertQuery
+export ComponentQuery, SubQuery, InsertQuery, UpdateQuery, DeleteQuery
+export Predicate
 export from
 export and, or, not_in, is_null, is_not_null, like, not_like, between, exists, not_exists
 export asc, desc
 export ?
 
 import ..Schema
+import .Schema: Table, ColumnPhrase
 import ..Assoc
-import ..Logger
 import ..Field
+import ..Inflector
+import ..Logger
 import Base: in, isless, ==, !, &, |
 
 abstract Model
+abstract RecordQuery
 
 module A
 
@@ -29,77 +33,85 @@ end
 include("query/predicate.jl")
 include("query/subquery.jl")
 include("query/changequery.jl")
+include("query/componentquery.jl")
 
-models = Dict{Type, Type}() # {Query.Model, Type}
+models = Dict{Type, Query.Model}()
+origin_types = Dict{Type, Type}() # {Type{<:Query.Model}, Type}
 
 function from(; kw...)::SubQuery
-    subquery(From(Set{Type}([])); kw...)
-end
-
-function from{M<:Query.Model}(::M; kw...)::SubQuery
-    subquery(From(Set{Type}([M])); kw...)
+    subquery(From([]); kw...)
 end
 
 function from(T::Type; kw...)::SubQuery
-    from(in(T); kw...)
+    subquery(From([T]); kw...)
 end
 
-function type_generate(T::Type)::Type # <: Query.Model
-    type_name = T.name.name
-    type_name_uuid = replace(string(type_name, '_', Base.Random.uuid1()), '-', '_')
-    lines = String[]
-    fields = Assoc()
-    for i in 1:nfields(T)
-        push!(fields, (fieldname(T, i), :Field))
-    end
-    if haskey(Schema.relations, type_name)
-        for (relation,name,FT) in Schema.relations[type_name]
-            if :has_many == relation
-            #    push!(fields, (name, Base.Generator.name))
-            elseif :belongs_to == relation
-                push!(fields, (Symbol("$(name)_id"), :Field))
-            else # :has_one
-            #    push!(fields, (name, FT))
-            end
-        end
-    end
-    push!(lines, "type $type_name_uuid <: Query.Model")
-    for (name,typ) in fields
-        push!(lines, "    $name::$typ")
-    end
-    push!(lines, "end")
-    code = join(lines, "\n")
-    #Logger.info("code", code)
+function from{M<:Query.Model}(::M; kw...)::SubQuery
+    from(origin_types[M]; kw...)
+end
+
+function proc_field_name_type(column::ColumnPhrase)::String
+    string(column.name, "::", :Field)
+end
+
+function proc_field_name_type(schema_table::Table)::Vector{String}
+    proc_field_name_type.(schema_table.columns)
+end
+
+function generate_query_model(T::Type, schema_table::Table)::Query.Model
+    typ_name = T.name.name
+    typ_name_uuid = replace(string(typ_name, '_', Base.Random.uuid1()), '-', '_')
+    code = string("type $typ_name_uuid <: Query.Model", "\n",
+                  join(map(phrase -> string("    ", phrase), proc_field_name_type(schema_table)), "\n"), "\n",
+                  "end", "\n"
+           )
+    # Logger.info("query model code", code)
     eval(A, parse(code))
-    eval(A, parse("$type_name = $type_name_uuid"))
-    model = getfield(A, type_name)
-    models[model] = T
+    eval(A, parse("$typ_name = $typ_name_uuid"))
+    model_typ = getfield(A, typ_name)
+    model = model_typ(map(schema_table.columns) do column
+        Field(T, column.name, column.options)
+    end...)
+    models[T] = model
+    origin_types[model_typ] = T
     model
 end
 
-function table_name{M<:Query.Model}(::Type{M})::String
-    Schema.table_name(models[M])
-end
-
-function table_name(T::Type)::String
-    Schema.table_name(T)
-end
-
-function pooling_model(T::Type)::Type # <: Query.Model
-    type_name = T.name.name
-    if isdefined(A, type_name)
-        model = getfield(A, type_name)
-        haskey(models, model) ? model : type_generate(T)
+function schema_table_name(T::Type)::String
+    if applicable(Schema.table_name, T)
+        Schema.table_name(T)
     else
-        type_generate(T)
+        Inflector.tableize(string(T.name.name))
     end
 end
 
+function schema_table_alias_name(tables::Vector{Type}, T::Type)::String
+    table_name_chars = first.(schema_table_name.(tables))
+    table_name_char = first(schema_table_name(T))
+    if length(findin(table_name_chars, table_name_char)) > 1
+        ind = findfirst(tables, T)
+        string(table_name_char, ind)
+    else
+        string(table_name_char)
+    end
+end
+
+function in(block::Function, T::Type)::Query.Model
+    table = Table(Vector{ColumnPhrase}())
+    block(table)
+    schema_table = Schema.build_schema_table(T, table)
+    generate_query_model(T, schema_table)
+end
+
 function in(T::Type)::Query.Model
-    model = pooling_model(T)
-    model(map(fieldnames(model)) do name
-        Field(T, name)
-    end...)
+    typ_name = T.name.name
+    if haskey(models, T)
+        models[T]
+    else
+        table = Table(Vector{ColumnPhrase}())
+        schema_table = Schema.build_schema_table(T, table)
+        generate_query_model(T, schema_table)
+    end
 end
 
 end # module Bukdu.Octo.Query

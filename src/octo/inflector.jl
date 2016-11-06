@@ -1,5 +1,7 @@
 # module Bukdu.Octo
 
+module Inflector
+
 function singularize(s::String)::String
     word = lowercase(s)
     m = match(r"(\w*)s", word)
@@ -15,4 +17,12 @@ function pluralize(s::String)::String
     string(word, "s")
 end
 
-# irregular
+function tableize(word::String)::String
+    pluralize(underscore(word))
+end
+
+function underscore(word::String)::String
+    join(matchall(r"([A-Z]+[a-z]*)", word), "_")
+end
+
+end # module Bukdu.Octo.Inflector

@@ -35,12 +35,9 @@ try
     Pkg.installed(adapter_name)
     import SQLite
 catch
-    if Database.settings[:automatically_install_packages]
-        Logger.info("Installing $adapter_name...")
-        Pkg.add(adapter_name)
+    if Database.install_guide(adapter_name)
         import SQLite
     else
-        Logger.warn(string("Please install $adapter_name with ", Logger.with_color(:bold, """Pkg.add("$adapter_name")""")))
         import .Mock: SQLite
     end
 end

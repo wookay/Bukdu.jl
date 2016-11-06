@@ -37,12 +37,9 @@ try
     Pkg.installed(adapter_name)
     import MySQL
 catch
-    if Database.settings[:automatically_install_packages]
-        Logger.info("Installing $adapter_name...")
-        Pkg.add(adapter_name)
+    if Database.install_guide(adapter_name)
         import MySQL
     else
-        Logger.warn(string("Please install $adapter_name with ", Logger.with_color(:bold, """Pkg.add("$adapter_name")""")))
         import .Mock: MySQL
     end
 end
@@ -60,9 +57,14 @@ end
 Base.length(itr::MySQL.MySQLRowIterator) = itr.rowsleft
 
 function Adapter.all(adapter::Adapter.MySQL, statement::String)::Base.Generator
-    itr = MySQL.MySQLRowIterator(adapter.handle, statement)
-    Logger.debug("all    ", statement, " |", Logger.with_color(:bold, itr.rowsleft))
-    Base.Generator(identity, collect(itr))
+    try
+        itr = MySQL.MySQLRowIterator(adapter.handle, statement)
+        Logger.debug("all    ", statement, " |", Logger.with_color(:bold, itr.rowsleft))
+        Base.Generator(identity, collect(itr))
+    catch ex
+        Logger.error("all    ", statement, " |", ex)
+        Base.Generator(identity, ())
+    end
 end
 
 function Adapter.execute(adapter::Adapter.MySQL, statement::String)::Bool

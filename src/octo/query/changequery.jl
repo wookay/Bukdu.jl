@@ -3,19 +3,19 @@
 import .Schema: PrimaryKey
 import ..Changeset
 
-type InsertQuery
-    table::String
+type InsertQuery <: RecordQuery
+    table_name::String
     fields::Assoc
 end
 
-type UpdateQuery
+type UpdateQuery <: RecordQuery
     fields::Assoc
     from::From
     where::Nullable{Predicate}
 end
 
-type DeleteQuery
-    table::String
+type DeleteQuery <: RecordQuery
+    table_name::String
     fields::Assoc
 end
 
@@ -36,7 +36,6 @@ end
 
 function insert(object; kw...)::InsertQuery
     T = typeof(object)
-    table = Schema.table_name(T)
     fields = Assoc()
     for name in fieldnames(T)
         if fieldtype(T, name) <: PrimaryKey
@@ -44,21 +43,19 @@ function insert(object; kw...)::InsertQuery
             push!(fields, (name, getfield(object, name)))
         end
     end
-    InsertQuery(table, fields)
+    InsertQuery(Query.schema_table_name(T), fields)
 end
 
 function insert(T::Type; kw...)::InsertQuery
-    table = Schema.table_name(T)
     fields = Assoc(kw)
-    InsertQuery(table, fields)
+    InsertQuery(Query.schema_table_name(T), fields)
 end
 
 function update(changeset::Changeset; where= Nullable{Predicate}())::UpdateQuery
-    from = From(Set{Type}([typeof(changeset.model)]))
+    from = From([typeof(changeset.model)])
     UpdateQuery(changeset.changes, from, isnull(where) ? where : Nullable{Predicate}(where))
 end
 
 function delete(T::Type; kw...)::DeleteQuery
-    table = Schema.table_name(T)
-    DeleteQuery(table, Assoc(kw))
+    DeleteQuery(Query.schema_table_name(T), Assoc(kw))
 end

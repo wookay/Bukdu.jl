@@ -18,11 +18,11 @@ type Comment
     text::String
 end
 
-schema(User) do user
+in(User) do user
     has_many(user, :comments, Comment)
 end
 
-schema(Comment) do comment
+in(Comment) do comment
     belongs_to(comment, :user, User)
 end
 

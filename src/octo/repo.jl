@@ -2,12 +2,15 @@
 
 module Repo
 
+import ..Octo: Assoc, Changeset, Database, default
 import ..SQL
 import ..Query
 import .Query: Predicate
-import ..Octo: Assoc, Changeset, Database, default
+import ..Migration: MigrationQuery, MigrationSet, MigrationItem, migration_revert_query
 import ..Logger
 import Base: get
+
+migration_sets = Vector{MigrationSet}()
 
 function convert_result_row(T::Type, row)::T
     result = row
@@ -68,6 +71,28 @@ end
 function delete(T::Type, id)::Bool # throw NoAdapterError
     adapter = Database.get_adapter()
     SQL.delete(adapter, Query.delete(T; id=id))
+end
+
+function migration(block::Function, version::VersionNumber)
+    task = current_task()
+    task.storage[:migration] = Vector{MigrationItem}()
+    block()
+    items = task.storage[:migration]
+    delete!(task.storage, :migration)
+    up = Vector{MigrationQuery}()
+    down = Vector{MigrationQuery}()
+    for item in items
+        if (+) == item.op
+            push!(up, item.query)
+        elseif (-) == item.op
+            push!(down, item.query)
+        elseif (~) == item.op
+            push!(up, item.query)
+            push!(down, migration_revert_query(item.query))
+        end
+    end
+    set = MigrationSet(version, up, down)
+    push!(migration_sets, set)
 end
 
 end # module Bukdu.Octo.Repo

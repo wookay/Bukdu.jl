@@ -1,10 +1,9 @@
 # module Bukdu.Octo.Query
 
 import ..Database: Adapter, get_adapter
-import ..pluralize
 
 type From
-    tables::Set{Type}
+    tables::Vector{Type}
 end
 
 type Select
@@ -16,7 +15,7 @@ type OrderBy
     fields::Vector{Predicate}
 end
 
-type SubQuery
+type SubQuery <: RecordQuery
     from::From
     select::Select
     where::Nullable{Predicate}
@@ -40,7 +39,7 @@ function subquery(from::From; kw...)::SubQuery # throw SubQueryError
            isa(value, Tuple) ||
            isa(value, Vector{Field})
             for table in Query.tables(value)
-                push!(from.tables, table)
+                !in(table, from.tables) && push!(from.tables, table)
             end
         end
     else
@@ -48,7 +47,7 @@ function subquery(from::From; kw...)::SubQuery # throw SubQueryError
     end
     where = haskey(opts, :where) ? Nullable(opts[:where]) : Nullable{Predicate}()
     for table in Query.tables(where)
-        push!(from.tables, table)
+        !in(table, from.tables) && push!(from.tables, table)
     end
     if haskey(opts, :order_by)
         order = opts[:order_by] 
@@ -127,17 +126,6 @@ function tables(pred::Predicate)::Vector{Type}
         end
     end
     collect(values(dict))
-end
-
-function table_alias_name(tables::Vector{Type}, T::Type)::String
-    table_name_chars = first.(Schema.table_name.(tables))
-    table_name_char = first(Schema.table_name(T))
-    if length(findin(table_name_chars, table_name_char)) > 1
-        ind = findfirst(tables, T)
-        string(table_name_char, ind)
-    else
-        string(table_name_char)
-    end
 end
 
 in(field::Field, sub::SubQuery)::Predicate = Predicate(in, field, sub)

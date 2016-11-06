@@ -9,8 +9,7 @@ export Changeset, change, default, cast
 export validates, validate_length
 include("octo/changeset.jl")
 
-export singularize, pluralize
-include("octo/natural.jl")
+include("octo/inflector.jl")
 
 export Database, Adapter, disconnect
 include("octo/database.jl")
@@ -23,6 +22,9 @@ include("octo/query.jl")
 
 export SQL
 include("octo/sql.jl")
+
+export migrate
+include("octo/migration.jl")
 
 export Repo
 include("octo/repo.jl")

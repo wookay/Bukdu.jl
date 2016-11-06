@@ -1,7 +1,6 @@
 module test_octo_adapters_mysql
 
-importall Bukdu
-importall Bukdu.Octo
+importall Bukdu: Octo, Logger
 importall .Octo.Repo
 importall .Octo.Query
 import .Octo.Database: Adapter
