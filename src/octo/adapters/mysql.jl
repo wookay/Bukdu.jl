@@ -57,9 +57,14 @@ end
 Base.length(itr::MySQL.MySQLRowIterator) = itr.rowsleft
 
 function Adapter.all(adapter::Adapter.MySQL, statement::String)::Base.Generator
-    itr = MySQL.MySQLRowIterator(adapter.handle, statement)
-    Logger.debug("all    ", statement, " |", Logger.with_color(:bold, itr.rowsleft))
-    Base.Generator(identity, collect(itr))
+    try
+        itr = MySQL.MySQLRowIterator(adapter.handle, statement)
+        Logger.debug("all    ", statement, " |", Logger.with_color(:bold, itr.rowsleft))
+        Base.Generator(identity, collect(itr))
+    catch ex
+        Logger.error("all    ", statement, " |", ex)
+        Base.Generator(identity, ())
+    end
 end
 
 function Adapter.execute(adapter::Adapter.MySQL, statement::String)::Bool

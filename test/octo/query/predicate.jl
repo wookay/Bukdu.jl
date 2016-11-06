@@ -10,8 +10,8 @@ type User
     age
 end
 
-name = Field(User, :name)
-age = Field(User, :age)
+name = Field(User, :name, Dict())
+age = Field(User, :age, Dict())
 
 @test Predicate(>,3,name) ≈ (3 > name)
 @test Predicate(>,3,name) ≈ (name < 3)

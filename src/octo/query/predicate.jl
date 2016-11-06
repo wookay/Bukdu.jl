@@ -3,12 +3,12 @@
 import Base: isapprox
 
 type Predicate
-    iden::Function
-    f::Function
+    not::Function
+    op::Function
     first::Any
     second::Any
-    Predicate(f::Function, first::Any, second::Any) = new(identity, f, first, second)
-    Predicate(iden::Function, f::Function, first::Any, second::Any) = new(iden, f, first, second)
+    Predicate(op::Function, first::Any, second::Any) = new(identity, op, first, second)
+    Predicate(not::Function, op::Function, first::Any, second::Any) = new(not, op, first, second)
 end
 
 function isless(a::Any, field::Field)::Predicate
@@ -36,7 +36,7 @@ function ==(lhs::Predicate, rhs::Predicate)::Predicate
 end
 
 function !(pred::Predicate)::Predicate
-    Predicate(identity==pred.iden ? (!) : identity, pred.f, pred.first, pred.second)
+    Predicate(identity==pred.not ? (!) : identity, pred.op, pred.first, pred.second)
 end
 
 function and(lhs::Predicate, rhs::Predicate)::Predicate
@@ -56,7 +56,7 @@ function (|)(lhs::Predicate, rhs::Predicate)::Predicate
 end
 
 function isapprox(lhs::Predicate, rhs::Predicate)::Bool
-    ==(lhs.iden, rhs.iden) && ==(lhs.f, rhs.f) && isapprox(lhs.first, rhs.first) && isapprox(lhs.second, rhs.second)
+    ==(lhs.not, rhs.not) && ==(lhs.op, rhs.op) && isapprox(lhs.first, rhs.first) && isapprox(lhs.second, rhs.second)
 end
 
 function isapprox(lhs::Field, rhs::Field)::Bool

@@ -20,11 +20,11 @@ type Comment
     body::String
 end
 
-schema(User) do user
+in(User) do user
     has_many(user, :comments, Comment)
 end
 
-@test isdefined(Schema.A, :User)
+@test isdefined(Query.A, :User)
 
 user = User(0, "foo bar", 20)
 insertquery = Query.insert(user)

@@ -47,7 +47,7 @@ function install_guide(adapter_name::String)::Bool
         Pkg.add(adapter_name)
     else
         Logger.warn(string("Run ", Logger.with_color(:bold, """Pkg.add("$adapter_name")"""), " to install $adapter_name"))
-    end 
+    end
     automatically_install_packages
 end
 

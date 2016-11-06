@@ -3,16 +3,15 @@
 module Schema
 
 export PrimaryKey, Field
-export schema, table_name, field, has_many, has_one, belongs_to
+export add, has_many, has_one, belongs_to
+export create, create_if_not_exists, rename, alter, drop
 
 import ..Assoc
+import ..Inflector
 import ..Logger
-import ..pluralize
 import Base: ==
 
 abstract Model
-
-relations = Dict{Symbol,Vector}()
 
 type PrimaryKey{T}
     id::T
@@ -21,12 +20,33 @@ end
 type Field
     typ::Type
     name::Symbol
+    options::Dict{Symbol,Any}
+end
+
+type ColumnPhrase
+    action::Symbol
+    typ::Type
+    name::Symbol
+    options::Dict{Symbol,Any}
+end
+
+type Table
+    columns::Vector{ColumnPhrase}
+end
+
+type ComponentQuery
+    action::Function # create, create_if_not_exists, rename, alter, drop
+    kind::Symbol     # :table, :index, :constraint
+    table_name::String
+    table::Nullable{Table}
+    options::Dict
 end
 
 module A
 
 import ....Octo
 import .Octo: Schema
+import .Schema: PrimaryKey
 
 end # module Bukdu.Octo.Schema.A
 
@@ -36,86 +56,118 @@ Base.convert(::Type{PrimaryKey}, id::Int32) = PrimaryKey{Int}(id)
 
 ==(lhs::PrimaryKey, rhs::PrimaryKey) = ==(lhs.id, rhs.id)
 
-function origin_type
+function create(block::Function, kind::Symbol, name::String)::ComponentQuery
+    table = Table(Vector{ColumnPhrase}())
+    block(table)
+    ComponentQuery(create, kind, name, Nullable(table), Dict())
 end
 
-function type_generate(T::Type)::Type # <: Schema.Model
-    type_name = T.name.name
-    type_name_uuid = replace(string(type_name, '_', Base.Random.uuid1()), '-', '_')
-    lines = String[]
-    fields = Assoc()
-    for i in 1:nfields(T)
-        typ = fieldtype(T, i)
-        if typ <: PrimaryKey && isa(first(typ.parameters), TypeVar)
-            paramtyp = first(typ.parameters)
-            fieldtyp = isa(paramtyp, TypeVar) ? Int : paramtyp
-        else
-            fieldtyp = typ
-        end
-        push!(fields, (fieldname(T, i), fieldtyp))
-    end
-    if haskey(Schema.relations, type_name)
-        for (relation,name,FT) in Schema.relations[type_name]
-            if :has_many == relation
-                push!(fields, (name, Base.Generator.name))
-            elseif :belongs_to == relation
-                push!(fields, (Symbol("$(name)_id"), Int))
-            else # :has_one
-                push!(fields, (name, FT))
+function create_if_not_exists(block::Function, kind::Symbol, name::String)::ComponentQuery
+    table = Table(Vector{ColumnPhrase}())
+    block(table)
+    ComponentQuery(create_if_not_exists, kind, name, Nullable(table), Dict())
+end
+
+function rename(kind::Symbol, name::String, to::String)::ComponentQuery
+    ComponentQuery(rename, kind, name, Nullable{Table}(); Dict(:to=>to))
+end
+
+function alter(block::Function, kind::Symbol, name::String)::ComponentQuery
+    table = Table(Vector{ColumnPhrase}())
+    block(table)
+    ComponentQuery(alter, kind, name, Nullable(table), Dict())
+end
+
+function drop(kind::Symbol, name::String)::ComponentQuery
+    ComponentQuery(drop, kind, name, Nullable{Table}(), Dict())
+end
+
+function push_column_phrase(table::Table, action::Symbol, typ::Type, name::Symbol; kw...)
+    column = ColumnPhrase(action, typ, name, Dict(kw))
+    push!(table.columns, column)
+end
+
+function add(table::Table, name::Symbol, typ::Type; kw...)
+    push_column_phrase(table, :add, typ, name; kw...)
+end
+
+function modify(table::Table, name::Symbol, typ::Type; kw...)
+    push_column_phrase(table, :modify, typ, name; kw...)
+end
+
+function remove(table::Table, name::Symbol; kw...)
+    push_column_phrase(table, :remove, Void, name; kw...)
+end
+
+function has_many(table::Table, name::Symbol, typ::Type; kw...)
+    push_column_phrase(table, :has_many, typ, name; kw...)
+end
+
+function has_one(table::Table, name::Symbol, typ::Type; kw...)
+    push_column_phrase(table, :has_one, typ, name; kw...)
+end
+
+function belongs_to(table::Table, name::Symbol, typ::Type; kw...)
+    push_column_phrase(table, :belongs_to, typ, name; kw...)
+end
+
+function proc_field_name_type(column::ColumnPhrase)::String
+    if isempty(column.typ.parameters)
+        type_params = ""
+    else
+        type_params = string('{', join(map(column.typ.parameters) do param
+            if isa(param, TypeVar)
+                :PrimaryKey == column.typ.name.name ? Int : Any
+            elseif isa(param, Type)
+                isdefined(A, column.typ.name.name) ? column.typ.name.name : Any
+            else
+                param
             end
+        end, ','), '}')
+    end
+    string(column.name, "::", column.typ.name.name, type_params)
+end
+
+function proc_field_name_type(schema_table::Table)::Vector{String}
+    proc_field_name_type.(schema_table.columns)
+end
+
+function build_schema_table(T::Type, table::Table)::Table
+    schema_table = Table(Vector{ColumnPhrase}())
+    for i in 1:nfields(T)
+        name = fieldname(T, i)
+        in(name, map(column -> column.name, table.columns)) && continue
+        typ = fieldtype(T, i)
+        push!(schema_table.columns, ColumnPhrase(:type, typ, name, Dict{Symbol,Any}()))
+    end
+    for column in table.columns
+        if :belongs_to == column.action
+            col = ColumnPhrase(column.action, column.typ, string(column.name, "_id"), column.options)
+            push!(schema_table.columns, col)
+        else
+            push!(schema_table.columns, column)
         end
     end
-    push!(lines, "type $type_name_uuid <: Schema.Model")
-    for (name,typ) in fields
-        push!(lines, "    $name::$typ")
-    end
-    push!(lines, string("    ", type_name, "(", join(["$name::$typ" for (name,typ) in fields], ", "), ") = new(", join(keys(fields), ", "), ")"))
-    push!(lines, "end")
-    code = join(lines, "\n")
-    #Logger.info("code", code)
+    schema_table
+end
+
+function generate_schema_model(T::Type, schema_table::Table)::Type # <: Schema.Model
+    typ_name = T.name.name
+    typ_name_uuid = replace(string(typ_name, '_', Base.Random.uuid1()), '-', '_')
+    code = string("type $typ_name_uuid <: Schema.Model", "\n",
+                  join(map(phrase -> string("    ", phrase), proc_field_name_type(schema_table)), "\n"), "\n",
+                  "end", "\n"
+           )
+    Logger.info("schema model code", code)
     eval(A, parse(code))
-    eval(A, parse("$type_name = $type_name_uuid"))
-    getfield(A, type_name)
+    eval(A, parse("$typ_name = $typ_name_uuid"))
+    getfield(A, typ_name)
 end
 
-function pooling_type(T::Type)::Type # <: Schema.Model
-    typ_name = T.name.name
-    isdefined(A, typ_name) ? getfield(A, typ_name) : type_generate(T)
-end
-
-function schema(block::Function, T::Type)::Type # <: Schema.Model
-    typ_name = T.name.name
-    Schema.relations[typ_name] = Vector()
-    block(T)
-    pooling_type(T)
-end
-
-function table_name(T::Type)::String
-    typ_name = string(T.name.name)
-    pluralize(lowercase(typ_name))
-end
-
-function field(T::Type, name::Symbol; kw...)
-    typ_name = T.name.name
-    push!(Schema.relations[typ_name], (:field, name, kw))
-end
-
-function has_many(T::Type, name::Symbol, FT::Type; kw...)
-    typ_name = T.name.name
-    push!(Schema.relations[typ_name], (:has_many, name, FT))
-end
-
-function has_one(T::Type, name::Symbol, FT::Type; kw...)
-    typ_name = T.name.name
-    push!(Schema.relations[typ_name], (:has_one, name, FT))
-end
-
-function belongs_to(T::Type, name::Symbol, FT::Type; kw...)
-    typ_name = T.name.name
-    push!(Schema.relations[typ_name], (:belongs_to, name, FT))
+function table_name
 end
 
 end # module Bukdu.Octo.Schema
 
 import .Schema: PrimaryKey, Field
-import .Schema: schema, table_name, field, has_many, has_one, belongs_to
+import .Schema: add, has_many, has_one, belongs_to
