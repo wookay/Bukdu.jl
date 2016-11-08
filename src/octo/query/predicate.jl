@@ -15,8 +15,16 @@ function isless(a::Any, field::Field)::Predicate
     Predicate(<, a, field)
 end
 
+function isless(a::Any, pred::Predicate)::Predicate
+    Predicate(<, a, pred)
+end
+
 function isless(field::Field, a::Any)::Predicate
     Predicate(>, a, field)
+end
+
+function isless(pred::Predicate, a::Any)::Predicate
+    Predicate(>, a, pred)
 end
 
 function ==(a::Any, field::Field)::Predicate
@@ -90,3 +98,6 @@ function order_not_specified
 end
 asc(field::Field) = Predicate(asc, field, nothing)
 desc(field::Field) = Predicate(desc, field, nothing)
+
+count(field::Field) = Predicate(count, nothing, field)
+count(f::Function) = Predicate(count, nothing, f)
