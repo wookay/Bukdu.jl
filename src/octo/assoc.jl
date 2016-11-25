@@ -26,6 +26,14 @@ type Assoc
     end
 end
 
+function Base.get(assoc::Assoc, key::Symbol, defvalue::Any)
+    haskey(assoc, key) ? getindex(assoc, key) : defvalue
+end
+
+function Base.get(assoc::Assoc, key::String, defvalue::Any)
+    get(assoc, Symbol(key), defvalue)
+end
+
 function Base.getindex(assoc::Assoc, key::Symbol) # throw KeyError
     for (k,v) in assoc.vector
         k==key && return v

@@ -106,7 +106,6 @@ function redirect_to(url::String; kw...)
     Conn(:found, Dict("Location"=>location), nothing) # 302
 end
 
-include("router/keyword.jl")
 include("router/naming.jl")
 include("router/route.jl")
 include("router/scope.jl")

@@ -15,7 +15,7 @@ end
 module RouterResource
 
 import ..Bukdu: ApplicationController
-import ..Bukdu: Assoc, Keyword, Naming
+import ..Bukdu: Assoc, Naming
 import ..Bukdu: RouterScope
 import ..Bukdu: Resource
 import ..Bukdu: index, edit, new, show, create, update, delete
@@ -25,14 +25,14 @@ const controller_actions = [index, edit, new, show, create, update, delete]
 
 function build{AC<:ApplicationController}(path::String, ::Type{AC}, options::Dict)
     path  = RouterScope.validate_path(path)
-    alias = Keyword.get(options, :alias, "")
-    param = Keyword.get(options, :param, default_param_key)
-    name  = Keyword.get(options, :name, Naming.resource_name(AC, "Controller"))
-    as      = Keyword.get(options, :as, name)
-    private = Keyword.get(options, :private, Assoc())
-    assigns = Keyword.get(options, :assigns, Assoc())
+    alias = get(options, :alias, "")
+    param = get(options, :param, default_param_key)
+    name  = get(options, :name, Naming.resource_name(AC, "Controller"))
+    as      = get(options, :as, name)
+    private = get(options, :private, Assoc())
+    assigns = get(options, :assigns, Assoc())
 
-    singleton = Keyword.get(options, :singleton, false)
+    singleton = get(options, :singleton, false)
     actions   = extract_actions(options, singleton)
 
     route       = Dict(:as => as, :private => private, :assigns => assigns)
@@ -47,7 +47,7 @@ function extract_actions(options::Dict, singleton::Bool)::Vector{Function}
     if haskey(options, :only)
         setdiff(controller_actions, setdiff(controller_actions, options[:only]))
     else
-        except = Keyword.get(options, :except, [])
+        except = get(options, :except, [])
         setdiff(default_actions(singleton), except)
     end
 end

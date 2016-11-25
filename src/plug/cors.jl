@@ -1,7 +1,6 @@
 # module Bukdu.Plug
 
 import ....Bukdu
-import Bukdu: Keyword
 import Base: ismatch
 
 # Cross-Origin Resource Sharing
@@ -38,9 +37,9 @@ function ismatch(origins::Vector, cors_req::CrossOriginRequest)::Bool
 end
 
 function get_cors_req(conn::Conn)::CrossOriginRequest
-    origin = Keyword.get(conn.req_headers, "Origin", "")
-    request_method = Keyword.get(conn.req_headers, "Access-Control-Request-Method", "")
-    request_headers = Keyword.get(conn.req_headers, "Access-Control-Request-Headers", "")
+    origin = get(conn.req_headers, "Origin", "")
+    request_method = get(conn.req_headers, "Access-Control-Request-Method", "")
+    request_headers = get(conn.req_headers, "Access-Control-Request-Headers", "")
     CrossOriginRequest(origin, Symbol(lowercase(request_method)), split(request_headers, ", "))
 end
 
