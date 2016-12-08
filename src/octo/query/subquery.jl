@@ -11,14 +11,27 @@ type Select
     value::Any
 end
 
+type Join
+    name::Symbol # :join, ...
+    table::Type
+    on::Predicate
+end
+
+type GroupBy
+    columns::Vector{Field}
+    having::Nullable{Predicate}
+end
+
 type OrderBy
     fields::Vector{Predicate}
 end
 
 type SubQuery <: RecordQuery
-    from::From
     select::Select
+    from::From
+    join::Nullable{Join}
     where::Nullable{Predicate}
+    group_by::Nullable{GroupBy}
     order_by::Nullable{OrderBy}
     limit::Nullable{Int}
     offset::Nullable{Int}
@@ -31,7 +44,9 @@ end
 function subquery(from::From; kw...)::SubQuery # throw SubQueryError
     opts = Assoc(kw)
     select_names = intersect([:select, :select_distinct], keys(opts))
-    if !isempty(select_names)
+    if isempty(select_names)
+        select = Select(:select, *)
+    else
         name = first(select_names)
         value = opts[name]
         select = Select(name, value)
@@ -42,38 +57,71 @@ function subquery(from::From; kw...)::SubQuery # throw SubQueryError
                 !in(table, from.tables) && push!(from.tables, table)
             end
         end
+    end
+    join_names = intersect([:join, :left_join, :left_outer_join, :right_join, :right_outer_join,
+                            :full_join, :full_outer_join, :inner_join, :outer_join, :cross_join, :natural_join], keys(opts))
+    if isempty(join_names)
+        join = Nullable{Join}()
     else
-        select = Select(:select, *)
+        name = first(join_names)
+        table = opts[name]
+        join_table = isa(table, Query.Model) ? origin_types[typeof(table)] : table
+        on = opts[:on]
+        for table in Query.tables(on)
+            !in(table, from.tables) && push!(from.tables, table)
+        end
+        join = Nullable(Join(name, join_table, on))
     end
     where = haskey(opts, :where) ? Nullable(opts[:where]) : Nullable{Predicate}()
     for table in Query.tables(where)
         !in(table, from.tables) && push!(from.tables, table)
     end
-    if haskey(opts, :order_by)
-        order = opts[:order_by] 
-        fields = Vector{Predicate}()
-        if isa(order, Tuple)
-            order_tup = order
-        else
-            order_tup = tuple(order)
-        end
-        order_fields = Vector{Type}()
-        map(order_tup) do field
+    if haskey(opts, :group_by)
+        group = opts[:group_by]
+        group_tup = isa(group, Tuple) ? group : tuple(group)
+        column_tables = Vector{Type}()
+        columns = Vector{Field}()
+        for field in group_tup
             if isa(field, Field)
-                pred = Predicate(order_not_specified, field, nothing)
-                push!(order_fields, field.typ)
-            elseif isa(field, Predicate)
-                pred = field
-                push!(order_fields, field.first.typ)
+                push!(column_tables, field.typ)
             else
-                Logger.info("order_by", field)
+                throw(SubQueryError(""))
             end
-            push!(fields, pred)
+            push!(columns, field)
         end
-        for table in order_fields
+        for table in column_tables
             !in(table, from.tables) && push!(from.tables, table)
         end
-        order_by = Nullable(OrderBy(fields))
+        if haskey(opts, :having)
+            having = Nullable(opts[:having])
+        else
+            having = Nullable{Predicate}()
+        end
+        group_by = Nullable(GroupBy(columns, having))
+    else
+        group_by = Nullable{GroupBy}()
+    end
+    if haskey(opts, :order_by)
+        order = opts[:order_by]
+        order_tup = isa(order, Tuple) ? order : tuple(order)
+        field_tables = Vector{Type}()
+        preds = Vector{Predicate}()
+        for field in order_tup
+            if isa(field, Field)
+                pred = Predicate(order_not_specified, field, nothing)
+                push!(field_tables, field.typ)
+            elseif isa(field, Predicate)
+                pred = field
+                push!(field_tables, field.first.typ)
+            else
+                throw(SubQueryError(""))
+            end
+            push!(preds, pred)
+        end
+        for table in field_tables
+            !in(table, from.tables) && push!(from.tables, table)
+        end
+        order_by = Nullable(OrderBy(preds))
     else
         order_by = Nullable{OrderBy}()
     end
@@ -82,7 +130,7 @@ function subquery(from::From; kw...)::SubQuery # throw SubQueryError
     if isempty(from.tables)
         throw(SubQueryError(""))
     else
-        SubQuery(from, select, where, order_by, limit, offset)
+        SubQuery(select, from, join, where, group_by, order_by, limit, offset)
     end
 end
 

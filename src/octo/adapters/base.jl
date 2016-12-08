@@ -5,11 +5,11 @@ module LoadAdapterBase
 import ..Database: Adapter
 import .Adapter: AdapterBase
 import ..Query
-import .Query: From, Select, Predicate, SubQuery, InsertQuery, UpdateQuery, DeleteQuery
+import .Query: Select, From, Join, Predicate, SubQuery, InsertQuery, UpdateQuery, DeleteQuery
 import .Query: statement, and, or, between, column_phrase_type
 import .Query: in, is_null, like, exists
 import .Query: not_in, is_not_null, not_like, not_exists
-import .Query: order_not_specified, asc, desc
+import .Query: order_not_specified, asc, desc, count
 import ..Schema
 import .Schema: Field, ColumnPhrase, ComponentQuery
 import ..Logger
@@ -99,10 +99,13 @@ function normalize(adapter::AdapterBase, from::From, pred::Predicate)::String
         elseif between == pred.op
             op = string(uppercase("between"), ' ', pred.second.start, ' ', uppercase("and"))
             r = pred.second.stop
-        elseif order_not_specified == pred.op
-            op = nothing
         elseif pred.op in [asc, desc, like]
             op = uppercase(string(Base.function_name(pred.op)))
+        elseif count == pred.op
+            op = string(uppercase("count"), enclosed(adapter, normalize(adapter, from, pred.second)))
+            r = nothing
+        elseif order_not_specified == pred.op
+            op = nothing
         else
             op = pred.op
         end

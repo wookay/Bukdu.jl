@@ -6,7 +6,7 @@ export ComponentQuery, SubQuery, InsertQuery, UpdateQuery, DeleteQuery
 export Predicate
 export from
 export and, or, not_in, is_null, is_not_null, like, not_like, between, exists, not_exists
-export asc, desc
+export asc, desc, count
 export ?
 
 import ..Schema

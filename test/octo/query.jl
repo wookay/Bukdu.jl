@@ -118,6 +118,21 @@ query = from(select= ?, where= u.age > ?)
 query = from(where= c.user_id in [1,2], select= c.text)
 @test isa(query, SubQuery)
 
+@test "SELECT COUNT(u.name) FROM users AS u, comments AS c WHERE c.user_id = u.id" ==
+    Query.statement(from(select= count(u.name), where= c.user_id == u.id))
+
+@test "SELECT COUNT(*) FROM users AS u, comments AS c WHERE c.user_id = u.id" ==
+    Query.statement(from(select= count(*), where= c.user_id == u.id))
+
+@test "SELECT * FROM users AS u LEFT OUTER JOIN comments AS c ON c.user_id = u.id" ==
+    Query.statement(from(left_outer_join= c, on= c.user_id == u.id))
+
+@test "SELECT u.name, u.age FROM users AS u GROUP BY u.name" ==
+    Query.statement(from(select= (u.name, u.age), group_by= u.name))
+
+@test "SELECT u.name, u.age FROM users AS u GROUP BY u.name HAVING 2 <= COUNT(u.name)" ==
+    Query.statement(from(select= (u.name, u.age), group_by= u.name, having= count(u.name) >= 2))
+
 Database.reset()
 
 end # module test_octo_query
