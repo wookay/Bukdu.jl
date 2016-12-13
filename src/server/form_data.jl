@@ -3,7 +3,7 @@
 import ..Assoc
 import ..Plug
 import ..Logger
-import HttpCommon: Request, parsequerystring
+import HttpCommon: parsequerystring
 import URIParser: unescape_form
 
 type FormScanner
@@ -91,12 +91,32 @@ function scan(s::FormScanner)::Assoc
     assoc
 end
 
+immutable UrlEncodedScanner
+    data::Vector{UInt8}
+end
+
+# https://github.com/JuliaWeb/HttpCommon.jl/blob/v0.2.6/src/HttpCommon.jl#L141
+function scan(s::UrlEncodedScanner)::Assoc
+    query = String(s.data)
+    assoc = Assoc()
+    isempty(query) && return assoc
+    for field in split(query, "&")
+        keyval = split(field, "=")
+        length(keyval) != 2 && throw(ArgumentError("Field '$field' did not contain an '='."))
+        push!(assoc, (Symbol(unescape_form(keyval[1])), unescape_form(keyval[2])))
+    end
+    assoc
+end
+
 function form_data_for_post(headers::Headers, data::Vector{UInt8})::Assoc
     if haskey(headers, "Content-Type")
         content_type = headers["Content-Type"]
         if startswith(content_type, "multipart/form-data")
             boundary = content_type[length("multipart/form-data; boundary=")+1:end]
             scanner = FormScanner(data, string("--",boundary))
+            return scan(scanner)
+        elseif "application/x-www-form-urlencoded" == content_type
+            scanner = UrlEncodedScanner(data)
             return scan(scanner)
         end
     end
