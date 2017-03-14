@@ -3,7 +3,7 @@ module test_renderers_mustache
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type PageController <: ApplicationController
+struct PageController <: ApplicationController
 end
 
 show(::PageController) = render(View; path="renderers/page.tpl", contents="hello")
@@ -19,7 +19,7 @@ conn = (Router)(get, "/1")
 @test "1" == conn.params["page"]
 @test "1" == conn.params[:page]
 
-type ALayout <: ApplicationLayout
+struct ALayout <: ApplicationLayout
 end
 
 layout(::ALayout, body) = """<html><body>$body<body></html>"""

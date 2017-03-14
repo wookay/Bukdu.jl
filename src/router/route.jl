@@ -1,6 +1,6 @@
 # module Bukdu
 
-immutable Route{AC<:ApplicationController}
+struct Route{AC<:ApplicationController}
     verb::Function # get
     kind::Symbol # :match, :forward
     path::String

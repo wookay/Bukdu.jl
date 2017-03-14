@@ -15,5 +15,4 @@ for (idx, filepath) in enumerate(all_tests)
         include(filepath)
         Bukdu.reset()
     end
-    isdefined(Base.Test, :print_test_results) && Base.Test.print_test_results(ts)
 end

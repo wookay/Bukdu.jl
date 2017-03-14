@@ -7,7 +7,7 @@ export get_authorize, post_authorize, post_access_token
 import ....Bukdu: ApplicationController, ApplicationRouter, Conn, plug, get, post
 import ....Bukdu: Logger
 
-type OAuthController{P<:OAuth2.Provider} <: ApplicationController
+struct OAuthController{P<:OAuth2.Provider} <: ApplicationController
     conn::Conn
 end
 
@@ -26,7 +26,7 @@ end
 function post_access_token
 end
 
-immutable OAuth2Router <: ApplicationRouter
+struct OAuth2Router <: ApplicationRouter
 end
 
 function plug{P<:Provider}(::Type{Provider}, ::Type{P}; kw...)

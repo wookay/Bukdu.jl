@@ -7,11 +7,11 @@ import Requests # Requests.get, Requests.post
 import Requests: URI, statuscode, text
 import Base.Test: @test, @test_throws
 
-type UserController <: ApplicationController
+struct UserController <: ApplicationController
     conn::Conn
 end
 
-type User
+struct User
     name::String
     attendance::Bool
     age::Int
@@ -73,7 +73,7 @@ $(submit("Submit"))
     end
 end
 
-type FormLayout <: ApplicationLayout
+struct FormLayout <: ApplicationLayout
 end
 
 layout(::FormLayout, body) = "<div>$body</div>"
@@ -183,7 +183,7 @@ resp1 = Requests.get(URI("http://localhost:$port/"))
 
 resp2 = Requests.post(URI("http://localhost:$port/post_result"), data=Dict("user_name"=>"foo bar"))
 @test 200 == statuscode(resp2)
-@test """Bukdu.Octo.Changeset(test_renderers_html_form.User("foo bar",false,20,String[],"chicken","",0.5,Bukdu.Plug.Upload("","application/octet-stream",UInt8[])),Bukdu.Octo.Assoc(Tuple{Symbol,Any}[]))""" == text(resp2)
+@test """Bukdu.Octo.Changeset(test_renderers_html_form.User("foo bar", false, 20, String[], "chicken", "", 0.5, Bukdu.Plug.Upload("", "application/octet-stream", UInt8[])), Bukdu.Octo.Assoc(Tuple{Symbol,Any}[]))""" == text(resp2)
 
 sleep(0.1)
 Bukdu.stop()

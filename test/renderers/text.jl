@@ -3,10 +3,10 @@ module test_renderers_text
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type TextController <: ApplicationController
+struct TextController <: ApplicationController
 end
 
-type ALayout <: ApplicationLayout
+struct ALayout <: ApplicationLayout
 end
 
 layout(::ALayout, body) = """empty layout"""

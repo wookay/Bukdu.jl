@@ -5,7 +5,7 @@ import HttpCommon: Request, Response
 import JSON
 import Base.Test: @test, @test_throws
 
-type UserController <: ApplicationController
+struct UserController <: ApplicationController
 end
 
 index(::UserController) = render(JSON, "hello")
@@ -41,7 +41,7 @@ end
 conn = (Router)(get, "/api/users")
 @test ["b hello", "a hello"] == logs
 
-type JsonLayout <: ApplicationLayout
+struct JsonLayout <: ApplicationLayout
 end
 layout(::JsonLayout, body) = """[$body]"""
 show(::UserController) = render(JSON/JsonLayout, "hello")

@@ -1,8 +1,8 @@
 # module Bukdu
 
-abstract ApplicationRouter
-abstract ApplicationEndpoint
-abstract ApplicationController
-abstract ApplicationLayout
-abstract ApplicationView
-abstract ApplicationError
+abstract type ApplicationRouter end
+abstract type ApplicationEndpoint end
+abstract type ApplicationController end
+abstract type ApplicationLayout end
+abstract type ApplicationView end
+abstract type ApplicationError end

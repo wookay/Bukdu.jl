@@ -11,7 +11,7 @@ module V1
 
 importall Bukdu
 
-type UserController <: ApplicationController
+struct UserController <: ApplicationController
     conn::Conn
 end
 
@@ -21,7 +21,7 @@ edit(::UserController) = "api v1 users edit"
 foo_host(c::UserController) ="foo request from $(c[:host])"
 baz_host(c::UserController) = "baz request from $(c[:host])"
 
-type VenueController <: ApplicationController
+struct VenueController <: ApplicationController
 end
 
 end # module Api.V1

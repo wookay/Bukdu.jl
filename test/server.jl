@@ -6,10 +6,10 @@ import Requests: URI, statuscode, text
 import HttpCommon: Request, Response
 import Base.Test: @test, @test_throws
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
 end
 
-type ALayout <: ApplicationLayout
+struct ALayout <: ApplicationLayout
 end
 
 layout(::ALayout, body) = body

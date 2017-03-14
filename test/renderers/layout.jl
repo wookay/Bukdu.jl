@@ -3,13 +3,13 @@ module test_renderers_layout
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type HelloController <: ApplicationController
+struct HelloController <: ApplicationController
 end
 
-type ALayout <: ApplicationLayout
+struct ALayout <: ApplicationLayout
 end
 
-type CustomLayout <: ApplicationLayout
+struct CustomLayout <: ApplicationLayout
 end
 
 layout(::ALayout, body) = "layout $body"
@@ -37,7 +37,7 @@ conn = (Router)(get, "/custom")
 @test "custom layout hello" == render(HTML/ALayout/CustomLayout, "hello").resp_body
 @test "layout custom hello" == render(HTML/CustomLayout/ALayout, "hello").resp_body
 
-@test "Text{T}" == string(Text)
+@test "Text" == string(Text)
 @test "Text/ALayout" == string(Text/ALayout)
 @test "Text/ALayout/CustomLayout" == string(Text/ALayout/CustomLayout)
 @test "Text/CustomLayout/ALayout" == string(Text/CustomLayout/ALayout)

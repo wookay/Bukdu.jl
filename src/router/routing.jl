@@ -86,7 +86,7 @@ function add_route(resource::Resource)
 end
 
 function debug_route{AC<:ApplicationController}(route::Route, verb::Symbol, path::String, ::Type{AC})
-    controller_name = AC.name.name
+    controller_name = Base.datatype_name(AC)
     tuple(debug_verb(verb, path)..., "$(Base.function_name(route.action))(::$controller_name)")
 end
 

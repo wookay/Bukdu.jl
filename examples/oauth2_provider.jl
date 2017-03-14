@@ -3,7 +3,7 @@ importall Bukdu.Octo
 importall Bukdu.Tag
 importall Plug.OAuth2
 
-immutable CustomProvider <: OAuth2.Provider
+struct CustomProvider <: OAuth2.Provider
 end
 
 authorize_path(::Type{CustomProvider}) = "/login/oauth/authorize"

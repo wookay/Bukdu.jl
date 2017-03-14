@@ -1,6 +1,6 @@
 # module Bukdu.Plug.OAuth2
 
-immutable Facebook <: Provider
+struct Facebook <: Provider
 end
 
 authorize_uri(::Type{Facebook}) = "https://www.facebook.com/dialog/oauth"

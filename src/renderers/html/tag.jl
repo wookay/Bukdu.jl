@@ -13,12 +13,12 @@ import Bukdu: put_status, check_controller_has_field_conn
 import Bukdu: Logger
 import Base: select
 
-immutable FormBuildError <: ApplicationError
+struct FormBuildError <: ApplicationError
     conn::Conn
     message::String
 end
 
-typealias ChangesetOrVoid Union{Changeset, Void}
+const ChangesetOrVoid = Union{Changeset, Void}
 
 function tag_id(model, field, value)
     tag_name(model, field, value)
@@ -30,7 +30,7 @@ end
 
 function tag_name(model, field, value)
     typ = typeof(model)
-    name = string(lowercase(string(typ.name.name)), '_', field)
+    name = string(lowercase(string(Base.datatype_name(typ))), '_', field)
     if fieldtype(typ, field) <: Vector
         string(name, "[", value, "]")
     else
@@ -127,8 +127,6 @@ function text_input(changeset::ChangesetOrVoid, field::Symbol; value=nothing, kw
 end
 
 function select_option(changeset::ChangesetOrVoid, field::Symbol, options, value=nothing)
-    # broadcast #
-    # string(join(string.("    <option value=\"", options, "\">", options, "</option>"), '\n'), '\n')
     value = value_from_changeset(changeset, field, value)
     string(join(map(x->
         string("    <option value=\"", x, '"', (value==x ? " selected" : ""), ">", x, "</option>"), options), '\n'), '\n')

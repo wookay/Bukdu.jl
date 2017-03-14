@@ -3,7 +3,7 @@ module test_router_resource
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type ArticleController <: ApplicationController
+struct ArticleController <: ApplicationController
     conn::Conn
 end
 

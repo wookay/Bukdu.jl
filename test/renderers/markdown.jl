@@ -3,7 +3,7 @@ module test_renderers_markdown
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type MarkdownController <: ApplicationController
+struct MarkdownController <: ApplicationController
     conn::Conn
 end
 

@@ -7,10 +7,10 @@ importall Bukdu.Plug.OAuth2
 import Base.Test: @test, @test_throws
 
 # oauth2 provider
-immutable CustomProvider <: OAuth2.Provider
+struct CustomProvider <: OAuth2.Provider
 end
 
-immutable ProviderEndpoint <: ApplicationEndpoint
+struct ProviderEndpoint <: ApplicationEndpoint
 end
 
 authorize_path(::Type{CustomProvider}) = "/login/oauth/authorize"
@@ -103,7 +103,7 @@ conn = (ProviderEndpoint)("/login/oauth/authorize", redirect_uri=authorization_c
 @test 200 == conn.status
 
 # oauth2 client
-type TestOAuth2Controller{P<:OAuth2.Provider} <: ApplicationController
+struct TestOAuth2Controller{P<:OAuth2.Provider} <: ApplicationController
     conn::Conn
 end
 

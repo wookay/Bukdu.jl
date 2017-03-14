@@ -5,10 +5,10 @@ import Base: ismatch
 
 # Cross-Origin Resource Sharing
 
-immutable CORS
+struct CORS
 end
 
-immutable CrossOriginResponse
+struct CrossOriginResponse
     allow_origin::String            # 5.1 Access-Control-Allow-Origin
     allow_credentials::Bool         # 5.2 Access-Control-Allow-Credentials
     expose_headers::Vector{String}  # 5.3 Access-Control-Expose-Headers
@@ -17,7 +17,7 @@ immutable CrossOriginResponse
     allow_headers::Vector{String}   # 5.6 Access-Control-Allow-Headers
 end
 
-immutable CrossOriginRequest
+struct CrossOriginRequest
     origin::String                  # 5.7 Origin
     request_method::Symbol          # 5.8 Access-Control-Request-Method
     request_headers::Vector{String} # 5.9 Access-Control-Request-Headers

@@ -1,6 +1,6 @@
 # module Bukdu.Plug
 
-immutable Static
+struct Static
 end
 
 import HttpServer: Response, mimetypes
@@ -20,7 +20,7 @@ end
 
 import ..ApplicationController, ..Conn, ..Routing
 
-type StaticController <: ApplicationController
+struct StaticController <: ApplicationController
     conn::Conn
 end
 

@@ -3,10 +3,10 @@ module test_renderers_view
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type ViewController <: ApplicationController
+struct ViewController <: ApplicationController
 end
 
-type ALayout <: ApplicationLayout
+struct ALayout <: ApplicationLayout
 end
 
 layout(::ALayout, body) = "<html><body>$body<body></html>"

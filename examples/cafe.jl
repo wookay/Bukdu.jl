@@ -4,11 +4,11 @@ importall Bukdu
 importall Bukdu.Octo
 importall Bukdu.Tag
 
-type CafeController <: ApplicationController
+struct CafeController <: ApplicationController
     conn::Conn
 end
 
-type User
+struct User
     name::String
     attendance::Bool
     age::Int
@@ -104,7 +104,6 @@ Endpoint() do
     plug(Plug.Logger)
     plug(Plug.Static, at="/", from=normpath(dirname(@__FILE__), "public"), only=["css"])
     plug(Plug.Upload, at="/upload", tmp_dir=normpath(dirname(@__FILE__), "tmp"))
-    plug(Plug.CSRFProtection)
     plug(Router)
 end
 

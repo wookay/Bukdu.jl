@@ -13,7 +13,7 @@ Logger.set_level(:error)
 
 Bukdu.start(:any)
 
-immutable Endpoint2 <: ApplicationEndpoint
+struct Endpoint2 <: ApplicationEndpoint
 end
 
 Bukdu.start(Endpoint2, :any)
@@ -23,7 +23,7 @@ Bukdu.stop()
 
 Bukdu.stop(Endpoint2)
 
-immutable EndpointController <: ApplicationController
+struct EndpointController <: ApplicationController
 end
 
 index(::EndpointController) = ""
@@ -36,7 +36,7 @@ Endpoint() do
     plug(Router)
 end
 
-immutable Router2 <: ApplicationRouter
+struct Router2 <: ApplicationRouter
 end
 
 Router2() do
@@ -66,7 +66,7 @@ Logger.set_level(:error)
 @test_throws NoRouteError (Endpoint2)("/first")
 
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
 end
 
 first(::WelcomeController) = 1
@@ -86,7 +86,7 @@ conn = (Router)(get, "/")
 @test_throws NoRouteError (Endpoint)("/")
 
 
-type SecondRouter <: ApplicationRouter
+struct SecondRouter <: ApplicationRouter
 end
 
 SecondRouter() do
@@ -114,7 +114,7 @@ conn = (SecondRouter)(get, "/")
 conn = (Endpoint)("/")
 @test 1 == conn.resp_body
 
-type SecondEndpoint <: ApplicationEndpoint
+struct SecondEndpoint <: ApplicationEndpoint
 end
 
 SecondEndpoint() do
@@ -132,10 +132,10 @@ conn = (SecondEndpoint)("/")
 @test SecondRouter == conn.private[:router]
 @test SecondEndpoint == conn.private[:endpoint]
 
-type NothingRouter <: ApplicationRouter
+struct NothingRouter <: ApplicationRouter
 end
 
-type NothingEndpoint <: ApplicationEndpoint
+struct NothingEndpoint <: ApplicationEndpoint
 end
 
 NothingRouter() do

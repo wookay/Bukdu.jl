@@ -4,7 +4,7 @@ importall Bukdu
 import Bukdu.Controller: accepts
 import Base.Test: @test, @test_throws
 
-type ContactController <: ApplicationController
+struct ContactController <: ApplicationController
 end
 
 index(::ContactController) = "ok"

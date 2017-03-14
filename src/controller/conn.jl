@@ -7,14 +7,14 @@ import HttpCommon: Cookie
 const bukdu_cookie_key = "_bukdu_cookie_key"
 const bukdu_secret_key = rand(UInt8, 32)
 
-immutable Pipeline
+struct Pipeline
     block::Function
     only::Vector{Function}
     Pipeline(block::Function) = new(block, Vector{Function}())
     Pipeline(block::Function, only::Vector{Function}) = new(block, only)
 end
 
-type Conn
+mutable struct Conn
     ## Request fields
     host::String
     port::Int
@@ -71,7 +71,7 @@ type Conn
     end
 end
 
-immutable MissingConnError <: ApplicationError
+struct MissingConnError <: ApplicationError
     conn::Conn
     message::String
 end
