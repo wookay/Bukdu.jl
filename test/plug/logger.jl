@@ -4,7 +4,7 @@ importall Bukdu
 import Bukdu: NoRouteError
 import Base.Test: @test, @test_throws
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
 end
 
 index(::WelcomeController) = "hello world"

@@ -1,6 +1,6 @@
 # module Bukdu.Plug.OAuth2
 
-immutable Github <: Provider
+struct Github <: Provider
 end
 
 authorize_uri(::Type{Github}) = "https://github.com/login/oauth/authorize"

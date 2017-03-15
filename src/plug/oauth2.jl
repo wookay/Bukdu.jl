@@ -4,7 +4,7 @@ module OAuth2
 
 export authorize_uri, access_token_uri
 
-abstract Provider
+abstract type Provider end
 
 function authorize_uri{P<:Provider}(::Type{P})
 end

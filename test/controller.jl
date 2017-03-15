@@ -4,7 +4,7 @@ importall Bukdu
 import Bukdu: MissingConnError
 import Base.Test: @test, @test_throws
 
-immutable WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
     conn::Conn
 end
 
@@ -32,7 +32,7 @@ c = WelcomeController(Conn())
 @test Assoc() == c[:query_params]
 @test_throws KeyError c[:invalid_key]
 
-type SimpleController <: ApplicationController
+struct SimpleController <: ApplicationController
 end
 
 s = SimpleController()

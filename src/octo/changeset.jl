@@ -4,9 +4,8 @@ import ..Bukdu
 import Bukdu: ApplicationController
 import Bukdu: Logger
 import Base: ==
-isdefined(Base, :Iterators) && import Base.Iterators: filter
 
-type Changeset
+struct Changeset
     model
     changes::Assoc
     function Changeset(model, changes::Assoc)
@@ -35,7 +34,7 @@ end
 function typed_assoc(T::Type, changes::Assoc)::Assoc
     typ_fieldnames = fieldnames(T)
     Assoc(
-        map(filter(kv -> first(kv) in typ_fieldnames, changes)) do kv
+        map(Iterators.filter(kv -> first(kv) in typ_fieldnames, changes)) do kv
             (name, value) = kv
             if name in typ_fieldnames
                 fieldT = fieldtype(T, name)
@@ -49,7 +48,7 @@ function typed_assoc(T::Type, changes::Assoc)::Assoc
 end
 
 function cutout_brackets(T::Type, param::Tuple{Symbol,Any})::Tuple{Symbol,Any}
-    typ = lowercase(string(T.name.name))
+    typ = lowercase(string(Base.datatype_name(T)))
     (key, value) = param
     name = string(key)
     if endswith(name, "]")
@@ -109,11 +108,8 @@ default(T::Type, ::Type{Bool}) = false
 default(T::Type, ::Type{Vector{String}}) = Vector{String}()
 
 function default(T::Type)::T
-    # broadcast #
-    # fields = fieldtype.(T, fieldnames(T))
-    # T(default.(T, fields)...)
-    fields = [fieldtype(T, i) for i in 1:nfields(T)]
-    T(map(x-> default(T, x), fields)...)
+    fields = fieldtype.(T, fieldnames(T))
+    T(default.(T, fields)...)
 end
 
 function cast(changeset::Changeset, params, required_fields)::Changeset

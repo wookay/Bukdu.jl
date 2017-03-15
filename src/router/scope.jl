@@ -1,6 +1,6 @@
 # module Bukdu
 
-immutable Scope
+struct Scope
     path::String
     host::String
     pipes::Vector{Pipeline}

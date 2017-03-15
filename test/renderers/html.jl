@@ -3,7 +3,7 @@ module test_renderers_html
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type HTMLController <: ApplicationController
+struct HTMLController <: ApplicationController
 end
 
 index(::HTMLController) = render(HTML, "<p>hello</p>")
@@ -28,7 +28,7 @@ end
 conn = (Router)(get, "/")
 @test ["b <p>hello</p>", "a <p>hello</p>"] == logs
 
-type HtmlLayout <: ApplicationLayout
+struct HtmlLayout <: ApplicationLayout
 end
 layout(::HtmlLayout, body) = """<div>$body</div>"""
 show(::HTMLController) = render(HTML/HtmlLayout, "<p>hello</p>")

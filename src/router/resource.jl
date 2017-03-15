@@ -1,6 +1,6 @@
 # module Bukdu
 
-immutable Resource{AC<:ApplicationController}
+struct Resource{AC<:ApplicationController}
     path::String
     param::String
     controller::Type{AC}

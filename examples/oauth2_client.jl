@@ -3,7 +3,7 @@ import Plug.OAuth2
 import Plug.OAuth2: authorize_uri, access_token_uri
 import Plug.OAuth2: Github, Facebook, Slack # providers
 
-type Custom <: OAuth2.Provider
+struct Custom <: OAuth2.Provider
 end
 
 provider = Custom # Github Slack Facebook
@@ -33,7 +33,7 @@ authorization_callback_uri = "https://localhost:8085$(callback_path(provider))"
 
 callbacked = []
 
-type TestOAuth2Controller{P<:OAuth2.Provider} <: ApplicationController
+struct TestOAuth2Controller{P<:OAuth2.Provider} <: ApplicationController
     conn::Conn
 end
 

@@ -6,7 +6,7 @@ import Bukdu.Octo: |>
 import Bukdu.Plug: Upload
 import Base.Test: @test, @test_throws
 
-type User
+struct User
     name::String
     username::String
 end

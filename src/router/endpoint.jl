@@ -15,7 +15,7 @@ Endpoint() do
 end
 ```
 """
-immutable Endpoint <: ApplicationEndpoint
+struct Endpoint <: ApplicationEndpoint
 end
 
 function reload{AE<:ApplicationEndpoint}(::Type{AE})

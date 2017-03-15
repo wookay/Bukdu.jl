@@ -14,7 +14,7 @@ It's influenced by Phoenix framework (http://phoenixframework.org).
 ```julia
 importall Bukdu
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
 end
 
 index(::WelcomeController) = "hello world"

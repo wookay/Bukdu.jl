@@ -4,11 +4,11 @@ importall Bukdu
 import Bukdu.Octo: change
 import Base.Test: @test, @test_throws
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
     conn::Conn
 end
 
-type User
+struct User
     name::String
 end
 

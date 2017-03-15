@@ -1,6 +1,6 @@
 importall Bukdu
 
-type D3Controller <: ApplicationController
+struct D3Controller <: ApplicationController
 end
 
 index(::D3Controller) = redirect_to("/d3js-index.html")

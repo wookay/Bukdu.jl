@@ -1,6 +1,6 @@
 # module Bukdu
 
-immutable ErrorLayout <: ApplicationLayout
+struct ErrorLayout <: ApplicationLayout
 end
 
 function layout(::ErrorLayout, body, status, stacks)::String

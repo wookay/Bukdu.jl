@@ -5,7 +5,7 @@ importall Bukdu.Octo
 importall Bukdu.Tag
 import Base.Test: @test, @test_throws
 
-type User
+struct User
     name::String
     attendance::Bool
     age::Int

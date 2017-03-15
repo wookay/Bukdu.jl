@@ -3,7 +3,7 @@
 import Base: ==
 import ..Logger
 
-type Assoc
+struct Assoc
     vector::Vector{Tuple{Symbol,Any}}
     Assoc(; kw...) = new(Vector(kw))
     function Assoc(dict::Dict{AbstractString,AbstractString})

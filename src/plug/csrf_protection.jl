@@ -8,10 +8,10 @@ import Bukdu.RouterScope: pipe_through
 import HttpCommon: Cookie
 import MbedTLS: MbedException, CIPHER_AES, encrypt, decrypt
 
-immutable CSRFProtection
+struct CSRFProtection
 end
 
-immutable InvalidCSRFTokenError <: ApplicationError
+struct InvalidCSRFTokenError <: ApplicationError
     conn::Conn
     message::String
 end

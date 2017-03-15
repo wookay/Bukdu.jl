@@ -1,6 +1,6 @@
 importall Bukdu
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
 end
 
 index(::WelcomeController) = "Hello Bukdu"

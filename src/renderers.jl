@@ -34,14 +34,14 @@ for func in [before, after]
         end
 
         function $name(block::Function, render_func::Function, T::Type)
-            typ_name = T.name.name
+            typ_name = Base.datatype_name(T)
             $add_view_filter(block, render_func, typ_name)
         end
     end
 end
 
 function filtering(render_block::Function, render_func::Function, T::Type, args...)::Conn
-    typ_name = (:Val == T.name.name) ? T : T.name.name
+    typ_name = (:Val == Base.datatype_name(T)) ? T : Base.datatype_name(T)
     params = map(x->Any, args)
     key = (render_func, typ_name, params)
     if haskey(ViewFilter.filters, (before, key))

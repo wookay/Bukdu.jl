@@ -1,6 +1,6 @@
 # module Bukdu.Plug
 
-immutable Upload
+struct Upload
     filename::String
     content_type::String
     data::Vector{UInt8}

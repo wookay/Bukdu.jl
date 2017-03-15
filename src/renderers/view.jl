@@ -1,4 +1,4 @@
 # module Bukdu
 
-immutable View <: ApplicationView
+struct View <: ApplicationView
 end

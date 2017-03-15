@@ -3,7 +3,7 @@ module test_filter
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
     conn::Conn
 end
 

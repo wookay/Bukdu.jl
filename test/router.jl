@@ -4,11 +4,11 @@ importall Bukdu
 import Bukdu: NoRouteError
 import Base.Test: @test, @test_throws
 
-type PageController <: ApplicationController
+struct PageController <: ApplicationController
     conn::Conn
 end
 
-type UserController <: ApplicationController
+struct UserController <: ApplicationController
     conn::Conn
 end
 

@@ -22,7 +22,7 @@ end
 
 function getindex{AC<:ApplicationController}(controller::AC, sym::Symbol) # throw MissingConnError, KeyError
     if :name == sym
-        AC.name.name
+        Base.datatype_name(AC)
     else
         fields = fieldnames(AC)
         check_controller_has_field_conn(controller) # throw MissingConnError
@@ -56,7 +56,7 @@ module Controller
 import ..ApplicationError, ..Conn
 import ..get_req_header
 
-immutable NotAcceptableError <: ApplicationError
+struct NotAcceptableError <: ApplicationError
     conn::Conn
     message::String
 end

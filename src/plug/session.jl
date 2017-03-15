@@ -1,4 +1,4 @@
 # module Bukdu.Plug
 
-immutable Session
+struct Session
 end

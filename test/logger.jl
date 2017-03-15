@@ -3,7 +3,7 @@ module test_logger
 importall Bukdu
 import Base.Test: @test, @test_throws
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
 end
 
 function index(::WelcomeController)

@@ -25,11 +25,11 @@ importall Bukdu
 import JSON
 import Base.Docs: meta, @var, parsedoc
 
-type UserController <: ApplicationController
+struct UserController <: ApplicationController
     conn::Conn
 end
 
-type PostController <: ApplicationController
+struct PostController <: ApplicationController
     conn::Conn
 end
 

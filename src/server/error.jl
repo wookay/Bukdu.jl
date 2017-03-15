@@ -5,7 +5,7 @@ import .Logger: debug_verb
 
 function Base.show{AE<:ApplicationError}(io::IO, ex::AE)
     # don't show ex.conn
-    write(io, string(AE.name.name, "(\"", ex.message, "\")"))
+    write(io, string(Base.datatype_name(AE), "(\"", ex.message, "\")"))
 end
 
 function conn_error(verb::Symbol, path::String, ex, stackframes::Vector{StackFrame})::Conn

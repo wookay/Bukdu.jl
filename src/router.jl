@@ -17,10 +17,10 @@ Router() do
 end
 ```
 """
-immutable Router <: ApplicationRouter
+struct Router <: ApplicationRouter
 end
 
-immutable NoRouteError <: ApplicationError
+struct NoRouteError <: ApplicationError
     conn::Conn
     message::String
 end
