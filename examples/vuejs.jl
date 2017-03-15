@@ -1,6 +1,6 @@
 importall Bukdu
 
-type VueController <: ApplicationController
+struct VueController <: ApplicationController
 end
 
 index(::VueController) = redirect_to("/vuejs-index.html")
