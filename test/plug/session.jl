@@ -60,8 +60,8 @@ resp2 = Requests.post(URI("http://localhost:$port/create"), cookies=resp1.cookie
 @test isempty(resp2.cookies)
 
 resp3 = Requests.post(URI("http://localhost:$port/create"), cookies=resp1.cookies, data=Dict("_csrf_token"=>token))
-@test isempty(resp2.cookies)
 @test 200 == statuscode(resp3)
+@test isempty(resp2.cookies)
 
 sleep(0.1)
 Bukdu.stop()

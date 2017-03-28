@@ -62,7 +62,7 @@ immutable NotAcceptableError <: ApplicationError
 end
 
 function accepts(conn::Conn, accepted::Vector{String}) # throw NotAcceptableError
-    if haskey(conn.query_params, :_format)
+    if haskey(conn.body_params, :_format)
         if format in accepted
             put_format(conn, format)
         else

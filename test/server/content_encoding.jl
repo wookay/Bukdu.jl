@@ -13,7 +13,7 @@ type WelcomeController <: ApplicationController
 end
 
 function create(c::WelcomeController)
-    c[:query_params][:user_name]
+    c[:body_params][:user_name]
 end
 
 Router() do

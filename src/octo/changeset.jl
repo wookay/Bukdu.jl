@@ -84,7 +84,7 @@ function change(typ::Void; kw...)::Changeset # throw ArgumentError
 end
 
 function change{T<:Any,AC<:ApplicationController}(c::AC, model::T)::Changeset
-    params = map(param->cutout_brackets(T,param), c[:query_params])
+    params = map(param->cutout_brackets(T,param), c[:body_params])
     assoc = Assoc(params)
     for name in fieldnames(T)
         typ = fieldtype(T, name)

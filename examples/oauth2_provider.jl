@@ -22,7 +22,7 @@ end
 function get_authorize(c::OAuthController{CustomProvider})
     error_description = "User does not have access"
     try
-        params = c[:query_params]
+        params = c[:params]
         return render(HTML, string(
             "<h3>Authorize application</h3>",
             form_for(nothing, action=post_authorize, method=post) do f
@@ -47,7 +47,7 @@ authorization_code = nothing
 function post_authorize(c::OAuthController{CustomProvider})
     error_description = "User does not have access"
     try
-        params = c[:query_params]
+        params = c[:params]
         redirect_uri = params[:redirect_uri]
         state_for_csrf = params[:state]
         if redirect_uri==authorization_callback_url
@@ -63,7 +63,7 @@ end
 function post_access_token(c::OAuthController{CustomProvider})
     error_description = "User does not have access"
     try
-        params = c[:query_params]
+        params = c[:params]
         # check params ...
         if isa(authorization_code, Void)
             return json_error(:bad_verification_code, "The code passed is incorrect or expired.")

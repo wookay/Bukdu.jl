@@ -102,7 +102,7 @@ function squeeze_multiple_slashes(path::String)::String
     replace(path, r"/+", "/")
 end
 
-function route_request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, param_data::Assoc)::Conn # throw NoRouteError
+function route_request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, endpoint::Nullable{Type{AE}}, routes::Vector{Route}, verb::Symbol, path::String, headers::Assoc, cookies::Vector{Cookie}, body_params::Assoc)::Conn # throw NoRouteError
     uri = URI(path)
     uri_path = squeeze_multiple_slashes(uri.path)
     reqsegs = split(uri_path, '/')
@@ -133,24 +133,27 @@ function route_request{AE<:ApplicationEndpoint}(compare::Function, conn::Conn, e
                     (idx, rouseg) = idx_rouseg
                     startswith(rouseg, ':')
                 end
-                params = Assoc(map(filter(startswithcolon, enumerate(rousegs))) do idx_rouseg
-                    (idx, rouseg) = idx_rouseg
-                    (Symbol(replace(rouseg, r"^:", "")), String(reqsegs[idx]))
-                end)
                 C = route.controller
-                query_params = Assoc(parsequerystring(uri.query))
-                if !isempty(param_data)
-                    merge!(query_params, param_data)
-                end
                 ## Request fields - host, port, method, path, req_headers, scheme
                 conn.host = uri.host
                 conn.method = verb
                 conn.path = uri_path
                 conn.req_headers = headers
                 conn.scheme = uri.scheme
-                ## Fetchable fields - req_cookies, query_params, params
+                ## Fetchable fields - req_cookies, query_params, body_params, path_params, params
                 conn.req_cookies = cookies
+                query_params = Assoc(parsequerystring(uri.query))
+                path_params = Assoc(map(filter(startswithcolon, enumerate(rousegs))) do idx_rouseg
+                    (idx, rouseg) = idx_rouseg
+                    (Symbol(replace(rouseg, r"^:", "")), String(reqsegs[idx]))
+                end)
+                params = Assoc()
+                merge!(params, query_params)
+                merge!(params, body_params)
+                merge!(params, path_params)
                 conn.query_params = query_params
+                conn.body_params = body_params
+                conn.path_params = path_params
                 conn.params = params
                 ## Connection fields - assigns, halted, state
                 conn.assigns = copy(route.assigns)

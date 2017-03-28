@@ -4,6 +4,7 @@ importall Bukdu
 importall Bukdu.Octo
 importall Bukdu.Tag
 importall Bukdu.Plug.OAuth2
+import JSON
 import Base.Test: @test, @test_throws
 
 # oauth2 provider
@@ -38,7 +39,7 @@ end
 function get_authorize(c::OAuthController{CustomProvider})
     error_description = "User does not have access"
     try
-       params = c[:query_params]
+       params = c[:body_params]
        return render(HTML, string(
            "<h3>Authorize application</h3>",
            form_for(nothing, action=post_authorize, method=post) do f
@@ -65,7 +66,7 @@ state_for_csrf = string(Base.Random.uuid1())
 function post_authorize(c::OAuthController{CustomProvider})
     error_description = "User does not have access"
     try
-        params = c[:query_params]
+        params = c[:body_params]
         redirect_uri = params[:redirect_uri]
         state_for_csrf = params[:state]
         if redirect_uri==authorization_callback_url
@@ -81,7 +82,7 @@ end
 function post_access_token(c::OAuthController{CustomProvider})
     error_description = "User does not have access"
     try
-        params = c[:query_params]
+        params = c[:body_params]
         # check params ...
         if isa(authorization_code, Void)
             return json_error(:bad_verification_code, "The code passed is incorrect or expired.")
@@ -125,7 +126,7 @@ end
 
 function callback{P<:OAuth2.Provider}(c::TestOAuth2Controller{P})
     Logger.info("callback", P)
-    params = c[:query_params]
+    params = c[:body_params]
     if haskey(params, :state) && haskey(params, :code)
         if params[:state] == state_for_csrf
             global authorization_code = params[:code]

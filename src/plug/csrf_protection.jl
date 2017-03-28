@@ -24,8 +24,8 @@ end
 
 function check_csrf_token(conn::Conn)::Bool # throw InvalidCSRFTokenError
     conn.method in unprotected_methods && return false
-    if haskey(conn.query_params, :_csrf_token)
-        token = conn.query_params[:_csrf_token]
+    if haskey(conn.body_params, :_csrf_token)
+        token = conn.body_params[:_csrf_token]
         cookie = get_req_cookie(conn, cookie_key(conn))
         if isa(cookie, Cookie)
             cipher_text = hex2bytes(cookie.value)

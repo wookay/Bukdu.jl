@@ -26,6 +26,8 @@ type Conn
     ## Fetchable fields
     req_cookies::Vector{Cookie}
     query_params::Assoc
+    body_params::Assoc
+    path_params::Assoc
     params::Assoc
 
     ## Response fields
@@ -53,17 +55,17 @@ type Conn
     end
 
     function Conn(code::Int, resp_headers::Dict{String,String}, resp_body::Any)
-        Conn(code, resp_headers, resp_body, Assoc(), Assoc(), Assoc(), Assoc())
+        Conn(code, resp_headers, resp_body, Assoc(), Assoc())
     end
 
-    function Conn(status::Symbol, resp_headers::Dict{String,String}, resp_body::Any, params::Assoc, query_params::Assoc, private::Assoc, assigns::Assoc)
-        Conn(statuses[status], resp_headers, resp_body, params, query_params, private, assigns)
+    function Conn(status::Symbol, resp_headers::Dict{String,String}, resp_body::Any, private::Assoc, assigns::Assoc)
+        Conn(statuses[status], resp_headers, resp_body, private, assigns)
     end
 
-    function Conn(code::Int, resp_headers::Dict{String,String}, resp_body::Any, params::Assoc, query_params::Assoc, private::Assoc, assigns::Assoc)
+    function Conn(code::Int, resp_headers::Dict{String,String}, resp_body::Any, private::Assoc, assigns::Assoc)
         new(
             "", 0, :get, "", Assoc(), :http,                                    # host, port, method, path, req_headers, scheme,
-            Vector{Cookie}(), query_params, params,                             # req_cookies, query_params, params,
+            Vector{Cookie}(), Assoc(), Assoc(), Assoc(), Assoc(),               # req_cookies, query_params, body_params, path_params, params,
             resp_body, "utf-8", Vector{Cookie}(), resp_headers, code, identity, # resp_body, resp_charset, resp_cookies, resp_headers, status, before_send,
             assigns, false, :unset,                                             # assigns, halted, state,
             private                                                             # private
@@ -94,7 +96,7 @@ function put_req_header(conn::Conn, key::String, value::String)
 end
 
 
-## Fetchable fields - req_cookies, query_params, params
+## Fetchable fields - req_cookies, query_params, body_params, path_params, params
 
 function get_req_cookie(conn::Conn, name::String)::Union{Cookie,Void}
     for cookie in conn.req_cookies
