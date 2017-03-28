@@ -22,7 +22,7 @@ end
 
 function getindex{AC<:ApplicationController}(controller::AC, sym::Symbol) # throw MissingConnError, KeyError
     if :name == sym
-        AC.name.name
+        get_datatype_name(AC)
     else
         fields = fieldnames(AC)
         check_controller_has_field_conn(controller) # throw MissingConnError

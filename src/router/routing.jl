@@ -12,7 +12,7 @@ import Bukdu: get, post, delete, patch, put
 import Bukdu: before, after
 import Bukdu: put_status, parse_cookie_string, conn_bad_request
 import Bukdu: NoRouteError
-import Bukdu: Logger
+import Bukdu: Logger, get_datatype_name
 import Bukdu.Logger: trail, debug_verb
 import URIParser: URI
 import HttpCommon: Cookie, parsequerystring
@@ -86,7 +86,7 @@ function add_route(resource::Resource)
 end
 
 function debug_route{AC<:ApplicationController}(route::Route, verb::Symbol, path::String, ::Type{AC})
-    controller_name = AC.name.name
+    controller_name = get_datatype_name(AC)
     tuple(debug_verb(verb, path)..., "$(Base.function_name(route.action))(::$controller_name)")
 end
 

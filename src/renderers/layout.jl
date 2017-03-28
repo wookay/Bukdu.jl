@@ -12,9 +12,9 @@ end
 
 function viewlayout_symbol{AL<:ApplicationLayout}(D::LayoutDivision{AL})
     view_name = isa(D.dividend, LayoutDivision) ? viewlayout_symbol(D.dividend) :
-                isa(D.dividend, Type) ? D.dividend.name.name :
+                isa(D.dividend, Type) ? get_datatype_name(D.dividend):
                 Base.module_name(D.dividend)
-    layout_name = D.divisor.name.name
+    layout_name = get_datatype_name(D.divisor)
     Symbol(view_name, '/', layout_name)
 end
 
