@@ -18,7 +18,7 @@ immutable FormBuildError <: ApplicationError
     message::String
 end
 
-typealias ChangesetOrVoid Union{Changeset, Void}
+const ChangesetOrVoid = Union{Changeset, Void}
 
 function tag_id(model, field, value)
     tag_name(model, field, value)

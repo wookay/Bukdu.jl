@@ -3,8 +3,9 @@
 module OAuth2
 
 export authorize_uri, access_token_uri
+import Compat: @compat
 
-abstract Provider
+@compat abstract type Provider end
 
 function authorize_uri{P<:Provider}(::Type{P})
 end
