@@ -44,7 +44,7 @@ end
 ```
 
 
-### Working with params 
+### Working with params
 
 Put `conn::Conn` to the controller.
 Now, `params` could be accessed by indexing the controller. For example
