@@ -143,20 +143,21 @@ conn = (Router)(get, "/")
 @test "<div>$contents</div>" == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_name="jack")
+@test Assoc(user_name="jack") == conn.body_params
 @test isa(conn.resp_body, Changeset)
-@test Changeset(user,Assoc(name="jack")) == conn.resp_body
+@test Changeset(user, Assoc(name="jack")) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_attendance="true")
-@test Changeset(user,Assoc(attendance=true)) == conn.resp_body
+@test Changeset(user, Assoc(attendance=true)) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="20")
-@test Changeset(user,Assoc()) == conn.resp_body
+@test Changeset(user, Assoc()) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_age="19")
-@test Changeset(user,Assoc(age=19)) == conn.resp_body
+@test Changeset(user, Assoc(age=19)) == conn.resp_body
 
 conn = (Router)(post, "/post_result", user_undefined="undefined")
-@test Changeset(user,Assoc()) == conn.resp_body
+@test Changeset(user, Assoc()) == conn.resp_body
 
 form = change(default(User), name="jack")
 @test_throws Tag.FormBuildError form_for(()->"", form, action=post_result)

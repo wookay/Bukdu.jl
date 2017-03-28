@@ -45,8 +45,8 @@ end
 function (::Type{AR}){AR<:ApplicationRouter}(verb::Function, path::String, headers=Assoc(), cookies=Vector{Cookie}(); kw...)
     conn = Conn()
     routes = haskey(Routing.router_routes, AR) ? Routing.router_routes[AR] : Vector{Route}()
-    param_data = Assoc([(k, escape(v)) for (k,v) in kw])
-    Routing.route_request(conn, Nullable{Type{Endpoint}}(), routes, Base.function_name(verb), path, headers, cookies, param_data) do route
+    body_params = Assoc([(k, escape(v)) for (k,v) in kw])
+    Routing.route_request(conn, Nullable{Type{Endpoint}}(), routes, Base.function_name(verb), path, headers, cookies, body_params) do route
         Base.function_name(route.verb) == Base.function_name(verb)
     end
 end

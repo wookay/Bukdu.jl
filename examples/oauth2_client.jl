@@ -53,7 +53,7 @@ end
 
 function callback{P<:OAuth2.Provider}(c::TestOAuth2Controller{P})
     Logger.info("callback", P)
-    params = c[:query_params]
+    params = c[:params]
     if haskey(params, :state) && haskey(params, :code)
         if params[:state] == state_for_csrf
             global authorization_code = params[:code]

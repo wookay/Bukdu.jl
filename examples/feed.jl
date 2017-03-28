@@ -54,7 +54,7 @@ feed(::UserController) = render(JSON,
 after(c::Union{UserController,PostController}) = Logger.info(c[:path], " content_type:", c.conn.resp_headers["Content-Type"])
 
 function publishing(c::PostController)
-    params = c[:query_params]
+    params = c[:params]
     if haskey(params, :message)
         message = params[:message]
         Logger.info("publishing $message")
@@ -108,8 +108,8 @@ end
 
 function updating(c::PostController)
     find_post(c) do idx,post
-        if haskey(c[:query_params], :message)
-            post["message"] = c[:query_params][:message]
+        if haskey(c[:params], :message)
+            post["message"] = c[:params][:message]
             posts[idx] = post
         end
         Logger.info("updating $(post["id"])")
