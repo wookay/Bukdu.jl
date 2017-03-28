@@ -35,13 +35,42 @@ Use `Endpoint` to define the plug pipelines.
 * plug `Plug.Static` to serve the static files.
 * plug `Router` to give the routes into the Endpoint.
 
-```
+```julia
 Endpoint() do
     plug(Plug.Logger)
     plug(Plug.Static, at="/", from="public")
     plug(Router)
 end
 ```
+
+
+### Working with params 
+
+Put `conn::Conn` to the controller.
+Now, `params` could be accessed by indexing the controller. For example
+
+```julia
+importall Bukdu
+
+type CalculateController <: ApplicationController
+    conn::Conn
+end
+
+function my_fn(c::CalculateController)
+    q = c[:params]
+    x, y = map(v -> parse(Int, v), (q[:x], q[:y]))
+    render(JSON, x + 2*y)
+end
+
+Router() do
+    get("/my_fn", CalculateController, my_fn)
+end
+
+Bukdu.start(8080)
+```
+
+Check it by querying with parameters.
+http://localhost:8080/my_fn?x=2&y=3
 
 
 ### Deploy on Heroku
