@@ -2,7 +2,7 @@
 
 import ..Bukdu
 import Bukdu: ApplicationController
-import Bukdu: Logger
+import Bukdu: Logger, get_datatype_name
 import Base: ==
 isdefined(Base, :Iterators) && import Base.Iterators: filter
 
@@ -49,7 +49,7 @@ function typed_assoc(T::Type, changes::Assoc)::Assoc
 end
 
 function cutout_brackets(T::Type, param::Tuple{Symbol,Any})::Tuple{Symbol,Any}
-    typ = lowercase(string(T.name.name))
+    typ = lowercase(string(get_datatype_name(T)))
     (key, value) = param
     name = string(key)
     if endswith(name, "]")

@@ -4,6 +4,7 @@ module Bukdu
 
 include("exports.jl")
 
+include("util.jl")
 include("logger.jl")
 include("application.jl")
 include("octo.jl")
