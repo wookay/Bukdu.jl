@@ -9,7 +9,7 @@ type Assoc
     function Assoc(dict::Dict{AbstractString,AbstractString})
         new([(Symbol(k),v) for (k,v) in dict])
     end
-    function Assoc(dict::Dict{String,Any})
+    function Assoc(dict::Dict{String,String})
         new([(Symbol(k),v) for (k,v) in dict])
     end
     function Assoc(dict::Dict{Symbol,Any})
