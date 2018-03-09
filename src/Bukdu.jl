@@ -1,18 +1,11 @@
-__precompile__(true)
+# __precompile__(true)
 
 module Bukdu
 
-include("exports.jl")
-
-include("util.jl")
-include("logger.jl")
-include("application.jl")
-include("octo.jl")
-include("filter.jl")
-include("controller.jl")
-include("router.jl")
-include("plug.jl")
-include("renderers.jl")
+include("types.jl")
 include("server.jl")
+include("assoc.jl")
+include("controller.jl")
+include("routes.jl")
 
-end # module Bukdu
+end # module Octo
