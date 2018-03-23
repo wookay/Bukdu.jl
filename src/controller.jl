@@ -1,3 +1,5 @@
+# module Bukdu
+
 export Conn
 
 # using HTTP # HTTP.Messages HTTP.queryparams HTTP.URI
@@ -11,3 +13,5 @@ function Base.getproperty(c::C, prop::Symbol) where {C <: ApplicationController}
         getfield(c, prop)
     end
 end
+
+# module Bukdu

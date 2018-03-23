@@ -1,3 +1,9 @@
+# using Pkg
+# try
+#     Pkg.installed("Revise") && using Revise
+# end
+
+
 using Bukdu
 
 struct WelcomeController <: ApplicationController
@@ -5,7 +11,8 @@ struct WelcomeController <: ApplicationController
 end
 
 function index(c::WelcomeController)
-    "hello $(c.params.a)"
+    "q" => c.params.q
+    # render(JSON, "q" => c.params.q)
 end
 
 Router() do
