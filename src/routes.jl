@@ -33,17 +33,28 @@ const target_path_rpad = 26
 
 import Unicode # Unicode.graphemes
 function _unescape_req_target(req)
-    s = HTTP.URIs.unescapeuri(req.target)
+    s = req.target
+    try
+        s = HTTP.URIs.unescapeuri(req.target)
+    catch
+    end
     a = Unicode.graphemes(s)
     ifelse(length(a) > target_path_rpad, join(a), s)
 end
 
 function info_request(action, C::Type{<:ApplicationController}, req)
-    @info req.method rpad(nameof(action), action_rpad) rpad(nameof(C), controller_rpad) req.response.status _unescape_req_target(req)
-end
-
-function warn_missing(req)
-    @warn req.method rpad(missing, action_rpad)        rpad(" ", controller_rpad)       req.response.status _unescape_req_target(req)
+    logger = Base.global_logger()
+    buf = IOBuffer()
+    iob = IOContext(buf, logger.stream)
+    printstyled(iob, "INFO:  ", color=:cyan)
+    printstyled(iob, rpad(req.method, 6), color=:cyan)
+    printstyled(iob, string(' ', rpad(nameof(action), action_rpad),
+                            rpad(nameof(C), controller_rpad)))
+    printstyled(iob, req.response.status, color= 200 == req.response.status ? :normal : :red)
+    printstyled(iob, ' ', _unescape_req_target(req))
+    println(iob)
+    print(logger.stream, String(take!(buf)))
+    flush(logger.stream)
 end
 
 struct InternalError <: Exception
@@ -83,7 +94,7 @@ function request_handler(route::Routing.Route, req::Union{DirectRequest,HTTP.Mes
         end
     catch ex
         err = InternalError(string(ex))
-        req.response.status = 404
+        req.response.status = 500
         if req isa DirectRequest
             req.response.body = err
         else

@@ -8,6 +8,7 @@ It's influenced by [Phoenix framework](http://phoenixframework.org).
 using Bukdu
 
 struct WelcomeController <: ApplicationController
+    conn::Conn
 end
 
 index(::WelcomeController) = "hello world"
