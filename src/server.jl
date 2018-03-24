@@ -1,12 +1,13 @@
 # module Bukdu
 
-using HTTP # HTTP.Servers HTTP.handle
+# HTTP.Servers HTTP.handle
 import Sockets: @ip_str
+import .Routing
 
 function start(port; host=ip"127.0.0.1")
-    r = env[:router]
     server = HTTP.Servers.Server(stdout) do req
-        HTTP.handle(r, req)
+        route = Routing.handle(req)
+        request_handler(route, req)
     end
     env[:server] = server
     @async serve(
@@ -56,7 +57,7 @@ function serve(server::Server{T, H}, host, port, verbose) where {T, H}
            tcpisvalid=server.options.ratelimit > 0 ? check_rate_limit :
                                                      (tcp; kw...) -> true,
            ratelimits=Dict{IPAddr, RateLimit}(),
-           ratelimit=server.options.ratelimit) do request::HTTP.Request
+           ratelimit=server.options.ratelimit) do request::HTTP.Messages.Request
 
         handle(server.handler, request)
     end

@@ -11,7 +11,7 @@ end
 
 function plug(::Type{Static}; at::String, from::String) # cache::Bool
     function readfile(c::StaticController)
-        reqpath = c.conn.target
+        reqpath = c.conn.request.target
         filepath = normpath(from, reqpath[2:end])
         s = open(read, filepath)
         Render("application/octet-stream", s)

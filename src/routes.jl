@@ -1,78 +1,96 @@
 # module Bukdu
 
-export resources
 export Router
-export get
 
+export get, post, delete, patch, put
 import Base: get
-import Unicode # Unicode.graphemes
 
-# using HTTP # HTTP.Router HTTP.HandlerFunction HTTP.register! HTTP.Messages.Request
 
 const env = Dict{Symbol, Any}(
-    :router => nothing,
     :server => nothing,
 )
 
-struct Router
+struct Router <: ApplicationRouter
 end
 
-function get
+function post
 end
 
-function resources(::String, ::Type{C}; only=[], except=[]) where {C <: ApplicationController}
+function delete
 end
+
+function patch
+end
+
+function put
+end
+
+const routing_verbs = [get, post, delete, patch, put]
 
 const action_rpad      = 13
 const controller_rpad  = 20
 const target_path_rpad = 26
 
-
-function unescape_req_target(req)
+import Unicode # Unicode.graphemes
+function _unescape_req_target(req)
     s = HTTP.URIs.unescapeuri(req.target)
     a = Unicode.graphemes(s)
     ifelse(length(a) > target_path_rpad, join(a), s)
 end
 
 function info_request(action, C::Type{<:ApplicationController}, req)
-    @info req.method rpad(nameof(action), action_rpad) rpad(nameof(C), controller_rpad) req.response.status unescape_req_target(req)
+    @info req.method rpad(nameof(action), action_rpad) rpad(nameof(C), controller_rpad) req.response.status _unescape_req_target(req)
 end
 
 function warn_missing(req)
-    @warn req.method rpad(missing, action_rpad)        rpad(" ", controller_rpad)       req.response.status unescape_req_target(req)
-end
-
-struct RenderError <: Exception
-    msg::String
+    @warn req.method rpad(missing, action_rpad)        rpad(" ", controller_rpad)       req.response.status _unescape_req_target(req)
 end
 
 struct InternalError <: Exception
     msg::String
 end
 
-function request_handler(action, C::Type{<:ApplicationController}, req::HTTP.Messages.Request)
+mutable struct DirectResponse
+    status
+    body
+end
+
+mutable struct DirectRequest
+    req
+    method
+    target
+    response::DirectResponse
+end
+
+function request_handler(route::Routing.Route, req::Union{DirectRequest,HTTP.Messages.Request})
+    C = route.C
+    action = route.action
     Runtime.catch_request(action, C, req) #
     try
-        c = C(req)
+        conn = Conn(route.path_params, req isa HTTP.Messages.Request ? req : req.req)
+        c = C(conn)
         obj = action(c)
-        if obj isa Render
-            data = obj.body
-            push!(req.response.headers, Pair("Content-Type", obj.content_type))
-        elseif obj isa AbstractString
-            data = unsafe_wrap(Vector{UInt8}, obj)
+        if req isa DirectRequest
+            req.response.body = obj
         else
-            err = RenderError(string(obj))
-            data = unsafe_wrap(Vector{UInt8}, string(RenderError, ' ', err.msg))
-            req.response.status = 404
-            push!(req.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
+            if obj isa Render
+                data = obj.body
+                push!(req.response.headers, Pair("Content-Type", obj.content_type))
+            else
+                data = unsafe_wrap(Vector{UInt8}, string(obj))
+            end
+            req.response.body = data
         end
-        req.response.body = data
     catch ex
         err = InternalError(string(ex))
-        data = unsafe_wrap(Vector{UInt8}, string(InternalError, ' ', err.msg))
         req.response.status = 404
-        push!(req.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
-        req.response.body = data
+        if req isa DirectRequest
+            req.response.body = err
+        else
+            data = unsafe_wrap(Vector{UInt8}, string(InternalError, ' ', err.msg))
+            push!(req.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
+            req.response.body = data
+        end
     end
     info_request(action, C, req)
     Runtime.catch_response(action, C, req.response) #
@@ -80,22 +98,20 @@ function request_handler(action, C::Type{<:ApplicationController}, req::HTTP.Mes
 end
 
 function get(url::String, C::Type{<:ApplicationController}, action)
-    r = env[:router]
-    handler = HTTP.HandlerFunction() do req::HTTP.Messages.Request
-        request_handler(action, C, req)
-    end
-    HTTP.register!(r, "GET", url, handler)
+    Routing.add_route(get, url, C, action)
 end
 
 function Router(f)
-    r = HTTP.Router()
-    env[:router] = r
     f()
-    missing_handler = HTTP.HandlerFunction() do req
-        warn_missing(req)
-        req.response
-    end
-    HTTP.register!(r, "GET", "/*", missing_handler)
+end
+
+function (::Type{R})(verb, path::String) where {R <: ApplicationRouter}
+    method = Naming.verb_name(verb)
+    req = HTTP.Messages.Request(method, path)
+    route = Routing.handle(req)
+    dreq = DirectRequest(req, req.method, req.target, DirectResponse(200, nothing))
+    response = request_handler(route, dreq)
+    response.body
 end
 
 # module Bukdu

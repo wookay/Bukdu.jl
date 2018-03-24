@@ -24,7 +24,7 @@ function render(::Type{JSON}, data)::Render
     Render("application/json; charset=utf-8", unsafe_wrap(Vector{UInt8}, JSON2.write(data)))
 end
 
-function render(::Type{Javascript}, data)::Render
+function render(::Type{JavaScript}, data)::Render
     Render("application/javascript; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
 end
 
