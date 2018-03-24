@@ -1,9 +1,7 @@
-using Test
 using Bukdu # ApplicationController Conn Plug Render render get
 import Bukdu: Javascript
 
 #=
-using WebAssembly # WebAssembly.Func
 using Charlotte # @code_wasm
 
     relu(x) = ifelse(x < 0, 0, x)
