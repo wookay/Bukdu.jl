@@ -3,7 +3,7 @@
 using HTTP # HTTP.Servers HTTP.handle
 import Sockets: @ip_str
 
-function start(port)
+function start(port; host=ip"127.0.0.1")
     r = env[:router]
     server = HTTP.Servers.Server(stdout) do req
         HTTP.handle(r, req)
@@ -11,7 +11,7 @@ function start(port)
     env[:server] = server
     @async serve(
                 server,
-                ip"127.0.0.1",
+                host,
                 port,
                 false) # verbose
 end
