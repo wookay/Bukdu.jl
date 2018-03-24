@@ -11,9 +11,10 @@ include("runtime.jl")
 include("controller.jl")
 include("routes.jl")
 include("render.jl")
+include("plugs.jl")
 
 function __init__()
     global_logger(BukduLogger())
 end
 
-end # module Octo
+end # module Bukdu

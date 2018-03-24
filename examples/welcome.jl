@@ -3,7 +3,6 @@
 #     Pkg.installed("Revise") && using Revise
 # end
 
-
 using Bukdu
 
 struct WelcomeController <: ApplicationController
@@ -11,8 +10,7 @@ struct WelcomeController <: ApplicationController
 end
 
 function index(c::WelcomeController)
-    "q" => c.params.q
-    # render(JSON, "q" => c.params.q)
+    render(JSON, "q" => c.params.q)
 end
 
 Router() do
@@ -21,6 +19,6 @@ end
 
 Bukdu.start(8080)
 
-#Base.JLOptions().isinteractive==0 && wait()
+Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()

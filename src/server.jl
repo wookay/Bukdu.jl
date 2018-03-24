@@ -20,6 +20,7 @@ function stop()
     server = env[:server]
     env[:server] = nothing
     server isa HTTP.Servers.Server && put!(server.in, HTTP.Servers.KILL)
+    nothing
 end
 
 print_listening_on(host, port) = @info "Listening on: $host:$port"
@@ -27,7 +28,7 @@ print_listening_on(host, port) = @info "Listening on: $host:$port"
 
 
 # code from HTTP/src/Servers.jl
-import HTTP.Servers: Server, https, RateLimit, ConnectionPool, nosslconfig, Connection, handle_connection, handle, update!
+import HTTP.Servers: Server, https, RateLimit, ConnectionPool, KILL, nosslconfig, Connection, handle_connection, handle, update!
 import MbedTLS: SSLConfig
 import Sockets # Sockets.TCPServer
 import Sockets: listen, accept, IPAddr
@@ -144,3 +145,5 @@ function check_rate_limit(tcp;
     end
     return true
 end
+
+# module Bukdu

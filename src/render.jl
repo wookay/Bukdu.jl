@@ -2,6 +2,10 @@
 
 export render
 
+struct UnknownModuleError <: Exception
+    msg::String
+end
+
 """
     render
 """
@@ -16,10 +20,20 @@ function render(::Type{HTML}, data)::Render
     Render("text/html; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
 end
 
-# import JSON2
-
 function render(::Type{JSON}, data)::Render
     Render("application/json; charset=utf-8", unsafe_wrap(Vector{UInt8}, JSON2.write(data)))
+end
+
+function render(::Type{Javascript}, data)::Render
+    Render("application/javascript; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
+end
+
+function render(m::Module, data)::Render # throws UnknownModuleError
+    if nameof(m) == :JSON
+        render(JSON, data)
+    else
+        throws(UnknownModuleError(string(m)))
+    end
 end
 
 # module Bukdu

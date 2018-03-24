@@ -1,11 +1,15 @@
 # module Bukdu
 
 export ApplicationController
-export JSON
+export Render, JSON
 
 abstract type ApplicationController end
 
 mutable struct JSON{T}
+    content::T
+end
+
+mutable struct Javascript{T}
     content::T
 end
 
