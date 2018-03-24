@@ -92,15 +92,38 @@ document.addEventListener('DOMContentLoaded', function () {
 """)
 end
 
+import InteractiveUtils # InteractiveUtils.versioninfo
+function get_banner_versioninfo()
+    oldout = stdout
+    rdout, wrout = redirect_stdout()
+    out = @async read(rdout, String)
+    Base.banner() #
+    InteractiveUtils.versioninfo() #
+    redirect_stdout(oldout)
+    close(wrout)
+    rstrip(fetch(out))
+end
+
 function index(::WasmController)
     render(HTML, """
 <html>
 <head>
+  <title>Bukdu sevenstars</title>
   <script src="/javascripts/libwabt.js"></script>
   <script src="/hello.js"></script>
+  <style>
+    div#console {
+      background-color: lightgoldenrodyellow;
+      border-style: ridge;
+    }
+  </style>
 </head>
 <body>
   <h3>Bukdu sevenstars</h3>
+  <ul>
+    <li><a href="https://github.com/wookay/Bukdu.jl/tree/sevenstars">https://github.com/wookay/Bukdu.jl/tree/sevenstars</a></li>
+  </ul>
+  <pre>$(get_banner_versioninfo())</pre>
   <div id="console" />
 </body>
 </html>
