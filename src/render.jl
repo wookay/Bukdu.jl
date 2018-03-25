@@ -30,13 +30,13 @@ end
 
 # application/wasm
 
-function render(m::Module, data)::Render # throws UnknownModuleError
+function render(m::Module, data)::Render # throw UnknownModuleError
     if nameof(m) == :JSON
         render(JSON, data)
     elseif nameof(m) == :HTML5
         render(HTML, data)
     else
-        throws(UnknownModuleError(string(m)))
+        throw(UnknownModuleError(string(m)))
     end
 end
 
