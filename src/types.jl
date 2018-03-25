@@ -2,7 +2,7 @@
 
 export ApplicationController
 export Conn
-export Render, JSON
+export Render, JSON, JavaScript
 
 import HTTP
 

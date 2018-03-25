@@ -75,6 +75,7 @@ end
 
 function request_handler(route::Routing.Route, req::Union{DirectRequest,HTTP.Messages.Request})
     C = route.C
+    C === Routing.MissingController && (req.response.status = 404)
     action = route.action
     Runtime.catch_request(action, C, req) #
     try

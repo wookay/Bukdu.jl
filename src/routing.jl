@@ -17,7 +17,6 @@ function handle(req::HTTP.Messages.Request)
 end
 
 function not_found(c::MissingController)
-    c.conn.request.response.status = 404
     "not found"
 end
 

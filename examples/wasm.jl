@@ -1,5 +1,4 @@
 using Bukdu # ApplicationController Conn Plug Render render get
-import Bukdu: JavaScript
 
 #=
 using Charlotte # @code_wasm
