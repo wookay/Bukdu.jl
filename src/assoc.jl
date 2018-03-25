@@ -1,8 +1,12 @@
 # module Bukdu
 
+export Assoc
+
 struct Assoc
     __bukdu_assoc::Dict{String, String}
 end
+Assoc(pair::Pair) = Assoc(Dict(pair))
+Assoc(pairs...) = Assoc(Dict(pairs...))
 
 function Base.getindex(assoc::Assoc, key::String)
     if haskey(assoc.__bukdu_assoc, key)
@@ -29,7 +33,11 @@ for f in (:keys, :values, :pairs, :length, :isempty, :empty!)
         (Base.$f)(assoc::Assoc) = $f(assoc.__bukdu_assoc)
     end
 end
-Base.show(io::IO, mime::MIME"text/plain", assoc::Assoc) = show(io, mime, assoc.__bukdu_assoc)
+
+function Base.show(io::IO, mime::MIME"text/plain", assoc::Assoc)
+    body = join(assoc.__bukdu_assoc, ", ")
+    println(io, Assoc, '(', body, ')')
+end
 
 import JSON2
 JSON2.write(io::IO, assoc::Assoc) = JSON2.write(io, assoc.__bukdu_assoc)

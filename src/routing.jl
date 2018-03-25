@@ -46,6 +46,7 @@ function add_route(verb, url::String, C::Type{<:ApplicationController}, action)
     (vals, path_params) = penetrate_segments(segments) 
     method = Naming.verb_name(verb)
     @eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, Dict($(path_params...)))
+    @eval route(::typeof($verb), ::Type{$C}, ::typeof($action)) = $url
 end
 
 end # module Bukdu.Routing

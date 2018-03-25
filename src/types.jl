@@ -13,8 +13,11 @@ abstract type ApplicationRouter     end
 ### controller
 
 struct Conn
-    path_params::Dict{String, String}
     request::HTTP.Messages.Request
+    params::Assoc
+    query_params::Assoc
+    body_params::Assoc
+    path_params::Assoc
 end
 
 struct MissingController <: ApplicationController

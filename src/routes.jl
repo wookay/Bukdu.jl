@@ -25,7 +25,7 @@ end
 function put
 end
 
-const routing_verbs = [get, post, delete, patch, put]
+const routing_verbs = [:get, :post, :delete, :patch, :put]
 
 const action_rpad      = 13
 const controller_rpad  = 20
@@ -42,12 +42,23 @@ function _unescape_req_target(req)
     ifelse(length(a) > target_path_rpad, join(a), s)
 end
 
+function req_method_color(method::String)
+    bold = false
+    if "POST" == method
+        bold = true
+        color = :yellow
+    else
+        color = :cyan
+    end
+    (bold=bold, color=color)
+end
+
 function info_request(action, C::Type{<:ApplicationController}, req)
     logger = Base.global_logger()
     buf = IOBuffer()
     iob = IOContext(buf, logger.stream)
     printstyled(iob, "INFO:  ", color=:cyan)
-    printstyled(iob, rpad(req.method, 6), color=:cyan)
+    printstyled(iob, rpad(req.method, 6); req_method_color(req.method)...)
     printstyled(iob, string(' ', rpad(nameof(action), action_rpad),
                             rpad(nameof(C), controller_rpad)))
     printstyled(iob, req.response.status, color= 200 == req.response.status ? :normal : :red)
@@ -73,44 +84,49 @@ mutable struct DirectRequest
     response::DirectResponse
 end
 
-function request_handler(route::Routing.Route, req::Union{DirectRequest,HTTP.Messages.Request})
+function request_handler(route::Routing.Route, ureq::Union{DirectRequest,HTTP.Messages.Request})
     C = route.C
-    C === Routing.MissingController && (req.response.status = 404)
+    C === Routing.MissingController && (ureq.response.status = 404)
     action = route.action
-    Runtime.catch_request(action, C, req) #
+    Runtime.catch_request(action, C, ureq) #
     try
-        conn = Conn(route.path_params, req isa HTTP.Messages.Request ? req : req.req)
+        req = ureq isa HTTP.Messages.Request ? ureq : ureq.req
+        query_params = HTTP.queryparams(HTTP.URI(req.target))
+        body_params = FormData.form_data_body_params(req)
+        path_params = route.path_params
+        params = merge(query_params, body_params, path_params)
+        conn = Conn(req, Assoc.((params, query_params, body_params, path_params))...)
         c = C(conn)
         obj = action(c)
-        if req isa DirectRequest
-            req.response.body = obj
+        if ureq isa DirectRequest
+            ureq.response.body = obj
         else
             if obj isa Render
                 data = obj.body
-                push!(req.response.headers, Pair("Content-Type", obj.content_type))
+                push!(ureq.response.headers, Pair("Content-Type", obj.content_type))
             else
                 data = unsafe_wrap(Vector{UInt8}, string(obj))
             end
-            req.response.body = data
+            ureq.response.body = data
         end
     catch ex
         err = InternalError(string(ex))
-        req.response.status = 500
-        if req isa DirectRequest
-            req.response.body = err
+        ureq.response.status = 500
+        if ureq isa DirectRequest
+            ureq.response.body = err
         else
-            data = unsafe_wrap(Vector{UInt8}, string(InternalError, ' ', err.msg))
-            push!(req.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
-            req.response.body = data
+            data = unsafe_wrap(Vector{UInt8}, string(InternalError, ' ', err.msg, '\n', stacktrace(catch_backtrace())))
+            push!(ureq.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
+            ureq.response.body = data
         end
     end
-    info_request(action, C, req)
-    Runtime.catch_response(action, C, req.response) #
-    req.response
+    info_request(action, C, ureq)
+    Runtime.catch_response(action, C, ureq.response) #
+    ureq.response
 end
 
-function get(url::String, C::Type{<:ApplicationController}, action)
-    Routing.add_route(get, url, C, action)
+for verb in routing_verbs
+    @eval ($verb)(url::String, C::Type{<:ApplicationController}, action) = Routing.add_route($verb, url, C, action)
 end
 
 function Router(f)

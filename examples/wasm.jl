@@ -1,4 +1,4 @@
-using Bukdu # ApplicationController Conn Plug Render render get
+using Bukdu # ApplicationController Conn Plug Render JavaScript render get
 
 #=
 using Charlotte # @code_wasm
@@ -105,6 +105,7 @@ function index(::WasmController)
     render(HTML, """
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>Bukdu sevenstars</title>
   <script src="/javascripts/libwabt.js"></script>
   <script src="/hello.js"></script>

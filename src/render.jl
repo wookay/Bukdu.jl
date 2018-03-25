@@ -28,9 +28,13 @@ function render(::Type{JavaScript}, data)::Render
     Render("application/javascript; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
 end
 
+# application/wasm
+
 function render(m::Module, data)::Render # throws UnknownModuleError
     if nameof(m) == :JSON
         render(JSON, data)
+    elseif nameof(m) == :HTML5
+        render(HTML, data)
     else
         throws(UnknownModuleError(string(m)))
     end
