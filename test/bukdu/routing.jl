@@ -1,4 +1,4 @@
-module test_routing
+module test_bukdu_routing
 
 using Test
 
@@ -56,4 +56,4 @@ r = route(Val(Symbol(method)), vals...)
 @test r.action == index
 @test r.path_params == Dict("c"=>"36","b"=>"25")
 
-end # module test_routing
+end # module test_bukdu_routing

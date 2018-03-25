@@ -5,23 +5,15 @@ export change, form_for, text_input, submit
 import ...Bukdu: ApplicationController, Assoc, Changeset, Routing, Naming, post
 import Documenter.Utilities.DOM: @tags
 
-function model_prefix(M::Type)::String
-    string(lowercase(String(nameof(M))), '_')
-end
-
-function model_prefix(M::Type, field::Symbol)::String
-    string(model_prefix(M), field)
-end
-
 """
     change
 """
 function change(M::Type, params::Assoc)::Changeset
-    modelnameprefix = model_prefix(M)
+    modelnameprefix = Naming.model_prefix(M)
     ntkeys = []
     ntvalues = []
     modelfieldnames = fieldnames(M)
-    for (k::String, v) in pairs(params)
+    for (idx::Int, (k::String, v)) in pairs(params)
         if startswith(k, modelnameprefix)
             key = Symbol(k[length(modelnameprefix)+1:end])
             if key in modelfieldnames
@@ -42,21 +34,26 @@ function change(M::Type, params::Assoc)::Changeset
     Changeset(M, changes)
 end
 
-function change(M::Type, nt::NamedTuple, params::Assoc; primary_key::String)::Changeset
+function change(M::Type, nt::NamedTuple, params::Assoc; primary_key::Union{String,Nothing}=nothing)::Changeset
     p = change(M, params)
-    pk = Symbol(primary_key)
     ntkeys = []
     ntvalues = []
     for (k::Symbol, v) in pairs(p.changes)
         if haskey(nt, k)
-            if v != nt[k]
-                 push!(ntkeys, k)
-                 typ = typeof(nt[k])
-                 if v isa typ
-                     push!(ntvalues, v)
-                 else
-                     push!(ntvalues, parse(typ, v))
-                 end
+            typ = typeof(nt[k])
+            if v isa typ
+                val = v
+            else
+                val = parse(typ, v)
+            end
+            if val == nt[k]
+                if !(primary_key isa Nothing) && Symbol(primary_key) == k
+                    push!(ntkeys, k)
+                    push!(ntvalues, val)
+                end
+            else
+                push!(ntkeys, k)
+                push!(ntvalues, val)
             end
         end
     end
@@ -77,12 +74,20 @@ function form_for(f, changeset::Changeset, form_action::String; method=post, mul
     form[attrs...](f(changeset))
 end
 
-function text_input(f::Changeset, field::Symbol, value="")
+function form_value(f::Changeset, field::Symbol, value)
+    if value isa Nothing
+        get(f.changes, field, "")
+    else
+        value
+    end
+end
+
+function text_input(f::Changeset, field::Symbol, value=nothing)
     @tags input
-    input[:id => model_prefix(f.model, field),
-          :name => model_prefix(f.model, field),
+    input[:id => Naming.model_prefix(f.model, field),
+          :name => Naming.model_prefix(f.model, field),
           :type => "text",
-          :value => value]()
+          :value => form_value(f, field, value)]()
 end
 
 function submit(block_option)

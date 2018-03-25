@@ -1,4 +1,4 @@
-module test_resources
+module test_bukdu_resources
 
 using Test
 using Bukdu
@@ -25,4 +25,4 @@ end
 @test (Router)(get, "/articles") == (:index,)
 @test (Router)(get, "/articles/2") == (:show, "2")
 
-end # module test_resources
+end # module test_bukdu_resources

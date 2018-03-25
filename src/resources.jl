@@ -8,7 +8,6 @@ import .Actions: index, edit, new, show, create, update, delete
 const default_param_key = "id"
 
 function resources(path::String, ::Type{C}; only=[], except=[]) where {C <: ApplicationController}
-    name = Naming.resource_name(C, "Controller")
     param = default_param_key
     if !isempty(only)
         actions = only

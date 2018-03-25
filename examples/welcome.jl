@@ -10,7 +10,7 @@ struct WelcomeController <: ApplicationController
 end
 
 function index(c::WelcomeController)
-    render(JSON, "q" => c.params.q)
+    render(JSON, "Hello World")
 end
 
 Router() do

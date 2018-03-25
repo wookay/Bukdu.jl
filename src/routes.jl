@@ -45,7 +45,6 @@ end
 function req_method_color(method::String)
     bold = false
     if "POST" == method
-        bold = true
         color = :yellow
     else
         color = :cyan
@@ -91,7 +90,7 @@ function request_handler(route::Routing.Route, ureq::Union{DirectRequest,HTTP.Me
     Runtime.catch_request(action, C, ureq) #
     try
         req = ureq isa HTTP.Messages.Request ? ureq : ureq.req
-        query_params = HTTP.queryparams(HTTP.URI(req.target))
+        query_params::Vector{Pair{String,String}} = collect(HTTP.queryparams(HTTP.URI(req.target)))
         body_params = FormData.form_data_body_params(req)
         path_params = route.path_params
         params = merge(query_params, body_params, path_params)
@@ -112,10 +111,11 @@ function request_handler(route::Routing.Route, ureq::Union{DirectRequest,HTTP.Me
     catch ex
         err = InternalError(string(ex))
         ureq.response.status = 500
+        msg = string(InternalError, ' ', err.msg, '\n', stacktrace(catch_backtrace()))
         if ureq isa DirectRequest
-            ureq.response.body = err
+            ureq.response.body = msg
         else
-            data = unsafe_wrap(Vector{UInt8}, string(InternalError, ' ', err.msg, '\n', stacktrace(catch_backtrace())))
+            data = unsafe_wrap(Vector{UInt8}, msg)
             push!(ureq.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
             ureq.response.body = data
         end

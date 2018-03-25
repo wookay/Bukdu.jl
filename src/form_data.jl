@@ -11,17 +11,17 @@ struct UrlEncodedScanner
 end
 
 # https://github.com/JuliaWeb/HttpCommon.jl/blob/v0.2.6/src/HttpCommon.jl#L141
-function scan(s::UrlEncodedScanner)::Dict
+function scan(s::UrlEncodedScanner)::Vector{Pair{String,String}}
     query = String(s.data)
-    assoc = Dict()
+    ps = Vector{Pair{String,String}}()
     isempty(query) && return assoc
     for field in split(query, '&'; keep=false)
         (k, v) = split(field, '=')
         key = unescape_form(k)
         value = unescape_form(v)
-        setindex!(assoc, value, key)
+        push!(ps, Pair(key, value))
     end
-    assoc
+    ps
 end
 
 
@@ -66,7 +66,7 @@ function readData(s::FormScanner, len::Int, boundary::String, lf::UInt8, isfile:
     end
 end
 
-function scan(s::FormScanner)::Dict
+function scan(s::FormScanner)::Vector{Pair{String,String}}
     lf = 0x0a
     pat_filename = r"""Content-Disposition: form-data; name=\"(?P<name>[^\"]*)\"; filename=\"(?P<filename>[^\"]*)\""""
     pat = r"""Content-Disposition: form-data; name=\"(?P<name>[^\"]*)\""""
@@ -74,7 +74,7 @@ function scan(s::FormScanner)::Dict
     name = nothing
     filename = nothing
     content_type = nothing
-    assoc = Dict()
+    ps = Vector{Pair{String, String}}()
     while s.pos < len
         if lf==s.data[s.pos]
             if isa(filename, Nothing)
@@ -87,7 +87,7 @@ function scan(s::FormScanner)::Dict
                     m = match(pat, chunk)
                     if isa(m, RegexMatch)
                         name = m[:name]
-                        setindex!(assoc, String(readData(s, len, s.boundary, lf, false)), name)
+                        push!(ps, Pair(name, String(readData(s, len, s.boundary, lf, false))))
                     end
                 end
             else
@@ -97,7 +97,7 @@ function scan(s::FormScanner)::Dict
                     #upload = Plug.Upload(filename, content_type, readData(s, len, s.boundary, lf, true))
                     #Plug.UploadData.save(upload)
                     upload = ""
-                    setindex!(assoc, upload, name)
+                    push!(ps, Pair(name, upload))
                     filename = nothing
                     content_type = nothing
                 end
@@ -106,11 +106,11 @@ function scan(s::FormScanner)::Dict
         end
         s.pos += 1
     end
-    assoc
+    ps 
 end
 
 
-function form_data_body_params(req::HTTP.Messages.Request)::Dict{String, String}
+function form_data_body_params(req::HTTP.Messages.Request)::Vector{Pair{String,String}}
     if hasheader(req.headers, "Content-Type")
         content_type = header(req.headers, "Content-Type")
         if "application/x-www-form-urlencoded" == content_type
@@ -122,7 +122,7 @@ function form_data_body_params(req::HTTP.Messages.Request)::Dict{String, String}
             return scan(scanner)
         end
     end
-    Dict{String, String}()
+    Vector{Pair{String,String}}()
 end
 
 end # module Bukdu.FormData

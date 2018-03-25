@@ -16,6 +16,7 @@ function layout(body)
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 </head>
 <body>
+<h3>Bukdu.HTML5.Form</h3>
 $body
 </body>
 </html>
@@ -23,20 +24,20 @@ $body
 end
 
 function index(c::FormController)
-    changeset = Changeset(User)
     @tags div
-    
+    changeset = Changeset(User, (name="Alex",))
     form1 = form_for(changeset, (FormController, post_result), method=post, multipart=true) do f
         div(
             text_input(f, :name),
-            submit("Submit")
+            submit("Submit"),
+            " multipart/form-data",
         )
     end
-
     form2 = form_for(changeset, (FormController, post_result), method=post, multipart=false) do f
         div(
             text_input(f, :name),
-            submit("Submit")
+            submit("Submit"),
+            " application/x-www-form-urlencoded",
         )
     end
     body = div(form1, form2)
@@ -44,8 +45,13 @@ function index(c::FormController)
 end
 
 function post_result(c::FormController)
-    changeset = change(User, c.params)
-    body = changeset
+    @tags div a strong h3 li
+    changeset = change(User, (name="Alex",), c.params)
+    body = div(
+        h3( a[:href => "/"]("back") ),
+        li( isempty(changeset.changes) ? strong("nothing's changed") : "changed" ),
+        li( string(changeset) )
+    )
     render(HTML, layout(body))
 end
 

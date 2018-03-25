@@ -6,7 +6,7 @@ import ..Bukdu: HTTP
 struct Route
     C::Type{<:ApplicationController}
     action
-    path_params::Dict{String, String}
+    path_params::Vector{Pair{String,String}}
 end
 
 function handle(req::HTTP.Messages.Request)
@@ -20,7 +20,7 @@ function not_found(c::MissingController)
     "not found"
 end
 
-route(args...) = Route(MissingController, not_found, Dict())
+route(args...) = Route(MissingController, not_found, Vector{Pair{String,String}}())
 
 # idea from HTTP/src/Handlers.jl
 function penetrate_segments(segments)
@@ -30,7 +30,7 @@ function penetrate_segments(segments)
         if startswith(seg, ':')
             param = seg[2:end]
             mangled = Symbol(param, :_)
-            pair = :(Pair($param, String(first(typeof($mangled).parameters))))
+            pair = :(Pair(String($param), String(first(typeof($mangled).parameters))))
             push!(path_params, pair)
             expr = :($mangled::Any)
         else
@@ -41,11 +41,13 @@ function penetrate_segments(segments)
     return (vals, path_params)
 end
 
+(::Type{Vector{Pair{String,String}}})(p::Pair{String,String}) = [p]
+
 function add_route(verb, url::String, C::Type{<:ApplicationController}, action)
     segments = split(url, '/'; keep=false)
     (vals, path_params) = penetrate_segments(segments) 
     method = Naming.verb_name(verb)
-    @eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, Dict($(path_params...)))
+    @eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, Vector{Pair{String,String}}($(path_params...)))
     @eval route(::typeof($verb), ::Type{$C}, ::typeof($action)) = $url
 end
 

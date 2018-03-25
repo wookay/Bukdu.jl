@@ -2,7 +2,7 @@ using Bukdu
 import Bukdu.Routing: MissingController, not_found
 
 function not_found(c::MissingController)
-    render(HTML, "404 not found")
+    render(HTML, "custom 404 not found message")
 end
 
 Bukdu.start(8080)
