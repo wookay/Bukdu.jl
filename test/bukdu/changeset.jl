@@ -22,19 +22,34 @@ changeset = change(User, params)
 @test changeset.changes == (age=20,)
 
 params = Assoc("user_id" => "1", "user_name" => "Shen", "user_age" => "20")
-changeset = change(User, (id=1, name="Alex", age=20), params, primary_key="id")
+changeset = change(Changeset(User, (id=1, name="Alex", age=20)), params, primary_key="id")
 @test changeset.changes == (id=1, name="Shen")
 
 params = Assoc("user_id" => "1", "user_name" => "Shen", "user_age" => "20")
-changeset = change(User, (id=1, name="Alex", age=20), params)
+changeset = change(Changeset(User, (id=1, name="Alex", age=20)), params)
 @test changeset.changes == (name="Shen",)
 
 params = Assoc("user_id" => "1", "user_name" => "Shen", "user_age" => "20", "user_city" => "Paris")
-changeset = change(User, (id=1, name="Alex", age=20, city="Seoul"), params)
+changeset = change(Changeset(User, (id=1, name="Alex", age=20, city="Seoul")), params)
 @test changeset.changes == (name="Shen", city="Paris")
 
 params = Assoc("user_id" => "1", "user_name" => "Shen", "user_age" => "20", "user_city" => "Paris")
-changeset = change(User, (id=1, name="Alex", age=20, city="Paris"), params)
+changeset = change(Changeset(User, (id=1, name="Alex", age=20, city="Paris")), params)
+@test changeset.changes == (name="Shen",)
+
+changeset = Changeset(User, (name="",))
+params = Assoc("user_name" => "Shen", "user_age" => "20")
+changeset = change(changeset, params)
+@test changeset.changes == (name="Shen",)
+
+changeset = Changeset(User, (id=1, name="",))
+params = Assoc("user_id" => "1", "user_name" => "Shen", "user_age" => "20")
+changeset = change(changeset, params, primary_key="id")
+@test changeset.changes == (id=1, name="Shen",)
+
+changeset = Changeset(User, (id=1, name="",))
+params = Assoc("user_id" => "1", "user_name" => "Shen", "user_age" => "20")
+changeset = change(changeset, params)
 @test changeset.changes == (name="Shen",)
 
 end # module test_bukdu_changeset

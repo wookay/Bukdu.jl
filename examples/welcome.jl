@@ -1,8 +1,3 @@
-# using Pkg
-# try
-#     Pkg.installed("Revise") && using Revise
-# end
-
 using Bukdu
 
 struct WelcomeController <: ApplicationController
@@ -13,6 +8,10 @@ function index(c::WelcomeController)
     render(JSON, "Hello World")
 end
 
+
+
+if PROGRAM_FILE == basename(@__FILE__)
+
 Router() do
     get("/", WelcomeController, index)
 end
@@ -22,3 +21,5 @@ Bukdu.start(8080)
 Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
+
+end # if

@@ -92,6 +92,8 @@ end # module MainStuff
 
 
 
+if PROGRAM_FILE == basename(@__FILE__)
+
 using Bukdu
 import Bukdu.Actions: index
 
@@ -110,3 +112,5 @@ Bukdu.start(8080)
 Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
+
+end # if

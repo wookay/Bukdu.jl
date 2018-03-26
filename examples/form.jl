@@ -23,19 +23,21 @@ $body
 """
 end
 
+global changeset = Changeset(User, (name="",))
+
 function index(c::FormController)
+    global changeset
     @tags div
-    changeset = Changeset(User, (name="Alex",))
     form1 = form_for(changeset, (FormController, post_result), method=post, multipart=true) do f
         div(
-            text_input(f, :name),
+            text_input(f, :name, placeholder="Name"),
             submit("Submit"),
             " multipart/form-data",
         )
     end
     form2 = form_for(changeset, (FormController, post_result), method=post, multipart=false) do f
         div(
-            text_input(f, :name),
+            text_input(f, :name, placeholder="Name"),
             submit("Submit"),
             " application/x-www-form-urlencoded",
         )
@@ -45,15 +47,24 @@ function index(c::FormController)
 end
 
 function post_result(c::FormController)
+    global changeset
     @tags div a strong h3 li
-    changeset = change(User, (name="Alex",), c.params)
+    result = change(changeset, c.params)
+    if !isempty(result.changes)
+        changeset = result
+    end
     body = div(
         h3( a[:href => "/"]("back") ),
-        li( isempty(changeset.changes) ? strong("nothing's changed") : "changed" ),
-        li( string(changeset) )
+        li( isempty(result.changes) ? strong("nothing's changed") : "changed" ),
+        li( "result: ", string(result) ),
+        li( "global changeset: ", string(changeset) ),
     )
     render(HTML, layout(body))
 end
+
+
+
+if PROGRAM_FILE == basename(@__FILE__)
 
 Router() do
     get("/", FormController, index)
@@ -65,3 +76,5 @@ Bukdu.start(8080)
 Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
+
+end # if

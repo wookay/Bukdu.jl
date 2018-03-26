@@ -128,6 +128,10 @@ function index(::WasmController)
 """)
 end
 
+
+
+if PROGRAM_FILE == basename(@__FILE__)
+
 Router() do
     get("/", WasmController, index)
     get("/hello.js", WasmController, hello_js)
@@ -140,3 +144,5 @@ Bukdu.start(8080)
 Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
+
+end # if

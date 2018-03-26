@@ -35,10 +35,11 @@ function change(M::Type, params::Assoc)::Changeset
 end
 
 """
-    change(M::Type, nt::NamedTuple, params::Assoc; primary_key::Union{String,Nothing}=nothing)::Changeset
+    change(changeset::Changeset, params::Assoc; primary_key::Union{String,Nothing}=nothing)::Changeset
 """
-function change(M::Type, nt::NamedTuple, params::Assoc; primary_key::Union{String,Nothing}=nothing)::Changeset
-    p = change(M, params)
+function change(changeset::Changeset, params::Assoc; primary_key::Union{String,Nothing}=nothing)::Changeset
+    p = change(changeset.model, params)
+    nt = changeset.changes
     ntkeys = []
     ntvalues = []
     for (k::Symbol, v) in pairs(p.changes)
@@ -61,7 +62,7 @@ function change(M::Type, nt::NamedTuple, params::Assoc; primary_key::Union{Strin
         end
     end
     changes = NamedTuple{tuple(ntkeys...)}(tuple(ntvalues...))
-    Changeset(M, changes)
+    Changeset(changeset.model, changes)
 end
 
 """
@@ -92,14 +93,16 @@ function form_value(f::Changeset, field::Symbol, value)
 end
 
 """
-    text_input(f::Changeset, field::Symbol, value=nothing, placeholder=nothing)
+    text_input(f::Changeset, field::Symbol, value=nothing; kwargs...)
 """
-function text_input(f::Changeset, field::Symbol, value=nothing, placeholder=nothing)
+function text_input(f::Changeset, field::Symbol, value=nothing; kwargs...)
     @tags input
-    input[:id => Naming.model_prefix(f.model, field),
-          :name => Naming.model_prefix(f.model, field),
+    name = Naming.model_prefix(f.model, field)
+    input[:id => name,
+          :name => name,
           :type => "text",
-          :value => form_value(f, field, value)]()
+          :value => form_value(f, field, value),
+          kwargs...]()
 end
 
 """
