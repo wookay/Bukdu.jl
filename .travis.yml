@@ -2,14 +2,15 @@
 language: julia
 os:
   - linux
-  - osx
+  # - osx    needs above 0.7.0-DEV.4654
+  #                      0.7.0-DEV.4596
 julia:
   - nightly
 notifications:
   email: false
 script:
   # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --color=yes -e 'Pkg.clone(pwd()); Pkg.checkout("Bukdu", "sevenstars"); Pkg.build("Bukdu"); Pkg.test("Bukdu"; coverage=true)'
+  - julia --color=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.checkout("Bukdu", "sevenstars"); Pkg.checkout("HTTP", "master"); Pkg.build("Bukdu"); Pkg.test("Bukdu"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
   # - julia --color=yes -e 'cd(Pkg.dir("Bukdu")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
