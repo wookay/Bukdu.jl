@@ -1,4 +1,4 @@
-using Bukdu # ApplicationController Conn HTML render
+using Bukdu # ApplicationController Conn HTML Router render routes
 using Bukdu.HTML5.Form # change form_for text_input submit
 import Documenter.Utilities.DOM: @tags
 
@@ -72,6 +72,8 @@ routes() do
 end
 
 Bukdu.start(8080)
+
+(Router)(get, "/")
 
 Base.JLOptions().isinteractive==0 && wait()
 

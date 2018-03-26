@@ -1,4 +1,4 @@
-using Bukdu # ApplicationController Conn JavaScript Plug.Static render routes get plug
+using Bukdu # ApplicationController Conn JavaScript Plug.Static Router render routes get plug
 
 #=
 using Charlotte # @code_wasm
@@ -140,10 +140,12 @@ routes() do
     plug(Plug.Static, at="/", from=normpath(@__DIR__, "public"))
 end
 
-Bukdu.start(8080)
 # on Heroku
 # import Sockets: @ip_str
 # Bukdu.start(parse(Int,ENV["PORT"]); host=ip"0.0.0.0")
+Bukdu.start(8080)
+
+(Router)(get, "/")
 
 Base.JLOptions().isinteractive==0 && wait()
 

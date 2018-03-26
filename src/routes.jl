@@ -1,6 +1,6 @@
 # module Bukdu
 
-export routes
+export Router, routes
 
 export get, post, delete, patch, put
 import Base: get
@@ -10,6 +10,9 @@ const env = Dict{Symbol, Any}(
     :server => nothing,
 )
 
+"""
+    Router
+"""
 struct Router
 end
 

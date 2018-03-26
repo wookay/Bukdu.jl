@@ -26,7 +26,7 @@ function not_found(c::MissingController)
     "not found"
 end
 
-route(args...) = Route(MissingController, not_found, Vector{Pair{String,String}}())
+route(args...) = Route(MissingController, not_found, Vector{Pair{String,String}}(), Vector{Function}())
 
 # idea from HTTP/src/Handlers.jl
 function penetrate_segments(segments)

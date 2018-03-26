@@ -109,6 +109,8 @@ end
 
 Bukdu.start(8080)
 
+(Router)(get, "/")
+
 Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
