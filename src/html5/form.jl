@@ -6,7 +6,7 @@ import ...Bukdu: ApplicationController, Assoc, Changeset, Routing, Naming, post
 import Documenter.Utilities.DOM: @tags
 
 """
-    change
+    change(M::Type, params::Assoc)::Changeset
 """
 function change(M::Type, params::Assoc)::Changeset
     modelnameprefix = Naming.model_prefix(M)
@@ -34,6 +34,9 @@ function change(M::Type, params::Assoc)::Changeset
     Changeset(M, changes)
 end
 
+"""
+    change(M::Type, nt::NamedTuple, params::Assoc; primary_key::Union{String,Nothing}=nothing)::Changeset
+"""
 function change(M::Type, nt::NamedTuple, params::Assoc; primary_key::Union{String,Nothing}=nothing)::Changeset
     p = change(M, params)
     ntkeys = []
@@ -61,12 +64,18 @@ function change(M::Type, nt::NamedTuple, params::Assoc; primary_key::Union{Strin
     Changeset(M, changes)
 end
 
+"""
+    form_for(f, changeset::Changeset, controller_action::Tuple; method=post, kwargs...)
+"""
 function form_for(f, changeset::Changeset, controller_action::Tuple; method=post, kwargs...)
     (controller, action) = controller_action
     form_action = Routing.route(method, controller, action)
     form_for(f, changeset, form_action; method=method, kwargs...)
 end
 
+"""
+    form_for(f, changeset::Changeset, form_action::String; method=post, multipart::Bool=false)
+"""
 function form_for(f, changeset::Changeset, form_action::String; method=post, multipart::Bool=false)
     @tags form
     attrs = [:action => form_action, :method => Naming.verb_name(method)]
@@ -82,7 +91,10 @@ function form_value(f::Changeset, field::Symbol, value)
     end
 end
 
-function text_input(f::Changeset, field::Symbol, value=nothing)
+"""
+    text_input(f::Changeset, field::Symbol, value=nothing, placeholder=nothing)
+"""
+function text_input(f::Changeset, field::Symbol, value=nothing, placeholder=nothing)
     @tags input
     input[:id => Naming.model_prefix(f.model, field),
           :name => Naming.model_prefix(f.model, field),
@@ -90,6 +102,9 @@ function text_input(f::Changeset, field::Symbol, value=nothing)
           :value => form_value(f, field, value)]()
 end
 
+"""
+    submit(block_option)
+"""
 function submit(block_option)
     @tags button
     button[:type => "submit"](block_option)

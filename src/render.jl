@@ -7,23 +7,29 @@ struct UnknownModuleError <: Exception
 end
 
 """
-    render
+    render(::Type{Text}, data)::Render
 """
-function render
-end
-
 function render(::Type{Text}, data)::Render
     Render("text/plain; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
 end
 
+"""
+    render(::Type{HTML}, data)::Render
+"""
 function render(::Type{HTML}, data)::Render
     Render("text/html; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
 end
 
+"""
+    render(::Type{JSON}, data)::Render
+"""
 function render(::Type{JSON}, data)::Render
     Render("application/json; charset=utf-8", unsafe_wrap(Vector{UInt8}, JSON2.write(data)))
 end
 
+"""
+    render(::Type{JavaScript}, data)::Render
+"""
 function render(::Type{JavaScript}, data)::Render
     Render("application/javascript; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
 end

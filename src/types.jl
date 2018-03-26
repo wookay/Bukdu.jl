@@ -6,12 +6,18 @@ export Render, JSON, JavaScript
 
 import HTTP
 
+"""
+    ApplicationController
+"""
 abstract type ApplicationController end
 abstract type ApplicationRouter     end
 
 
-### controller
+### controllers
 
+"""
+    Conn
+"""
 struct Conn
     request::HTTP.Messages.Request
     params::Assoc
@@ -25,8 +31,11 @@ struct MissingController <: ApplicationController
 end
 
 
-### render
+### renders
 
+"""
+    Render
+"""
 struct Render
     content_type::String
     body::Vector{UInt8}

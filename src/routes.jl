@@ -129,8 +129,11 @@ for verb in routing_verbs
     @eval ($verb)(url::String, C::Type{<:ApplicationController}, action) = Routing.add_route($verb, url, C, action)
 end
 
-function Router(f)
-    f()
+"""
+    Router(routes::Function)
+"""
+function Router(routes::Function)
+    routes()
 end
 
 function (::Type{R})(verb, path::String) where {R <: ApplicationRouter}
