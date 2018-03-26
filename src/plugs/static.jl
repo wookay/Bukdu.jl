@@ -1,5 +1,8 @@
 # module Bukdu.Plug
 
+"""
+    Plug.Static
+"""
 struct Static <: AbstractPlug
 end
 
@@ -9,7 +12,10 @@ struct StaticController <: ApplicationController
     conn::Conn
 end
 
-function plug(::Type{Static}; at::String, from::String) # cache::Bool
+"""
+    plug(::Type{Static}; at::String, from::String)
+"""
+function plug(::Type{Static}; at::String, from::String)
     function readfile(c::StaticController)
         reqpath = c.conn.request.target
         filepath = normpath(from, reqpath[2:end])

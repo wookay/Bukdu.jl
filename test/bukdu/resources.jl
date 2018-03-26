@@ -16,12 +16,13 @@ create(::ArticleController)  = (:create,)
 delete(c::ArticleController) = (:delete, c.params.id)
 update(c::ArticleController) = (:update, c.params.id)
 
-Router() do
+routes() do
     # resources("/articles", ArticleController)
     resources("/articles", ArticleController, only=[index, show])
     # resources("/articles", ArticleController, except=[index, show])
 end
 
+import Bukdu: Router
 @test (Router)(get, "/articles") == (:index,)
 @test (Router)(get, "/articles/2") == (:show, "2")
 

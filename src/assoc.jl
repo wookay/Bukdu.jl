@@ -19,6 +19,10 @@ function Base.getindex(assoc::Assoc, key::Symbol)::String
     getindex(assoc, String(key))
 end
 
+function Base.setindex!(assoc::Assoc, value::String, key::Symbol)
+    setindex!(assoc, value, String(key))
+end
+
 function Base.setindex!(assoc::Assoc, value::String, key::String)
     ind = coalesce(findfirst(isequal(key), keys(assoc)), 0)
     if ind > 0

@@ -101,7 +101,7 @@ using .WelcomeStuff
 using .CalculatorStuff
 using .MainStuff
 
-Router() do
+routes() do
     get("/", MainController, index)
     get("/welcome", WelcomeController, index)
     get("/calculator", Calculator, index)

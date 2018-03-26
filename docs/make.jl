@@ -11,8 +11,9 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "controllers" => "controllers.md", # ApplicationController Conn
-        "renders" => "renders.md", # render Render
-        "Router" => "Router.md", # Router
+        "renders" => "renders.md", # Render render
+        "routes" => "routes.md", # routes pipeline
+        "plugs" => "plugs.md", # Plug plug
         "Actions" => "Actions.md", # Actions
         "HTML5.Form" => "HTML5/Form.md", # HTML5.Form
     ],

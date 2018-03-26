@@ -66,7 +66,7 @@ end
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-Router() do
+routes() do
     get("/", FormController, index)
     post("/post_result", FormController, post_result)
 end

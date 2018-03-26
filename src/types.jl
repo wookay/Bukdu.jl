@@ -10,7 +10,6 @@ import HTTP
     ApplicationController
 """
 abstract type ApplicationController end
-abstract type ApplicationRouter     end
 
 
 ### controllers

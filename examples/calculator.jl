@@ -29,7 +29,7 @@ end
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-Router() do
+routes() do
     get("/", Calculator, index)
 end
 

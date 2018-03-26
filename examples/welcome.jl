@@ -12,7 +12,7 @@ end
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-Router() do
+routes() do
     get("/", WelcomeController, index)
 end
 

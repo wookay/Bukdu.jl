@@ -1,6 +1,6 @@
 # module Bukdu
 
-export Router
+export routes
 
 export get, post, delete, patch, put
 import Base: get
@@ -10,7 +10,7 @@ const env = Dict{Symbol, Any}(
     :server => nothing,
 )
 
-struct Router <: ApplicationRouter
+struct Router
 end
 
 function post
@@ -83,12 +83,30 @@ mutable struct DirectRequest
     response::DirectResponse
 end
 
+function catch_internal_error(block, ureq)
+    try
+        block()
+    catch ex
+        err = InternalError(string(ex))
+        ureq.response.status = 500
+        msg = string(InternalError, ' ', err.msg, '\n', stacktrace(catch_backtrace()))
+        if ureq isa DirectRequest
+            ureq.response.body = msg
+        else
+            data = unsafe_wrap(Vector{UInt8}, msg)
+            push!(ureq.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
+            ureq.response.body = data
+        end
+    end
+end
+
 function request_handler(route::Routing.Route, ureq::Union{DirectRequest,HTTP.Messages.Request})
     C = route.C
     C === Routing.MissingController && (ureq.response.status = 404)
     action = route.action
     Runtime.catch_request(action, C, ureq) #
-    try
+    #catch_internal_error(ureq) do
+    begin
         req = ureq isa HTTP.Messages.Request ? ureq : ureq.req
         query_params::Vector{Pair{String,String}} = collect(HTTP.queryparams(HTTP.URI(req.target)))
         body_params = FormData.form_data_body_params(req)
@@ -96,6 +114,9 @@ function request_handler(route::Routing.Route, ureq::Union{DirectRequest,HTTP.Me
         params = merge(query_params, body_params, path_params)
         conn = Conn(req, Assoc.((params, query_params, body_params, path_params))...)
         c = C(conn)
+        for pip in route.pipelines
+            pip(c)
+        end
         obj = action(c)
         if ureq isa DirectRequest
             ureq.response.body = obj
@@ -106,17 +127,6 @@ function request_handler(route::Routing.Route, ureq::Union{DirectRequest,HTTP.Me
             else
                 data = unsafe_wrap(Vector{UInt8}, string(obj))
             end
-            ureq.response.body = data
-        end
-    catch ex
-        err = InternalError(string(ex))
-        ureq.response.status = 500
-        msg = string(InternalError, ' ', err.msg, '\n', stacktrace(catch_backtrace()))
-        if ureq isa DirectRequest
-            ureq.response.body = msg
-        else
-            data = unsafe_wrap(Vector{UInt8}, msg)
-            push!(ureq.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
             ureq.response.body = data
         end
     end
@@ -130,13 +140,22 @@ for verb in routing_verbs
 end
 
 """
-    Router(routes::Function)
+    routes(block::Function)
 """
-function Router(routes::Function)
-    routes()
+function routes(block::Function)
+    block()
 end
 
-function (::Type{R})(verb, path::String) where {R <: ApplicationRouter}
+"""
+    routes(block::Function, router::Symbol)
+"""
+function routes(block::Function, router::Symbol)
+    Routing.context[:router] = router
+    block()
+    Routing.context[:router] = nothing
+end
+
+function (::Type{Router})(verb, path::String)
     method = Naming.verb_name(verb)
     req = HTTP.Messages.Request(method, path)
     route = Routing.handle(req)

@@ -13,7 +13,7 @@ end
 
 index(::WelcomeController) = "hello world"
 
-Router() do
+routes() do
     get("/", WelcomeController, index)
 end
 

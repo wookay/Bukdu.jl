@@ -14,6 +14,7 @@ include("controller.jl")
 
 include("form_data.jl")
 include("routes.jl")
+include("pipelines.jl")
 include("actions.jl")
 include("resources.jl")
 

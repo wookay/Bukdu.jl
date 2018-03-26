@@ -1,4 +1,4 @@
-using Bukdu # ApplicationController Conn Plug Render JavaScript render get
+using Bukdu # ApplicationController Conn JavaScript Plug.Static render routes get plug
 
 #=
 using Charlotte # @code_wasm
@@ -119,7 +119,8 @@ function index(::WasmController)
 <body>
   <h3>Bukdu sevenstars</h3>
   <ul>
-    <li><a href="https://github.com/wookay/Bukdu.jl/tree/sevenstars">https://github.com/wookay/Bukdu.jl/tree/sevenstars</a></li>
+    <li>Full code of this page => <a href="https://github.com/wookay/Bukdu.jl/blob/sevenstars/examples/wasm.jl">https://github.com/wookay/Bukdu.jl/blob/sevenstars/examples/wasm.jl</a></li>
+    <li>Heroku example => <a href="https://github.com/wookay/heroku-sevenstars">https://github.com/wookay/heroku-sevenstars</a></li>
   </ul>
   <pre>$(get_banner_versioninfo())</pre>
   <div id="console" />
@@ -132,7 +133,7 @@ end
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-Router() do
+routes() do
     get("/", WasmController, index)
     get("/hello.js", WasmController, hello_js)
     get("/hello.wast", WasmController, hello_wast)
@@ -140,6 +141,9 @@ Router() do
 end
 
 Bukdu.start(8080)
+# on Heroku
+# import Sockets: @ip_str
+# Bukdu.start(parse(Int,ENV["PORT"]); host=ip"0.0.0.0")
 
 Base.JLOptions().isinteractive==0 && wait()
 
