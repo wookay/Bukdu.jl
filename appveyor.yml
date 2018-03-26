@@ -38,8 +38,8 @@ install:
 build_script:
 # Need to convert from shallow to complete for Pkg.clone to work
   - IF EXIST .git\shallow (git fetch --unshallow)
-  - C:\projects\julia\bin\julia --color=yes -e "InteractiveUtils.versioninfo();
-      using Pkg; Pkg.clone(pwd()); Pkg.checkout(\"Bukdu\", \"sevenstars\"); Pkg.checkout(\"HTTP\", \"master\"); Pkg.build(\"Bukdu\")"
+  - C:\projects\julia\bin\julia --color=yes -e "using InteractiveUtils; versioninfo()"
+  - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.clone(pwd()); Pkg.checkout(\"Bukdu\", \"sevenstars\"); Pkg.checkout(\"HTTP\", \"master\"); Pkg.build(\"Bukdu\")"
 
 test_script:
   - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.test(\"Bukdu\")"
