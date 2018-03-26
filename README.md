@@ -1,6 +1,8 @@
 # Bukdu 🌌
 
-  [![Travis CI](https://api.travis-ci.org/wookay/Bukdu.jl.svg?branch=sevenstars)](https://travis-ci.org/wookay/Bukdu.jl)
+[![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://wookay.github.io/docs/Bukdu.jl/)
+
+[![Travis CI](https://api.travis-ci.org/wookay/Bukdu.jl.svg?branch=sevenstars)](https://travis-ci.org/wookay/Bukdu.jl)
 
 
 Bukdu 🌌 is a web development framework for Julia (https://julialang.org).
