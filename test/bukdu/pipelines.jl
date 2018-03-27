@@ -1,16 +1,18 @@
 module test_bukdu_pipelines
 
 using Test # @test
-using Bukdu # Plug.AbstractPlug ApplicationController Conn pipeline plug routes get
-import Bukdu: Router
+using Bukdu # Plug.AbstractPlug ApplicationController Conn Routing pipeline plug routes get
 
 struct CSRF <: Plug.AbstractPlug
 end
+
 function plug(::Type{CSRF}, c::C) where {C<:ApplicationController}
     c.params[:csrf] = "1"
 end
+
 struct Auth <: Plug.AbstractPlug
 end
+
 function plug(::Type{Auth}, c::C) where {C<:ApplicationController}
     c.params[:auth] = "1"
 end
@@ -36,7 +38,13 @@ routes(:auth) do
     get("/a", A, index)    
 end
 
-@test (Router)(get, "/a") == ["csrf", "auth"]
-@test (Router)(get, "/w") == ["csrf"]
+@test Router.request(get, "/a") == ["csrf", "auth"]
+@test Router.request(get, "/w") == ["csrf"]
+
+@test Utils.read_stdout(CLI.routes) == """
+GET  /w  W  index  :web
+GET  /a  A  index  :auth"""
+
+Routing.empty!()
 
 end # module test_bukdu_pipelines

@@ -3,16 +3,21 @@ module Routing # Bukdu
 import ..Bukdu: ApplicationController, MissingController, Conn, Naming
 import ..Bukdu: HTTP
 
-context = Dict{Symbol, Union{Nothing, Symbol}}(
-    :router => nothing
+context = Dict{Symbol, Any}(
+    :pipe => nothing,
+    :routing_tables => Vector{Any}(),
 )
-router_pipelines = Dict{Symbol, Vector{Function}}()
+routing_pipelines = Dict{Symbol, Vector{Function}}()
 
 struct Route
     C::Type{<:ApplicationController}
     action
     path_params::Vector{Pair{String,String}}
     pipelines::Vector{Function}
+end
+
+struct RoutePathError <: Exception
+    msg
 end
 
 function handle(req::HTTP.Messages.Request)
@@ -27,6 +32,10 @@ function not_found(c::MissingController)
 end
 
 route(args...) = Route(MissingController, not_found, Vector{Pair{String,String}}(), Vector{Function}())
+
+function route_path(args...)
+    throw(RoutePathError("path not found"))
+end
 
 # idea from HTTP/src/Handlers.jl
 function penetrate_segments(segments)
@@ -50,12 +59,25 @@ end
 (::Type{Vector{Pair{String,String}}})(p::Pair{String,String}) = [p]
 
 function add_route(verb, url::String, C::Type{<:ApplicationController}, action)
-    pipelines = get(router_pipelines, context[:router], [])
+    pipe = context[:pipe]
+    pipelines = get(routing_pipelines, pipe, [])
     segments = split(url, '/'; keep=false)
     (vals, path_params) = penetrate_segments(segments) 
     method = Naming.verb_name(verb)
     @eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, Vector{Pair{String,String}}($(path_params...)), $pipelines)
-    @eval route(::typeof($verb), ::Type{$C}, ::typeof($action)) = $url
+    @eval route_path(::typeof($verb), ::Type{$C}, ::typeof($action)) = $url
+    routing_tables = vcat(context[:routing_tables],
+        Naming.verb_name(verb), url, nameof(C), nameof(action), (pipe isa Nothing ? "" : repr(pipe)))
+    context[:routing_tables] = routing_tables
+end
+
+"""
+    Routing.empty!()
+"""
+function empty!()
+    context[:pipe] = nothing
+    context[:routing_tables] = Vector{Any}()
+    Base.empty!(routing_pipelines)
 end
 
 end # module Bukdu.Routing

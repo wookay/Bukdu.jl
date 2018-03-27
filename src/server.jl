@@ -4,6 +4,10 @@
 import Sockets: @ip_str
 import .Routing
 
+const env = Dict{Symbol, Any}(
+    :server => nothing,
+)
+
 function start(port; host=ip"127.0.0.1")
     server = HTTP.Servers.Server(stdout) do req
         route = Routing.handle(req)

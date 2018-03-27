@@ -5,11 +5,11 @@ import Base: pipeline
 """
     pipeline(block::Function, routers...)
 """
-function pipeline(block::Function, routers...)
-    for router::Symbol in routers
-        pipelines = get(Routing.router_pipelines, router, [])
+function pipeline(block::Function, pipes...)
+    for pipe::Symbol in pipes
+        pipelines = get(Routing.routing_pipelines, pipe, [])
         push!(pipelines, block)
-        Routing.router_pipelines[router] = pipelines
+        Routing.routing_pipelines[pipe] = pipelines
     end
 end
 

@@ -1,4 +1,4 @@
-using Bukdu # ApplicationController Conn JavaScript Plug.Static Router render routes get plug
+using Bukdu # ApplicationController Conn JavaScript Plug.Static Router Utils CLI render routes get plug
 
 #=
 using Charlotte # @code_wasm
@@ -89,16 +89,12 @@ document.addEventListener('DOMContentLoaded', function () {
 """)
 end
 
-import InteractiveUtils # InteractiveUtils.versioninfo
+using InteractiveUtils # versioninfo
 function get_banner_versioninfo()
-    oldout = stdout
-    rdout, wrout = redirect_stdout()
-    out = @async read(rdout, String)
-    Base.banner() #
-    InteractiveUtils.versioninfo() #
-    redirect_stdout(oldout)
-    close(wrout)
-    rstrip(fetch(out))
+    Utils.read_stdout() do
+        Base.banner()
+        versioninfo()
+    end
 end
 
 function index(::WasmController)
@@ -145,7 +141,8 @@ end
 # Bukdu.start(parse(Int,ENV["PORT"]); host=ip"0.0.0.0")
 Bukdu.start(8080)
 
-(Router)(get, "/")
+Router.request(get, "/") #
+CLI.routes() #
 
 Base.JLOptions().isinteractive==0 && wait()
 

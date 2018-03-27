@@ -4,3 +4,7 @@
 ApplicationController
 Conn
 ```
+
+```@docs
+Assoc
+```

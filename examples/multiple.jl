@@ -109,7 +109,8 @@ end
 
 Bukdu.start(8080)
 
-(Router)(get, "/")
+Router.request(get, "/") #
+CLI.routes() #
 
 Base.JLOptions().isinteractive==0 && wait()
 

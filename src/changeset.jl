@@ -2,6 +2,9 @@
 
 export Changeset
 
+"""
+    Changeset
+"""
 struct Changeset
     model::Type
     changes::NT where {NT<:NamedTuple}

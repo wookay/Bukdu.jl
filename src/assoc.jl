@@ -2,6 +2,9 @@
 
 export Assoc
 
+"""
+    Assoc
+"""
 struct Assoc
     __bukdu_assoc::Vector{Pair{String,String}}
 end

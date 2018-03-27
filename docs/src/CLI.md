@@ -1,0 +1,5 @@
+# CLI
+
+```@docs
+CLI.routes()
+```

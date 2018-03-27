@@ -1,30 +1,37 @@
 # module Bukdu
 
-export Router, routes
+export routes
 
 export get, post, delete, patch, put
 import Base: get
 
-
-const env = Dict{Symbol, Any}(
-    :server => nothing,
-)
-
 """
-    Router
+    get(url::String, C::Type{<:ApplicationController}, action)
 """
-struct Router
+function get
 end
 
+"""
+    post(url::String, C::Type{<:ApplicationController}, action)
+"""
 function post
 end
 
+"""
+    delete(url::String, C::Type{<:ApplicationController}, action)
+"""
 function delete
 end
 
+"""
+    patch(url::String, C::Type{<:ApplicationController}, action)
+"""
 function patch
 end
 
+"""
+    put(url::String, C::Type{<:ApplicationController}, action)
+"""
 function put
 end
 
@@ -108,8 +115,8 @@ function request_handler(route::Routing.Route, ureq::Union{DirectRequest,HTTP.Me
     C === Routing.MissingController && (ureq.response.status = 404)
     action = route.action
     Runtime.catch_request(action, C, ureq) #
-    #catch_internal_error(ureq) do
-    begin
+    catch_internal_error(ureq) do
+    # begin
         req = ureq isa HTTP.Messages.Request ? ureq : ureq.req
         query_params::Vector{Pair{String,String}} = collect(HTTP.queryparams(HTTP.URI(req.target)))
         body_params = FormData.form_data_body_params(req)
@@ -150,21 +157,12 @@ function routes(block::Function)
 end
 
 """
-    routes(block::Function, router::Symbol)
+    routes(block::Function, pipe::Symbol)
 """
-function routes(block::Function, router::Symbol)
-    Routing.context[:router] = router
+function routes(block::Function, pipe::Symbol)
+    Routing.context[:pipe] = pipe
     block()
-    Routing.context[:router] = nothing
-end
-
-function (::Type{Router})(verb, path::String)
-    method = Naming.verb_name(verb)
-    req = HTTP.Messages.Request(method, path)
-    route = Routing.handle(req)
-    dreq = DirectRequest(req, req.method, req.target, DirectResponse(200, nothing))
-    response = request_handler(route, dreq)
-    response.body
+    Routing.context[:pipe] = nothing
 end
 
 # module Bukdu

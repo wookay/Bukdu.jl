@@ -2,7 +2,7 @@ module Form # Bukdu.HTML5
 
 export change, form_for, text_input, submit
 
-import ...Bukdu: ApplicationController, Assoc, Changeset, Routing, Naming, post
+import ...Bukdu: ApplicationController, Assoc, Changeset, Router, Naming, post
 import Documenter.Utilities.DOM: @tags
 
 """
@@ -69,8 +69,8 @@ end
     form_for(f, changeset::Changeset, controller_action::Tuple; method=post, kwargs...)
 """
 function form_for(f, changeset::Changeset, controller_action::Tuple; method=post, kwargs...)
-    (controller, action) = controller_action
-    form_action = Routing.route(method, controller, action)
+    (C, action) = controller_action
+    form_action = Router.Helpers.url_path(method, C, action)
     form_for(f, changeset, form_action; method=method, kwargs...)
 end
 

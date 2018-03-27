@@ -1,5 +1,5 @@
 module HTML5 # Bukdu
 
-include("html5/form.jl")
+include("HTML5/Form.jl")
 
 end # module Bukdu.HTML5

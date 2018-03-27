@@ -1,4 +1,4 @@
-using Bukdu # ApplicationController Conn HTML Router render routes
+using Bukdu # ApplicationController Conn HTML Router CLI render routes get post
 using Bukdu.HTML5.Form # change form_for text_input submit
 import Documenter.Utilities.DOM: @tags
 
@@ -73,7 +73,8 @@ end
 
 Bukdu.start(8080)
 
-(Router)(get, "/")
+Router.request(get, "/") #
+CLI.routes() #
 
 Base.JLOptions().isinteractive==0 && wait()
 
