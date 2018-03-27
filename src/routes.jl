@@ -37,8 +37,8 @@ end
 
 const routing_verbs = [:get, :post, :delete, :patch, :put]
 
-const action_rpad      = 13
 const controller_rpad  = 20
+const action_rpad      = 16
 const target_path_rpad = 26
 
 import Unicode # Unicode.graphemes
@@ -68,8 +68,10 @@ function info_request(action, C::Type{<:ApplicationController}, req)
     iob = IOContext(buf, logger.stream)
     printstyled(iob, "INFO:  ", color=:cyan)
     printstyled(iob, rpad(req.method, 6); req_method_color(req.method)...)
-    printstyled(iob, string(' ', rpad(nameof(action), action_rpad),
-                            rpad(nameof(C), controller_rpad)))
+    printstyled(iob, string(' ', 
+                            rpad(nameof(C), controller_rpad),
+                            rpad(nameof(action), action_rpad)
+    ))
     printstyled(iob, req.response.status, color= 200 == req.response.status ? :normal : :red)
     printstyled(iob, ' ', _unescape_req_target(req))
     println(iob)
