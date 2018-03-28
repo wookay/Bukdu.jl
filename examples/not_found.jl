@@ -12,7 +12,7 @@ if PROGRAM_FILE == basename(@__FILE__)
 Bukdu.start(8080)
 
 Router.request(get, "/") #
-CLI.routes() #
+# CLI.routes()
 
 Base.JLOptions().isinteractive==0 && wait()
 

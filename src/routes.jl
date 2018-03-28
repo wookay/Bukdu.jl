@@ -39,17 +39,46 @@ const routing_verbs = [:get, :post, :delete, :patch, :put]
 
 const controller_rpad  = 20
 const action_rpad      = 16
-const target_path_rpad = 26
+const target_path_rpad = 28
 
-import Unicode # Unicode.graphemes
+function _regularize_text(str::String, padding::Int)::String
+    s = escape_string(str)
+    if textwidth(s) < padding
+        padded_str = rpad(s, padding)
+        if textwidth(padded_str) > padding
+        else
+            return s
+        end
+    end
+    n = 0
+    a = []
+    for (idx, x) in enumerate(s)
+        n += textwidth(x)
+        if n > padding - 2
+            break
+        end
+        push!(a, x)
+    end
+    newstr = join(a)
+    newpad = padding - textwidth(newstr)
+    if newpad >= 2
+        news = string(newstr, "..")
+    elseif newpad == 1
+        news = string(newstr, ".")
+    else
+        news = newstr
+    end
+    npad = padding - textwidth(news)
+    rstrip(string(news, npad > 0 ? join(fill(' ', npad)) : ""))
+end
+
 function _unescape_req_target(req)
-    s = req.target
+    str = req.target
     try
-        s = HTTP.URIs.unescapeuri(req.target)
+        str = HTTP.URIs.unescapeuri(req.target)
     catch
     end
-    a = Unicode.graphemes(s)
-    ifelse(length(a) > target_path_rpad, join(a), s)
+    _regularize_text(str, target_path_rpad)
 end
 
 function req_method_color(method::String)
