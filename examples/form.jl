@@ -1,5 +1,8 @@
 using Bukdu # ApplicationController Conn HTML Router CLI render routes get post
-using Bukdu.HTML5.Form # change form_for text_input submit
+using Bukdu.HTML5.Form # change
+                       # form_for label_for
+                       # textarea text_input radio_button checkbox
+                       # submit
 import Documenter.Utilities.DOM: @tags
 
 struct FormController <: ApplicationController
@@ -23,23 +26,34 @@ $body
 """
 end
 
-global changeset = Changeset(User, (name="",))
+global changeset = Changeset(User, (name="", famous=false, season="summer", intro=""))
 
 function index(c::FormController)
     global changeset
     @tags div
     form1 = form_for(changeset, (FormController, post_result), method=post, multipart=true) do f
         div(
-            text_input(f, :name, placeholder="Name"),
-            submit("Submit"),
-            " multipart/form-data",
+            div.([
+                text_input(f, :name, placeholder="Name"),
+                label_for(checkbox(f, :famous), "Famous"),
+                submit("Submit"),
+                " multipart/form-data",
+            ])
         )
     end
     form2 = form_for(changeset, (FormController, post_result), method=post, multipart=false) do f
         div(
-            text_input(f, :name, placeholder="Name"),
-            submit("Submit"),
-            " application/x-www-form-urlencoded",
+            div.([
+                textarea(f, :intro, placeholder="Intro", rows="5", cols="50"),
+                [
+                    label_for(radio_button(f, :season, "winter"), "Winter"),
+                    label_for(radio_button(f, :season, "spring"), "Spring"),
+                    label_for(radio_button(f, :season, "summer"), "Summer"),
+                    label_for(radio_button(f, :season, "autumn"), "Autumn"),
+                ],
+                submit("Submit"),
+                " application/x-www-form-urlencoded",
+            ])
         )
     end
     body = div(form1, form2)
@@ -51,7 +65,7 @@ function post_result(c::FormController)
     @tags div a strong h3 li
     result = change(changeset, c.params)
     if !isempty(result.changes)
-        changeset = result
+        changeset.changes = merge(changeset.changes, result.changes)
     end
     body = div(
         h3( a[:href => "/"]("back") ),
