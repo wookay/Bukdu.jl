@@ -62,14 +62,16 @@ end
 
 function post_result(c::FormController)
     global changeset
-    @tags div a strong h3 li
+    @tags div a h3 li p
     result = change(changeset, c.params)
     if !isempty(result.changes)
         changeset.changes = merge(changeset.changes, result.changes)
     end
     body = div(
         h3( a[:href => "/"]("back") ),
-        li( isempty(result.changes) ? strong("nothing's changed") : "changed" ),
+        p(isempty(result.changes) ?
+            "nothing's changed" :
+            "✅ changed"),
         li( "result: ", string(result) ),
         li( "global changeset: ", string(changeset) ),
     )
@@ -87,7 +89,7 @@ end
 
 Bukdu.start(8080)
 
-Router.request(get, "/") #
+Router.call(get, "/") #
 # CLI.routes()
 
 Base.JLOptions().isinteractive==0 && wait()

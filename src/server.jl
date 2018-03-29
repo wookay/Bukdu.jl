@@ -1,8 +1,7 @@
 # module Bukdu
 
-# HTTP.Servers HTTP.handle
+import .Deps: HTTP, MbedTLS
 import Sockets: @ip_str
-import .Routing
 
 const env = Dict{Symbol, Any}(
     :server => nothing,
@@ -32,9 +31,8 @@ print_listening_on(host, port) = @info "Listening on: $host:$port"
 
 
 
-# code from HTTP/src/Servers.jl
-import HTTP.Servers: Server, https, RateLimit, ConnectionPool, KILL, nosslconfig, Connection, handle_connection, handle, update!
-import MbedTLS: SSLConfig
+# code from HTTP.jl/src/Servers.jl
+import .HTTP.Servers: Server, https, RateLimit, ConnectionPool, KILL, nosslconfig, Connection, handle_connection, handle, update!
 import Sockets # Sockets.TCPServer
 import Sockets: listen, accept, IPAddr
 import Dates
@@ -61,7 +59,7 @@ function serve(server::Server{T, H}, host, port, verbose) where {T, H}
            tcpisvalid=server.options.ratelimit > 0 ? check_rate_limit :
                                                      (tcp; kw...) -> true,
            ratelimits=Dict{IPAddr, RateLimit}(),
-           ratelimit=server.options.ratelimit) do request::HTTP.Messages.Request
+           ratelimit=server.options.ratelimit) do request::Deps.Request
 
         handle(server.handler, request)
     end
@@ -74,14 +72,14 @@ function listen(f::Function,
                 host::String="127.0.0.1", port::Int=8081;
                 ssl::Bool=false,
                 require_ssl_verification::Bool=true,
-                sslconfig::SSLConfig=nosslconfig,
+                sslconfig::MbedTLS.SSLConfig=nosslconfig,
                 pipeline_limit::Int=ConnectionPool.default_pipeline_limit,
                 tcpisvalid::Function=(tcp; kw...)->true,
                 tcpref::Ref{Sockets.TCPServer}=Ref{Sockets.TCPServer}(),
                 kw...)
 
     if sslconfig === nosslconfig
-        sslconfig = SSLConfig(require_ssl_verification)
+        sslconfig = MbedTLS.SSLConfig(require_ssl_verification)
     end
 
     print_listening_on(host, port) ##

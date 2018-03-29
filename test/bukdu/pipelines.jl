@@ -1,28 +1,28 @@
 module test_bukdu_pipelines
 
 using Test # @test
-using Bukdu # Plug.AbstractPlug ApplicationController Conn Routing pipeline plug routes get
+using Bukdu # Plug.AbstractPlug Conn Routing pipeline plug routes get
 
 struct CSRF <: Plug.AbstractPlug
 end
 
-function plug(::Type{CSRF}, c::C) where {C<:ApplicationController}
-    c.params[:csrf] = "1"
+function plug(::Type{CSRF}, conn::Conn)
+    conn.params[:csrf] = "1"
 end
 
 struct Auth <: Plug.AbstractPlug
 end
 
-function plug(::Type{Auth}, c::C) where {C<:ApplicationController}
-    c.params[:auth] = "1"
+function plug(::Type{Auth}, conn::Conn)
+    conn.params[:auth] = "1"
 end
 
-pipeline(:web, :auth) do c
-    plug(CSRF, c)
+pipeline(:web, :auth) do conn::Conn
+    plug(CSRF, conn)
 end
 
-pipeline(:auth) do c
-    plug(Auth, c)
+pipeline(:auth) do conn::Conn
+    plug(Auth, conn)
 end
 
 struct W <: ApplicationController; conn::Conn end
@@ -31,15 +31,15 @@ index(w::W) = keys(w.params)
 index(a::A) = keys(a.params)
 
 routes(:web) do
-    get("/w", W, index)    
+    get("/w", W, index)
 end
 
 routes(:auth) do
-    get("/a", A, index)    
+    get("/a", A, index)
 end
 
-@test Router.request(get, "/a") == ["csrf", "auth"]
-@test Router.request(get, "/w") == ["csrf"]
+@test Router.call(get, "/a") == ["csrf", "auth"]
+@test Router.call(get, "/w") == ["csrf"]
 
 @test Utils.read_stdout(CLI.routes) == """
 GET  /w  W  index  :web

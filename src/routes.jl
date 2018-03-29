@@ -4,6 +4,105 @@ export routes
 
 export get, post, delete, patch, put
 import Base: get
+import .System: InternalError, HaltedError, SystemController, internal_error, halted_error, info_response
+
+struct DirectRequest
+    _req
+end
+
+const routing_verbs = [:get, :post, :delete, :patch, :put]
+
+function fetch_query_params(req::Deps.Request)::Vector{Pair{String,String}}
+    collect(Deps.HTTP.queryparams(Deps.HTTP.URIs.URI(req.target)))
+end
+
+function _build_conn_and_pipelines(route::Route, req::Deps.Request)
+    # cookies #
+    body_params = Plug.Parsers.fetch_body_params(req)
+    query_params = fetch_query_params(req)
+    path_params = route.path_params
+    params = merge(body_params, query_params, path_params)
+    halted = false
+    conn = Conn(req, Assoc.((body_params, query_params, path_params, params))..., halted)
+    for pipefunc in route.pipelines
+        pipefunc(conn)
+        halted = conn.halted
+        halted && break
+    end
+    if halted
+        err = HaltedError("halted on pipelines")
+        rou = Route(SystemController, halted_error, route.path_params, route.pipelines)
+        obj = halted_error(SystemController(conn, err))
+        (rou, obj)
+    else
+        controller = route.C(conn)
+        obj = route.action(controller)
+        (route, obj)
+    end
+end
+
+function _catch_internal_error(block, route, req)
+    try
+        block(route, req)
+    catch ex
+        stackframes = stacktrace(catch_backtrace())
+        err = InternalError(ex, stackframes)
+        conn = Conn(req)
+        rou = Route(SystemController, internal_error, route.path_params, route.pipelines)
+        obj = internal_error(SystemController(conn, err))
+        (rou, obj)
+    end
+end
+
+function _proc_request(route::Route, req::Deps.Request)
+    Runtime.catch_request(route, req)           # Runtime
+    req.response.status = 200
+    _catch_internal_error(route, req) do route, req
+    # begin #
+        _build_conn_and_pipelines(route, req)
+    end
+end
+
+function _proc_response(route::Route, req::Deps.Request)
+    info_response(route, req, req.response)
+    Runtime.catch_response(route, req.response) # Runtime
+end
+
+function request_handler(route::Route, dreq::DirectRequest)
+    (rou, obj) = _proc_request(route, dreq._req)
+    _proc_response(rou, dreq._req)
+    (body=obj,)
+end
+
+function request_handler(route::Route, req::Deps.Request)
+    (rou, obj) = _proc_request(route, req)
+    if obj isa Render
+        data = obj.body
+        push!(req.response.headers, Pair("Content-Type", obj.content_type))
+    else
+        data = unsafe_wrap(Vector{UInt8}, string(obj))
+    end
+    req.response.body = data
+    _proc_response(rou, req)
+    req.response
+end
+
+"""
+    routes(block::Function)
+"""
+function routes(block::Function)
+    block()
+end
+
+"""
+    routes(block::Function, pipe::Symbol)
+"""
+function routes(block::Function, pipe::Symbol)
+    Routing.context[:pipe] = pipe
+    block()
+    Routing.context[:pipe] = nothing
+end
+
 
 """
     get(url::String, C::Type{<:ApplicationController}, action)
@@ -35,165 +134,8 @@ end
 function put
 end
 
-const routing_verbs = [:get, :post, :delete, :patch, :put]
-
-const controller_rpad  = 20
-const action_rpad      = 16
-const target_path_rpad = 28
-
-function _regularize_text(str::String, padding::Int)::String
-    s = escape_string(str)
-    if textwidth(s) < padding
-        padded_str = rpad(s, padding)
-        if textwidth(padded_str) > padding
-        else
-            return s
-        end
-    end
-    n = 0
-    a = []
-    for (idx, x) in enumerate(s)
-        n += textwidth(x)
-        if n > padding - 2
-            break
-        end
-        push!(a, x)
-    end
-    newstr = join(a)
-    newpad = padding - textwidth(newstr)
-    if newpad >= 2
-        news = string(newstr, "..")
-    elseif newpad == 1
-        news = string(newstr, ".")
-    else
-        news = newstr
-    end
-    npad = padding - textwidth(news)
-    rstrip(string(news, npad > 0 ? join(fill(' ', npad)) : ""))
-end
-
-function _unescape_req_target(req)
-    str = req.target
-    try
-        str = HTTP.URIs.unescapeuri(req.target)
-    catch
-    end
-    _regularize_text(str, target_path_rpad)
-end
-
-function req_method_color(method::String)
-    bold = false
-    if "POST" == method
-        color = :yellow
-    else
-        color = :cyan
-    end
-    (bold=bold, color=color)
-end
-
-function info_request(action, C::Type{<:ApplicationController}, req)
-    logger = Base.global_logger()
-    buf = IOBuffer()
-    iob = IOContext(buf, logger.stream)
-    printstyled(iob, "INFO:  ", color=:cyan)
-    printstyled(iob, rpad(req.method, 6); req_method_color(req.method)...)
-    printstyled(iob, string(' ', 
-                            rpad(nameof(C), controller_rpad),
-                            rpad(nameof(action), action_rpad)
-    ))
-    printstyled(iob, req.response.status, color= 200 == req.response.status ? :normal : :red)
-    printstyled(iob, ' ', _unescape_req_target(req))
-    println(iob)
-    print(logger.stream, String(take!(buf)))
-    flush(logger.stream)
-end
-
-struct InternalError <: Exception
-    msg::String
-end
-
-mutable struct DirectResponse
-    status
-    body
-end
-
-mutable struct DirectRequest
-    req
-    method
-    target
-    response::DirectResponse
-end
-
-function catch_internal_error(block, ureq)
-    try
-        block()
-    catch ex
-        err = InternalError(string(ex))
-        ureq.response.status = 500
-        msg = string(InternalError, ' ', err.msg, '\n', stacktrace(catch_backtrace()))
-        if ureq isa DirectRequest
-            ureq.response.body = msg
-        else
-            data = unsafe_wrap(Vector{UInt8}, msg)
-            push!(ureq.response.headers, Pair("Content-Type", "text/html; charset=utf-8"))
-            ureq.response.body = data
-        end
-    end
-end
-
-function request_handler(route::Routing.Route, ureq::Union{DirectRequest,HTTP.Messages.Request})
-    C = route.C
-    C === Routing.MissingController && (ureq.response.status = 404)
-    action = route.action
-    Runtime.catch_request(action, C, ureq) #
-    catch_internal_error(ureq) do
-    # begin
-        req = ureq isa HTTP.Messages.Request ? ureq : ureq.req
-        query_params::Vector{Pair{String,String}} = collect(HTTP.queryparams(HTTP.URI(req.target)))
-        body_params = FormData.form_data_body_params(req)
-        path_params = route.path_params
-        params = merge(query_params, body_params, path_params)
-        conn = Conn(req, Assoc.((params, query_params, body_params, path_params))...)
-        c = C(conn)
-        for pip in route.pipelines
-            pip(c)
-        end
-        obj = action(c)
-        if ureq isa DirectRequest
-            ureq.response.body = obj
-        else
-            if obj isa Render
-                data = obj.body
-                push!(ureq.response.headers, Pair("Content-Type", obj.content_type))
-            else
-                data = unsafe_wrap(Vector{UInt8}, string(obj))
-            end
-            ureq.response.body = data
-        end
-    end
-    info_request(action, C, ureq)
-    Runtime.catch_response(action, C, ureq.response) #
-    ureq.response
-end
-
 for verb in routing_verbs
     @eval ($verb)(url::String, C::Type{<:ApplicationController}, action) = Routing.add_route($verb, url, C, action)
-end
-
-"""
-    routes(block::Function)
-"""
-function routes(block::Function)
-    block()
-end
-
-"""
-    routes(block::Function, pipe::Symbol)
-"""
-function routes(block::Function, pipe::Symbol)
-    Routing.context[:pipe] = pipe
-    block()
-    Routing.context[:pipe] = nothing
 end
 
 # module Bukdu

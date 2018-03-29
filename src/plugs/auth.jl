@@ -3,9 +3,11 @@
 struct Auth <: AbstractPlug
 end
 
-function plug(::Type{Auth}, c::C) where {C<:ApplicationController}
+function plug(::Type{Auth}, conn::Conn)
     # TODO
-    @info plug Auth C
+    @error Auth @__FILE__
+    conn.request.response.status = 401 # 401 Unauthorized
+    conn.halted = true
 end
 
 # module Bukdu.Plug

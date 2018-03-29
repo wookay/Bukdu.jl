@@ -1,5 +1,7 @@
 module Actions # module Bukdu
 
+import InteractiveUtils: edit
+
 import ..delete
 
 function index

@@ -1,7 +1,6 @@
 module CLI # Bukdu
 
 import ..Bukdu: Routing, Naming
-import ..Bukdu.Routing: MissingController, not_found
 
 """
     CLI.routes()

@@ -2,6 +2,8 @@
 
 module Runtime
 
+import ..Routing
+
 function catch_request
 end
 
@@ -12,11 +14,11 @@ end # module Bukdu.Runtime
 
 
 
-function Bukdu.Runtime.catch_request(action, C::Type{<:ApplicationController}, req)
+function Bukdu.Runtime.catch_request(route::Route, req)
 #    @debug "REQ " req.headers
 end
 
-function Bukdu.Runtime.catch_response(action, C::Type{<:ApplicationController}, resp)
+function Bukdu.Runtime.catch_response(route::Route, resp)
 #    @debug "RESP" resp.headers String(resp.body)
 end
 

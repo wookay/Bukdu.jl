@@ -1,8 +1,6 @@
-module FormData # Bukdu
+module Parsers # Bukdu.Plug
 
-import ..Bukdu: HTTP
-import HTTP.Messages: hasheader, header
-import URIParser: unescape_form
+import ...Deps: HTTP, URIParser, Request
 
 # application/x-www-form-urlencoded
 
@@ -17,8 +15,8 @@ function scan(s::UrlEncodedScanner)::Vector{Pair{String,String}}
     isempty(query) && return assoc
     for field in split(query, '&'; keep=false)
         (k, v) = split(field, '=')
-        key = unescape_form(k)
-        value = unescape_form(v)
+        key = URIParser.unescape_form(k)
+        value = URIParser.unescape_form(v)
         push!(ps, Pair(key, value))
     end
     ps
@@ -110,9 +108,9 @@ function scan(s::FormScanner)::Vector{Pair{String,String}}
 end
 
 
-function form_data_body_params(req::HTTP.Messages.Request)::Vector{Pair{String,String}}
-    if hasheader(req.headers, "Content-Type")
-        content_type = header(req.headers, "Content-Type")
+function fetch_body_params(req::Request)::Vector{Pair{String,String}}
+    if HTTP.Messages.hasheader(req.headers, "Content-Type")
+        content_type = HTTP.Messages.header(req.headers, "Content-Type")
         if "application/x-www-form-urlencoded" == content_type
             scanner = UrlEncodedScanner(req.body)
             return scan(scanner)
@@ -125,4 +123,4 @@ function form_data_body_params(req::HTTP.Messages.Request)::Vector{Pair{String,S
     Vector{Pair{String,String}}()
 end
 
-end # module Bukdu.FormData
+end # module Bukdu.Plug.Parsers

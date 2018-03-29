@@ -1,19 +1,22 @@
 using Bukdu
 
-struct WelcomeController <: ApplicationController
+struct PlugController <: ApplicationController
     conn::Conn
 end
 
-function index(c::WelcomeController)
-    render(JSON, "Hello World")
+function index(::PlugController)
+    "ok"
 end
-
 
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-routes() do
-    get("/", WelcomeController, index)
+pipeline(:auth) do conn::Conn
+    # plug(Plug.Auth, conn)
+end
+
+routes(:auth) do
+    get("/", PlugController, index)
 end
 
 Bukdu.start(8080)

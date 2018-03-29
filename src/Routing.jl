@@ -1,7 +1,6 @@
 module Routing # Bukdu
 
-import ..Bukdu: ApplicationController, MissingController, Conn, Naming
-import ..Bukdu: HTTP
+import ..Bukdu: ApplicationController, Naming, System, Deps, Route
 
 context = Dict{Symbol, Any}(
     :pipe => nothing,
@@ -9,35 +8,20 @@ context = Dict{Symbol, Any}(
 )
 routing_pipelines = Dict{Symbol, Vector{Function}}()
 
-struct Route
-    C::Type{<:ApplicationController}
-    action
-    path_params::Vector{Pair{String,String}}
-    pipelines::Vector{Function}
-end
-
-struct RoutePathError <: Exception
-    msg
-end
-
-function handle(req::HTTP.Messages.Request)
-    uri = HTTP.URI(req.target)
+function handle(req::Deps.Request)
+    uri = Deps.HTTP.URIs.URI(req.target)
     segments = split(uri.path, '/'; keep=false)
     vals = [Val(Symbol(seg)) for seg in segments]
     route(Val(Symbol(req.method)), vals...)
 end
 
-function not_found(c::MissingController)
-    "not found"
+route(args...) = Route(System.MissingController, System.not_found, Vector{Pair{String,String}}(), Vector{Function}())
+
+function route_path(args...)::Nothing
+    nothing
 end
 
-route(args...) = Route(MissingController, not_found, Vector{Pair{String,String}}(), Vector{Function}())
-
-function route_path(args...)
-    throw(RoutePathError("path not found"))
-end
-
-# idea from HTTP/src/Handlers.jl
+# idea from HTTP.jl/src/Handlers.jl
 function penetrate_segments(segments)
     vals = Expr[]
     path_params = Expr[]

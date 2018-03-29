@@ -1,16 +1,15 @@
 module Router # Bukdu
 
-import ..Bukdu: Naming, Routing, DirectRequest, DirectResponse, request_handler
-import ..Bukdu: HTTP
+import ..Bukdu: Naming, Deps, Routing, DirectRequest, request_handler
 
 """
-    Router.request(verb, path::String)
+    Router.call(verb, path::String)
 """
-function request(verb, path::String)
+function call(verb, path::String)
     method = Naming.verb_name(verb)
-    req = HTTP.Messages.Request(method, path)
+    req = Deps.Request(method, path)
     route = Routing.handle(req)
-    dreq = DirectRequest(req, req.method, req.target, DirectResponse(200, nothing))
+    dreq = DirectRequest(req)
     response = request_handler(route, dreq)
     response.body
 end
@@ -20,8 +19,17 @@ module Helpers # Bukdu.Router
 
 import ...Bukdu: ApplicationController, Routing
 
+struct URLPathError <: Exception
+    msg
+end
+
 function url_path(verb, C::Type{<:ApplicationController}, action)
-    Routing.route_path(verb, C, action)
+    path = Routing.route_path(verb, C, action)
+    if path isa Nothing
+        URLPathError(string("failed to get the path: ", join([verb, C, action], ' ')))
+    else
+        path
+    end
 end
 
 end # module Bukdu.Router.Helpers

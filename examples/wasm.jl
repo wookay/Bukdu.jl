@@ -141,7 +141,7 @@ end
 # Bukdu.start(parse(Int,ENV["PORT"]); host=ip"0.0.0.0")
 Bukdu.start(8080)
 
-Router.request(get, "/") #
+Router.call(get, "/") #
 # CLI.routes()
 
 Base.JLOptions().isinteractive==0 && wait()

@@ -1,6 +1,5 @@
 # module Bukdu
 
-# HTTP.queryparams HTTP.URI
 function Base.getproperty(c::C, prop::Symbol) where {C <: ApplicationController}
     if prop in (:params, :query_params, :path_params, :body_params)
         getfield(c.conn, prop)

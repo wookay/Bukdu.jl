@@ -15,7 +15,7 @@ resources
 ```
 
 ```@docs
-Router.request
+Router.call
 ```
 
 ```@docs
