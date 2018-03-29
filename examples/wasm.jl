@@ -1,4 +1,15 @@
+if PROGRAM_FILE == basename(@__FILE__)
+    println("please  julia -i sevenstars.jl")
+    exit()
+end
+
+module WASM
+
+export WasmController
+
 using Bukdu # ApplicationController Conn JavaScript Plug.Static Router Utils CLI render routes get plug
+import Bukdu.Actions: index
+import ..Layout: layout
 
 #=
 using Charlotte # @code_wasm
@@ -97,55 +108,31 @@ function get_banner_versioninfo()
     end
 end
 
-function index(::WasmController)
-    render(HTML, """
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>Bukdu sevenstars</title>
+end # module WASM
+
+
+import .Layout: layout
+import .WASM: get_banner_versioninfo
+function WASM.index(::WASM.WasmController)
+    title = " - web assembly demo"
+    script = """
   <script src="/javascripts/libwabt.js"></script>
   <script src="/hello.js"></script>
+"""
+    style = """
   <style>
     div#console {
       background-color: lightgoldenrodyellow;
       border-style: ridge;
     }
   </style>
-</head>
-<body>
-  <h3>Bukdu sevenstars</h3>
-  <ul>
-    <li>Full code of this page => <a href="https://github.com/wookay/Bukdu.jl/blob/sevenstars/examples/wasm.jl">https://github.com/wookay/Bukdu.jl/blob/sevenstars/examples/wasm.jl</a></li>
-    <li>Heroku example => <a href="https://github.com/wookay/heroku-sevenstars">https://github.com/wookay/heroku-sevenstars</a></li>
-  </ul>
+"""
+    body = """
+  <h3><a href="/">Back</a></h3>
+
+  <h3>WebAssembly Demo</h3>
   <pre>$(get_banner_versioninfo())</pre>
   <div id="console" />
-</body>
-</html>
-""")
+"""
+    layout(title, script, style, body)
 end
-
-
-
-if PROGRAM_FILE == basename(@__FILE__)
-
-routes() do
-    get("/", WasmController, index)
-    get("/hello.js", WasmController, hello_js)
-    get("/hello.wast", WasmController, hello_wast)
-    plug(Plug.Static, at="/", from=normpath(@__DIR__, "public"))
-end
-
-# on Heroku
-# import Sockets: @ip_str
-# Bukdu.start(parse(Int,ENV["PORT"]); host=ip"0.0.0.0")
-Bukdu.start(8080)
-
-Router.call(get, "/") #
-# CLI.routes()
-
-Base.JLOptions().isinteractive==0 && wait()
-
-# Bukdu.stop()
-
-end # if

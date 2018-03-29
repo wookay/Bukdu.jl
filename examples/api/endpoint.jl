@@ -37,6 +37,7 @@ function show(c::CustomerController) # GET
 end
 
 function new(c::CustomerController) # GET
+    "new"
 end
 
 function edit(c::CustomerController) # GET
@@ -44,6 +45,7 @@ function edit(c::CustomerController) # GET
 end
 
 function create(c::CustomerController) # POST
+    "create"
 end
 
 function delete(c::CustomerController) # DELETE

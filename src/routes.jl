@@ -4,7 +4,7 @@ export routes
 
 export get, post, delete, patch, put
 import Base: get
-import .System: InternalError, HaltedError, SystemController, internal_error, halted_error, info_response
+import .System: HaltedError, NotApplicableError, InternalError, SystemController, internal_error, halted_error, not_applicable, info_response
 
 struct DirectRequest
     _req
@@ -36,8 +36,15 @@ function _build_conn_and_pipelines(route::Route, req::Deps.Request)
         (rou, obj)
     else
         controller = route.C(conn)
-        obj = route.action(controller)
-        (route, obj)
+        if applicable(route.action, controller)
+            obj = route.action(controller)
+            (route, obj)
+        else
+            err = NotApplicableError(string(route.action, "(::", route.C, ")"))
+            rou = Route(SystemController, not_applicable, route.path_params, route.pipelines)
+            obj = not_applicable(SystemController(conn, err))
+            (rou, obj)
+        end
     end
 end
 

@@ -7,6 +7,10 @@ struct HaltedError <: Exception
     msg
 end
 
+struct NotApplicableError <: Exception
+    msg
+end
+
 struct InternalError <: Exception
     exception
     stackframes
@@ -21,16 +25,6 @@ struct MissingController <: ApplicationController
     conn::Conn
 end
 
-function internal_error(c::SystemController)
-    @tags h3 p pre
-    c.conn.request.response.status = 500 # 500 Internal Server Error
-    render(HTML, string(
-        h3(string(InternalError)),
-        p(string(c.err.exception)),
-        (p ∘ string).(c.err.stackframes)...
-    ))
-end
-
 function halted_error(c::SystemController)
     @tags h3 p
     # set the status code when halted on Plug
@@ -39,6 +33,26 @@ function halted_error(c::SystemController)
         p(string(c.err.msg)),
     ))
 end
+
+function not_applicable(c::SystemController)
+    @tags h3 p
+    c.conn.request.response.status = 500 # 500 Internal Server Error
+    render(HTML, string(
+        h3(string(NotApplicableError)),
+        p(string(c.err.msg)),
+    ))
+end
+
+function internal_error(c::SystemController)
+    @tags h3 p
+    c.conn.request.response.status = 500 # 500 Internal Server Error
+    render(HTML, string(
+        h3(string(InternalError)),
+        p(string(c.err.exception)),
+        (p ∘ string).(c.err.stackframes)...
+    ))
+end
+
 
 function not_found(c::MissingController)
     @tags h3

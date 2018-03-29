@@ -16,7 +16,9 @@ struct WelcomeController <: ApplicationController
     conn::Conn
 end
 
-index(::WelcomeController) = "hello world"
+function index(c::WelcomeController)
+    render(JSON, "Hello World")
+end
 
 routes() do
     get("/", WelcomeController, index)
@@ -24,6 +26,13 @@ end
 
 Bukdu.start(8080)
 ```
+
+
+### REST API Demo
+
+Visit [Bukdu sevenstars on Heroku](https://sevenstars.herokuapp.com)
+and check its [source code](https://github.com/wookay/heroku-sevenstars).
+(A sleeping heroku page, it will become active again after a short delay.)
 
 
 ### Requirements
@@ -35,8 +44,6 @@ using Pkg
 Pkg.clone("https://github.com/wookay/Bukdu.jl.git")
 Pkg.checkout("Bukdu", "sevenstars")
 ```
-
-There's [heroku demo](https://sevenstars.herokuapp.com). see [the code](https://github.com/wookay/heroku-sevenstars).
 
 
 
