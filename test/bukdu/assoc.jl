@@ -11,5 +11,7 @@ assoc = Assoc("A" => "B")
 params = Assoc("x" => "2")
 @test get(params, :x, 0) == 2
 @test get(params, :y, 3) == 3
+@test !haskey(params, :a)
+@test params.a == ""
 
 end # module test_bukdu_assoc

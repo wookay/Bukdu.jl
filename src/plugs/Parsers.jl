@@ -1,6 +1,19 @@
 module Parsers # Bukdu.Plug
 
 import ...Deps: HTTP, URIParser, Request
+import .HTTP.Messages: hasheader, header
+
+
+# getindex_header
+
+function getindex_header(headers::Vector{Pair{String,String}}, key::String)::Union{String,Nothing}
+    if hasheader(headers, key)
+        header(headers, key)
+    else
+        nothing
+    end
+end
+
 
 # application/x-www-form-urlencoded
 
@@ -109,8 +122,8 @@ end
 
 
 function fetch_body_params(req::Request)::Vector{Pair{String,String}}
-    if HTTP.Messages.hasheader(req.headers, "Content-Type")
-        content_type = HTTP.Messages.header(req.headers, "Content-Type")
+    if hasheader(req.headers, "Content-Type")
+        content_type = header(req.headers, "Content-Type")
         if "application/x-www-form-urlencoded" == content_type
             scanner = UrlEncodedScanner(req.body)
             return scan(scanner)

@@ -11,7 +11,9 @@ struct WelcomeController <: ApplicationController
     conn::Conn
 end
 
-index(::WelcomeController) = "hello world"
+function index(c::WelcomeController)
+    render(JSON, "Hello World")
+end
 
 routes() do
     get("/", WelcomeController, index)

@@ -67,7 +67,6 @@ using Bukdu
 import Bukdu.Actions: index, show, new, edit, create, delete, update
 
 pipeline(:api) do conn::Conn
-    # plug(Plug.Accepts, conn, ["json"])
 end
 
 routes(:api) do

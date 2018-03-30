@@ -15,7 +15,6 @@ import .WASM: WasmController, hello_js, hello_wast
 using Sockets
 
 pipeline(:api) do conn::Conn
-    # plug(Plug.Accepts, conn, ["json"])
 end
 
 routes(:api) do

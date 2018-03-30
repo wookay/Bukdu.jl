@@ -4,9 +4,15 @@ module Runtime
 
 import ..Routing
 
+"""
+    Bukdu.Runtime.catch_request(route::Route, req)
+"""
 function catch_request
 end
 
+"""
+    Bukdu.Runtime.catch_response(route::Route, resp)
+"""
 function catch_response
 end
 

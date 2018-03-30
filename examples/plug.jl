@@ -11,11 +11,11 @@ end
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-pipeline(:auth) do conn::Conn
-    # plug(Plug.Auth, conn)
+pipeline(:web) do conn::Conn
+    plug(Plug.CSRF.Protection, conn)
 end
 
-routes(:auth) do
+routes(:web) do
     get("/", PlugController, index)
 end
 

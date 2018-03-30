@@ -1,4 +1,10 @@
-using Documenter, Bukdu
+if haskey(ENV, "PRIVATE_DOCUMENTER")
+    include("../../PrivateDocumenter/src/Documenter.jl")
+    using .Documenter
+else
+    using Documenter
+end
+using Bukdu
 using Bukdu.HTML5.Form
 
 makedocs(
@@ -23,6 +29,7 @@ makedocs(
                                          # form_for text_input submit
         "Changeset" => "changeset.md", # Changeset
         "CLI" => "CLI.md", # CLI
+        "Runtime" => "Runtime.md", # Runtime
         "Utils" => "Utils.md", # Utils
     ],
     html_prettyurls = !("local" in ARGS),

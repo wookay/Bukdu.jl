@@ -55,11 +55,11 @@ function Base.empty!(assoc::Assoc)
     empty!(assoc.__bukdu_assoc)
 end
 
-function haskey(assoc::Assoc, key::String)::Bool
+function Base.haskey(assoc::Assoc, key::String)::Bool
     key in keys(assoc)
 end
 
-function haskey(assoc::Assoc, key::Symbol)::Bool
+function Base.haskey(assoc::Assoc, key::Symbol)::Bool
     String(key) in keys(assoc)
 end
 
