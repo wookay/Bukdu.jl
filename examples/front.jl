@@ -24,7 +24,7 @@ import .Layout: layout
 function Front.index(::Front.WelcomeController)
     wasm_path = Router.Helpers.url_path(get, WasmController, index)
     bukdu_git_url = "http://github.com/wookay/Bukdu.jl"
-    
+
     title = ""
     script = ""
     style = ""
