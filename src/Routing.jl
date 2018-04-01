@@ -10,7 +10,7 @@ routing_pipelines = Dict{Symbol, Vector{Function}}()
 
 function handle(req::Deps.Request)
     uri = Deps.HTTP.URIs.URI(req.target)
-    segments = split(uri.path, '/'; keep=false)
+    segments = split(uri.path, '/'; keepempty=false)
     vals = [Val(Symbol(seg)) for seg in segments]
     route(Val(Symbol(req.method)), vals...)
 end
@@ -40,12 +40,17 @@ function penetrate_segments(segments)
     return (vals, path_params)
 end
 
+struct AbstractControllerError <: Exception
+    msg
+end
+
 (::Type{Vector{Pair{String,String}}})(p::Pair{String,String}) = [p]
 
-function add_route(verb, url::String, C::Type{<:ApplicationController}, action)
+function add_route(verb, url::String, C::Type{<:ApplicationController}, action) # throw AbstractControllerError
+    isabstracttype(C) && throw(AbstractControllerError(string("use concrete type")))
     pipe = context[:pipe]
     pipelines = get(routing_pipelines, pipe, [])
-    segments = split(url, '/'; keep=false)
+    segments = split(url, '/'; keepempty=false)
     (vals, path_params) = penetrate_segments(segments) 
     method = Naming.verb_name(verb)
     @eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, Vector{Pair{String,String}}($(path_params...)), $pipelines)

@@ -18,7 +18,7 @@ end
 
 Bukdu.start(8080)
 
-Router.call(get, "/") #
+# Router.call(get, "/") #
 # CLI.routes()
 
 Base.JLOptions().isinteractive==0 && wait()

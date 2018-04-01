@@ -34,6 +34,7 @@ include("Utils.jl")
 
 export CLI
 include("CLI.jl")
+# include("Assembly.jl")
 
 function __init__()
     global_logger(BukduLogger())

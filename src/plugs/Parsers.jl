@@ -26,7 +26,7 @@ function scan(s::UrlEncodedScanner)::Vector{Pair{String,String}}
     query = String(s.data)
     ps = Vector{Pair{String,String}}()
     isempty(query) && return assoc
-    for field in split(query, '&'; keep=false)
+    for field in split(query, '&'; keepempty=false)
         (k, v) = split(field, '=')
         key = URIParser.unescape_form(k)
         value = URIParser.unescape_form(v)

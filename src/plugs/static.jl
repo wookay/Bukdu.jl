@@ -18,15 +18,29 @@ end
 function plug(::Type{Static}; at::String, from::String)
     function readfile(c::StaticController)
         reqpath = c.conn.request.target
-        filepath = normpath(from, reqpath[2:end])
-        s = open(read, filepath)
-        Render("application/octet-stream", s)
+        offset = isdirpath(at) ? 1 : 0
+        targetpath = reqpath[length(at)+offset:end]
+        filepath = joinpath(from, targetpath)
+        (_, fileext) = splitext(filepath)
+        ext = lowercase(fileext)
+        if ext in (".html", ".htm")
+            s = open(read, filepath)
+            Render("text/html; charset=utf-8", s)
+        else
+            # FIXME: stream
+            s = open(read, filepath)
+            if ext in (".wasm",)
+                Render("application/wasm", s)
+            else
+                Render("application/octet-stream", s)
+            end
+        end
     end
     for (root, dirs, files) in walkdir(from)
-        for filename in files
-            filepath = normpath(root, filename)
-            reqpath = normpath(at, filepath[length(from)+2:end])
-            get(reqpath, StaticController, readfile)
+         subpath = root[length(from)+1:end]
+         for filename in files
+             reqpath = normpath(at, subpath, filename)
+             get(reqpath, StaticController, readfile)
         end
     end
 end
