@@ -18,7 +18,7 @@ end
 function plug(::Type{Static}; at::String, from::String)
     function readfile(c::StaticController)
         reqpath = c.conn.request.target
-        offset = isdirpath(at) ? 1 : 0
+        offset = isdirpath(at) ? 1 : 2
         targetpath = reqpath[length(at)+offset:end]
         filepath = joinpath(from, targetpath)
         (_, fileext) = splitext(filepath)
