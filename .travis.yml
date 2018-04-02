@@ -2,8 +2,7 @@
 language: julia
 os:
   - linux
-  # - osx    needs above 0.7.0-DEV.4654
-  #                      0.7.0-DEV.4596
+  - osx
 julia:
   - nightly
 notifications:
