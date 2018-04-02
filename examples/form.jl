@@ -34,7 +34,7 @@ function index(c::FormController)
     form1 = form_for(changeset, (FormController, post_result), method=post, multipart=true) do f
         div(
             div.([
-                text_input(f, :name, placeholder="Name"),
+                textarea(f, :name, placeholder="Name", rows="3", cols="50"),
                 label_for(checkbox(f, :famous), "Famous"),
                 submit("Submit"),
                 " multipart/form-data",

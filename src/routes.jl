@@ -105,9 +105,9 @@ end
     routes(block::Function, pipe::Symbol)
 """
 function routes(block::Function, pipe::Symbol)
-    Routing.context[:pipe] = pipe
+    Routing.store[:pipe] = pipe
     block()
-    Routing.context[:pipe] = nothing
+    Routing.store[:pipe] = nothing
 end
 
 

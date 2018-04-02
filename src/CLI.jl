@@ -6,7 +6,7 @@ import ..Bukdu: Routing, Naming
     CLI.routes()
 """
 function routes()
-    A = Routing.context[:routing_tables]
+    A = Routing.store[:routing_tables]
     isempty(A) && return
     ncols = 5 # verb url C action pipe
     nrows = Int(length(A)/ncols)
