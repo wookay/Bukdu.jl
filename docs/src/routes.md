@@ -15,9 +15,5 @@ resources
 ```
 
 ```@docs
-Router.call
-```
-
-```@docs
 Routing.empty!
 ```

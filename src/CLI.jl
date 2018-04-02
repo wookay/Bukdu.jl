@@ -4,6 +4,8 @@ import ..Bukdu: Routing, Naming
 
 """
     CLI.routes()
+
+Showing the routing table.
 """
 function routes()
     A = Routing.store[:routing_tables]

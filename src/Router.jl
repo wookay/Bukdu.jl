@@ -3,6 +3,15 @@ module Router # Bukdu
 import ..Bukdu: Naming, Deps, Routing, DirectRequest, request_handler
 
 """
+    Router.call
+
+To get the object of the action without going through HTTP server.
+Results are named tuple `(got= , resp= , route= )`.
+"""
+function call
+end
+
+"""
     Router.call(verb, path::String)
 """
 function call(verb, path::String)

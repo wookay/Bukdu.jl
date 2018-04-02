@@ -25,6 +25,9 @@ struct MissingController <: ApplicationController
     conn::Conn
 end
 
+"""
+    halted_error(c::SystemController)
+"""
 function halted_error(c::SystemController)
     @tags h3 p
     # set the status code when halted on Plug
@@ -34,6 +37,9 @@ function halted_error(c::SystemController)
     ))
 end
 
+"""
+    not_applicable(c::SystemController)
+"""
 function not_applicable(c::SystemController)
     @tags h3 p
     c.conn.request.response.status = 500 # 500 Internal Server Error
@@ -43,6 +49,9 @@ function not_applicable(c::SystemController)
     ))
 end
 
+"""
+    internal_error(c::SystemController)
+"""
 function internal_error(c::SystemController)
     @tags h3 p
     c.conn.request.response.status = 500 # 500 Internal Server Error
@@ -54,6 +63,9 @@ function internal_error(c::SystemController)
 end
 
 
+"""
+    not_found(c::MissingController)
+"""
 function not_found(c::MissingController)
     @tags h3
     c.conn.request.response.status = 404 # 404 Not Found
@@ -152,4 +164,25 @@ function info_response(route::Route, req, response)
     flush(logger.stream)
 end
 
+"""
+    Bukdu.System.catch_request(route::Bukdu.Route, req)
+"""
+function catch_request
+end
+
+"""
+    Bukdu.System.catch_response(route::Bukdu.Route, resp)
+"""
+function catch_response
+end
+
 end # module Bukdu.System
+
+
+function Bukdu.System.catch_request(route::Bukdu.Route, req)
+#    @debug "REQ " req.headers
+end
+
+function Bukdu.System.catch_response(route::Bukdu.Route, resp)
+#    @debug "RESP" resp.headers resp.status
+end

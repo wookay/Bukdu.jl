@@ -4,6 +4,8 @@ export Changeset
 
 """
     Changeset
+
+Used with `HTML5.Form.change`.
 """
 mutable struct Changeset
     model::Type

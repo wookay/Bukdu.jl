@@ -62,7 +62,7 @@ function _catch_internal_error(block, route, req)
 end
 
 function _proc_request(route::Route, req::Deps.Request)
-    Runtime.catch_request(route, req)           # Runtime
+    System.catch_request(route, req)           # System
     req.response.status = 200
     _catch_internal_error(route, req) do route, req
     # begin #
@@ -72,7 +72,7 @@ end
 
 function _proc_response(route::Route, req::Deps.Request)
     info_response(route, req, req.response)
-    Runtime.catch_response(route, req.response) # Runtime
+    System.catch_response(route, req.response) # System
 end
 
 function request_handler(route::Route, dreq::DirectRequest)

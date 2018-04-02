@@ -48,9 +48,8 @@ julia> function index(c::WelcomeController)
            render(JSON, "Love")
        end
 index (generic function with 1 method)
-
-julia> INFO:  GET    WelcomeController   index           200 /
 ```
+That's it! Refresh your page of the web browser.
 
 
 ### Requirements
