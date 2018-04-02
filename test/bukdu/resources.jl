@@ -33,6 +33,10 @@ DELETE  /articles/:id       ArticleController  delete
 PATCH   /articles/:id       ArticleController  update
 PUT     /articles/:id       ArticleController  update"""
 
+Router.call(delete, "/articles/1")
+Router.call(patch, "/articles/1")
+Router.call(put, "/articles/1")
+
 Routing.empty!()
 
 

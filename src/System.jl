@@ -111,27 +111,41 @@ function _unescape_req_target(req)
     _regularize_text(str, target_path_rpad)
 end
 
-function req_method_color(method::String)
-    bold = false
-    if "POST" == method
-        color = :yellow
-    else
-        color = :cyan
-    end
-    (bold=bold, color=color)
+const style_request_action_others  = :red
+const style_request_action = Dict{String,Symbol}(
+    "GET"    => :normal,
+    "POST"   => :yellow,
+    "DELETE" => :magenta,
+    "PATCH"  => :blue,
+    "PUT"    => :cyan,
+)
+
+const style_response_status_others = :red
+const style_response_status = Dict{Int,Symbol}(
+    200 => :normal,
+    500 => :magenta, # 500 Internal Server Error
+    404 => :blue,    # 404 Not Found
+)
+
+function req_method_style(method::String)
+    (color=get(style_request_action, method, style_request_action_others),)
+end
+
+function resp_status_style(status::Int16)
+    (color=get(style_response_status, status, style_response_status_others),)
 end
 
 function info_response(route::Route, req, response)
     logger = Base.global_logger()
     buf = IOBuffer()
     iob = IOContext(buf, logger.stream)
-    printstyled(iob, "INFO:  ", color=:cyan)
-    printstyled(iob, rpad(req.method, 6); req_method_color(req.method)...)
+    printstyled(iob, "INFO: ", color=:cyan)
+    printstyled(iob, rpad(req.method, 6); req_method_style(req.method)...)
     printstyled(iob, string(' ',
                             rpad(nameof(route.C), controller_rpad),
                             rpad(nameof(route.action), action_rpad)
     ))
-    printstyled(iob, response.status, color= 200 == response.status ? :normal : :red)
+    printstyled(iob, response.status; resp_status_style(response.status)...)
     printstyled(iob, ' ', _unescape_req_target(req))
     println(iob)
     print(logger.stream, String(take!(buf)))
