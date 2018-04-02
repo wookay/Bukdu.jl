@@ -47,4 +47,27 @@ GET  /a  A  index  :auth"""
 
 Routing.empty!()
 
+
+### halted
+struct HaltedAuth <: Plug.AbstractPlug
+end
+
+function plug(::Type{HaltedAuth}, conn::Conn)
+    conn.request.response.status = 401 # 401 Unauthorized
+    conn.halted = true
+end
+
+pipeline(:halted_auth) do conn::Conn
+    plug(HaltedAuth, conn)
+end
+
+routes(:halted_auth) do
+    get("/ha", A, index)
+end
+result = Router.call(get, "/ha")
+@test result.route.action === Bukdu.System.halted_error
+@test result.resp.status == 401
+
+Routing.empty!()
+
 end # module test_bukdu_pipelines

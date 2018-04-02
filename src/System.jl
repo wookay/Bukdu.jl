@@ -88,15 +88,18 @@ function _regularize_text(str::String, padding::Int)::String
     end
     newstr = join(a)
     newpad = padding - textwidth(newstr)
-    if newpad >= 2
-        news = string(newstr, "..")
-    elseif newpad == 1
-        news = string(newstr, ".")
-    else
+    if length(s) == length(a)
         news = newstr
+    else
+        if newpad >= 2
+            news = string(newstr, "..")
+        elseif newpad == 1
+            news = string(newstr, ".")
+        else
+            news = newstr
+        end
     end
-    npad = padding - textwidth(news)
-    rstrip(string(news, npad > 0 ? join(fill(' ', npad)) : ""))
+    news
 end
 
 function _unescape_req_target(req)

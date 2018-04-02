@@ -18,23 +18,39 @@ update(c::ArticleController) = (:update, c.params.id)
 
 routes() do
     resources("/articles", ArticleController)
-    # resources("/articles", ArticleController, only=[index, show])
-    # resources("/articles", ArticleController, except=[index, show])
 end
 
 @test Router.call(get, "/articles").got   == (:index,)
 @test Router.call(get, "/articles/2").got == (:show, "2")
 
 @test Utils.read_stdout(CLI.routes) == """
-GET     /articles           ArticleController  index   
-GET     /articles/new       ArticleController  new     
-GET     /articles/:id/edit  ArticleController  edit    
-GET     /articles/:id       ArticleController  show    
-POST    /articles           ArticleController  create  
-DELETE  /articles/:id       ArticleController  delete  
-PATCH   /articles/:id       ArticleController  update  
+GET     /articles           ArticleController  index
+GET     /articles/new       ArticleController  new
+GET     /articles/:id/edit  ArticleController  edit
+GET     /articles/:id       ArticleController  show
+POST    /articles           ArticleController  create
+DELETE  /articles/:id       ArticleController  delete
+PATCH   /articles/:id       ArticleController  update
 PUT     /articles/:id       ArticleController  update"""
 
+Routing.empty!()
+
+
+routes() do
+    resources("/articles", ArticleController, only=[index, show])
+end
+@test Utils.read_stdout(CLI.routes) == """
+GET  /articles      ArticleController  index
+GET  /articles/:id  ArticleController  show"""
+Routing.empty!()
+
+
+routes() do
+    resources("/articles", ArticleController, except=[new, edit, create, delete, update])
+end
+@test Utils.read_stdout(CLI.routes) == """
+GET  /articles      ArticleController  index
+GET  /articles/:id  ArticleController  show"""
 Routing.empty!()
 
 end # module test_bukdu_resources

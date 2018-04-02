@@ -8,12 +8,12 @@ import ..Bukdu: Routing, Naming
 function routes()
     A = Routing.context[:routing_tables]
     isempty(A) && return
-    ncols = 5
+    ncols = 5 # verb url C action pipe
     nrows = Int(length(A)/ncols)
     rt = reshape(A, ncols, nrows)
     paddings = maximum((length ∘ string).(rt), dims=2) .+ 2
-    function f(idx, el)
-        if idx == ncols # pipe
+    function f(idx, el, lastcolumn)
+        if idx == lastcolumn
             el
         else
             rpad(el, paddings[idx])
@@ -21,7 +21,8 @@ function routes()
     end
     for rowidx in 1:nrows
         row = rt[:, rowidx]
-        print.([f(idx, el) for (idx, el) in enumerate(row)])
+        lastcolumn = isempty(row[ncols]) ? ncols-1 : ncols
+        print.([f(idx, el, lastcolumn) for (idx, el) in enumerate(row[1:lastcolumn])])
         println()
     end
 end

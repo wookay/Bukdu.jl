@@ -1,7 +1,7 @@
 # module Bukdu
 
 import Base.CoreLogging: AbstractLogger, global_logger, handle_message, min_enabled_level
-import Base.CoreLogging: LogLevel, Info, Warn, Debug
+import Base.CoreLogging: LogLevel, Debug, Info, Warn, Error
 
 struct BukduLogger <: AbstractLogger
     stream::IO
@@ -32,6 +32,8 @@ function handle_message(logger::BukduLogger, level, message, _module, group, id,
         color = :yellow
     elseif level == Debug
         color = :magenta
+    elseif level == Error
+        color = :red
     else
         color = :normal
     end

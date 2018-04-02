@@ -80,4 +80,4 @@ Pkg.checkout("Bukdu", "sevenstars")
 [appveyor-url]: https://ci.appveyor.com/project/wookay/bukdu-jl/branch/sevenstars
 
 [codecov-img]: https://codecov.io/gh/wookay/Bukdu.jl/branch/sevenstars/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/wookay/Bukdu.jl
+[codecov-url]: https://codecov.io/gh/wookay/Bukdu.jl/branch/sevenstars

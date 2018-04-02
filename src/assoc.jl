@@ -91,6 +91,10 @@ function Base.push!(assoc::Assoc, kv::Pair{String,String})
     push!(assoc.__bukdu_assoc, kv)
 end
 
+function Base.:(==)(left::Assoc, right::Assoc)::Bool
+    left.__bukdu_assoc == right.__bukdu_assoc
+end
+
 function Base.get(assoc::Assoc, key::Symbol, value::Any)
     if haskey(assoc, key)
         v = assoc[key]

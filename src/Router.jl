@@ -8,6 +8,13 @@ import ..Bukdu: Naming, Deps, Routing, DirectRequest, request_handler
 function call(verb, path::String)
     method = Naming.verb_name(verb)
     req = Deps.Request(method, path)
+    call(req)
+end
+
+"""
+    Router.call(req::Deps.Request)
+"""
+function call(req::Deps.Request)
     route = Routing.handle(req)
     dreq = DirectRequest(req)
     request_handler(route, dreq) # (got=,resp=)

@@ -40,86 +40,67 @@ end
 
 mutable struct FormScanner
     data::Vector{UInt8}
-    offset::Int
-    pos::Int
     boundary::String
-    FormScanner(data::Vector{UInt8}, boundary::String) = new(data, 1, 1, boundary)
+    FormScanner(data::Vector{UInt8}, boundary::String) = new(data, boundary)
 end
 
-function empty_carriage_return(data::Vector{UInt8}, isfile::Bool)::Vector{UInt8}
-    len = length(data)
-    if len > 2
-        if isfile
-            [0x2d,0x2d] == data[end-1:end] ? data[1:end-5] : data[1:end-2]
-        else
-            [x for x in ([0x0d,0x0a] == data[1:2] ? data[3:end-4] : data[2:end-2]) if x != 0x0d]
-        end
+const CR = 0x0d
+const LF = 0x0a
+const ContentDisposition = "Content-Disposition: form-data;"
+
+function rstripcr(vec::Vector{UInt8})::Vector{UInt8}
+    if !isempty(vec) && vec[end] == CR
+        vec[1:end-1]
     else
-        return Vector{UInt8}()
+        vec
     end
 end
 
-function readData(s::FormScanner, len::Int, boundary::String, lf::UInt8, isfile::Bool)::Vector{UInt8}
-    s.offset = s.pos+1
-    offset_begin = s.offset
-    len_boundary = length(boundary)
-    while s.pos < len
-        if lf==s.data[s.pos] || s.pos==len-1
-            chunk = String(s.data[s.offset+1:s.pos])
-            if startswith(chunk, boundary)
-                data = s.data[offset_begin:s.pos-len_boundary]
-                s.offset = s.pos
-                return empty_carriage_return(data, isfile)
-            end
-            s.offset = s.pos
-        end
-        s.pos += 1
+function rstripcrlf(vec::Vector{UInt8})::Vector{UInt8}
+    if !isempty(vec) && vec[end] == LF
+        rstripcr(vec[1:end-1])
+    else
+        vec
     end
+end
+
+function content_disposition_fields(io::IOBuffer)::Dict{String,String}
+    fields = Dict{String,String}()
+    str = String(readuntil(io, LF))
+    h = rstripcr(readuntil(io, LF))
+    if isempty(h)
+    else
+        (k, v) = split(String(h), ": ")
+        fields[k] = v
+        readuntil(io, LF)
+    end
+    pat = r" (?P<key>[^\"]*)=\"(?P<val>[^\"]*)\""
+    for m in eachmatch(pat, str)
+        fields[m[:key]] = m[:val]
+    end
+    fields
 end
 
 function scan(s::FormScanner)::Vector{Pair{String,String}}
-    lf = 0x0a
-    pat_filename = r"""Content-Disposition: form-data; name=\"(?P<name>[^\"]*)\"; filename=\"(?P<filename>[^\"]*)\""""
-    pat = r"""Content-Disposition: form-data; name=\"(?P<name>[^\"]*)\""""
-    len = length(s.data)
-    name = nothing
-    filename = nothing
-    content_type = nothing
     ps = Vector{Pair{String, String}}()
-    while s.pos < len
-        if lf==s.data[s.pos]
-            if isa(filename, Nothing)
-                chunk = String(s.data[s.offset:s.pos])
-                m_filename = match(pat_filename, chunk)
-                if isa(m_filename, RegexMatch)
-                    name = m_filename[:name]
-                    filename = String(m_filename[:filename])
-                else
-                    m = match(pat, chunk)
-                    if isa(m, RegexMatch)
-                        name = m[:name]
-                        push!(ps, Pair(name, String(readData(s, len, s.boundary, lf, false))))
-                    end
-                end
-            else
-                if isa(content_type, Nothing)
-                    content_type = String(chomp(String(s.data[s.offset+length("Content-Type: ")+1:s.pos])))
-                else
-                    #upload = Plug.Upload(filename, content_type, readData(s, len, s.boundary, lf, true))
-                    #Plug.UploadData.save(upload)
-                    upload = ""
-                    push!(ps, Pair(name, upload))
-                    filename = nothing
-                    content_type = nothing
-                end
+    io = IOBuffer(s.data, read=true, truncate=false)
+    while !eof(io)
+        chunk = readuntil(io, s.boundary)
+        if !isempty(chunk)
+            chunkio = IOBuffer(chunk)
+            skip(chunkio, CR)
+            skip(chunkio, LF)
+            contentdisposition = readuntil(chunkio, ContentDisposition)
+            if !isempty(contentdisposition)
+            contentio = IOBuffer(contentdisposition)
+            fields = content_disposition_fields(contentio)
+            value = String(rstripcrlf(read(contentio)))
+            push!(ps, Pair(fields["name"], value))
             end
-            s.offset = s.pos
         end
-        s.pos += 1
     end
-    ps 
+    ps
 end
-
 
 function fetch_body_params(req::Request)::Vector{Pair{String,String}}
     if hasheader(req.headers, "Content-Type")
@@ -128,9 +109,13 @@ function fetch_body_params(req::Request)::Vector{Pair{String,String}}
             scanner = UrlEncodedScanner(req.body)
             return scan(scanner)
         elseif startswith(content_type, "multipart/form-data")
-            boundary = content_type[length("multipart/form-data; boundary=")+1:end]
-            scanner = FormScanner(req.body, string("--",boundary))
-            return scan(scanner)
+            pat = r"boundary=\"?([\W\w]*)\"?"
+            m = match(pat, content_type)
+            if m isa RegexMatch
+                boundary = m[1]
+                scanner = FormScanner(req.body, string("--", boundary))
+                return scan(scanner)
+            end
         end
     end
     Vector{Pair{String,String}}()
