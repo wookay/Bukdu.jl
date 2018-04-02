@@ -16,10 +16,7 @@ function handle(req::Deps.Request)
 end
 
 route(args...) = Route(System.MissingController, System.not_found, Vector{Pair{String,String}}(), Vector{Function}())
-
-function route_path(args...)::Nothing
-    nothing
-end
+route_path(args...)::Nothing = nothing
 
 # idea from HTTP.jl/src/Handlers.jl
 function penetrate_segments(segments)
@@ -67,6 +64,14 @@ function empty!()
     context[:pipe] = nothing
     context[:routing_tables] = Vector{Any}()
     Base.empty!(routing_pipelines)
+    for f in (route, route_path)
+        ms = methods(f)
+        for m in ms
+            Base.delete_method(m)
+        end
+    end
+    @eval route(args...) = Route(System.MissingController, System.not_found, Vector{Pair{String,String}}(), Vector{Function}())
+    @eval route_path(args...)::Nothing = nothing
 end
 
 end # module Bukdu.Routing

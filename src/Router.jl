@@ -10,8 +10,7 @@ function call(verb, path::String)
     req = Deps.Request(method, path)
     route = Routing.handle(req)
     dreq = DirectRequest(req)
-    response = request_handler(route, dreq)
-    response.body
+    request_handler(route, dreq) # (got=,resp=)
 end
 
 

@@ -38,8 +38,8 @@ routes(:auth) do
     get("/a", A, index)
 end
 
-@test Router.call(get, "/a") == ["csrf", "auth"]
-@test Router.call(get, "/w") == ["csrf"]
+@test Router.call(get, "/a").got == ["csrf", "auth"]
+@test Router.call(get, "/w").got == ["csrf"]
 
 @test Utils.read_stdout(CLI.routes) == """
 GET  /w  W  index  :web

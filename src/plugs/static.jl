@@ -13,9 +13,9 @@ struct StaticController <: ApplicationController
 end
 
 """
-    plug(::Type{Static}; at::String, from::String)
+    plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing)
 """
-function plug(::Type{Static}; at::String, from::String)
+function plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing)
     function readfile(c::StaticController)
         reqpath = c.conn.request.target
         offset = isdirpath(at) ? 1 : 2
@@ -35,10 +35,15 @@ function plug(::Type{Static}; at::String, from::String)
                 Render("application/octet-stream", s)
             end
         end
-    end
+    end # function readfile
+    has_only = only isa Vector{String} && !isempty(only)
     for (root, dirs, files) in walkdir(from)
          subpath = root[length(from)+1:end]
          for filename in files
+             if has_only
+                 subfilepath = normpath(subpath, filename)
+                 !any(x->startswith(subfilepath, x), only) && continue # for filename
+             end
              reqpath = normpath(at, subpath, filename)
              get(reqpath, StaticController, readfile)
         end

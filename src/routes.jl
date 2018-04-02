@@ -78,7 +78,7 @@ end
 function request_handler(route::Route, dreq::DirectRequest)
     (rou, obj) = _proc_request(route, dreq._req)
     _proc_response(rou, dreq._req)
-    (body=obj,)
+    (got=obj, resp=dreq._req.response)
 end
 
 function request_handler(route::Route, req::Deps.Request)

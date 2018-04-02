@@ -22,8 +22,8 @@ routes() do
     # resources("/articles", ArticleController, except=[index, show])
 end
 
-@test Router.call(get, "/articles")   == (:index,)
-@test Router.call(get, "/articles/2") == (:show, "2")
+@test Router.call(get, "/articles").got   == (:index,)
+@test Router.call(get, "/articles/2").got == (:show, "2")
 
 @test Utils.read_stdout(CLI.routes) == """
 GET     /articles           ArticleController  index   
