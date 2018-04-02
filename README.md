@@ -1,8 +1,8 @@
 # Bukdu 🌌
 
-|  **Documentation**                        |  **Build Status**                                                 |
-|:-----------------------------------------:|:-----------------------------------------------------------------:|
-|  [![][docs-latest-img]][docs-latest-url]  |  [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url]  |
+|  **Documentation**                        |  **Build Status**                                                                                 |
+|:-----------------------------------------:|:-------------------------------------------------------------------------------------------------:|
+|  [![][docs-latest-img]][docs-latest-url]  |  [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url] [![][codecov-img]][codecov-url]  |
 
 
 Bukdu 🌌 is a web development framework for Julia (https://julialang.org).
@@ -28,7 +28,7 @@ Bukdu.start(8080)
 ```
 
 
-### REST API Demo
+### RESTful API Demo
 
 Visit [Bukdu sevenstars on Heroku](https://sevenstars.herokuapp.com)
 and check its [source code](https://github.com/wookay/heroku-sevenstars).
@@ -78,3 +78,6 @@ Pkg.checkout("Bukdu", "sevenstars")
 
 [appveyor-img]: https://ci.appveyor.com/api/projects/status/v1af95637qm7j582/branch/sevenstars?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/wookay/bukdu-jl/branch/sevenstars
+
+[codecov-img]: https://codecov.io/gh/wookay/Bukdu.jl/branch/sevenstars/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/wookay/Bukdu.jl
