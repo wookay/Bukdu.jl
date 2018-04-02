@@ -43,8 +43,7 @@ Content-Disposition: form-data; name="field2"; filename="example.txt"
 value2
 --boundary--""")
 )
-result = Router.call(req)
-@test result.got == Assoc("field1"=>"value1", "field2"=>"value2")
+@test Router.call(req).got == Assoc("field1"=>"value1", "field2"=>"value2")
 
 
 req = Deps.HTTP.Request(
@@ -63,7 +62,6 @@ Content-Type: text/plain
 value2
 --boundary--""")
 )
-result = Router.call(req)
 @test Router.call(req).got == Assoc("field1"=>"value1", "field2"=>"value2")
 
 req = Deps.HTTP.Request(
@@ -73,7 +71,6 @@ req = Deps.HTTP.Request(
     codeunits("""
 ------WebKitFormBoundaryLeFS8sRvPzeszrWy\r\nContent-Disposition: form-data; name=\"user_name\"\r\n\r\n\r\n------WebKitFormBoundaryLeFS8sRvPzeszrWy\r\nContent-Disposition: form-data; name=\"user_famous\"\r\n\r\nfalse\r\n------WebKitFormBoundaryLeFS8sRvPzeszrWy--\r\n""")
 )
-result = Router.call(req)
 @test Router.call(req).got == Assoc("user_name"=>"", "user_famous"=>"false")
 
 Routing.empty!()
