@@ -2,7 +2,7 @@ module Form # Bukdu.HTML5
 
 export change
 export form_for, label_for
-export text_input, textarea, radio_button, checkbox
+export text_input, text_area, radio_button, checkbox
 export submit
 
 import ...Bukdu: ApplicationController, Assoc, Changeset, Router, Naming, post
@@ -110,7 +110,7 @@ function label_for(nodes::Vector{Node}, text::Union{String,Nothing}=nothing; kwa
     [nodes..., text isa Nothing ? fo : fo(text)]
 end
 
-function _form_value_text(f::Changeset, field::Symbol, value) # text_input textarea
+function _form_value_text(f::Changeset, field::Symbol, value) # text_input text_area
     if value isa Nothing
         get(f.changes, field, "")
     else
@@ -144,9 +144,9 @@ function text_input(f::Changeset, field::Symbol, value=nothing; kwargs...)::Node
 end
 
 """
-    textarea(f::Changeset, field::Symbol, value=nothing; kwargs...)::Node
+    text_area(f::Changeset, field::Symbol, value=nothing; kwargs...)::Node
 """
-function textarea(f::Changeset, field::Symbol, value=nothing; kwargs...)::Node
+function text_area(f::Changeset, field::Symbol, value=nothing; kwargs...)::Node
     @tags textarea
     name = Naming.model_prefix(f.model, field)
     val = _form_value_text(f, field, value)

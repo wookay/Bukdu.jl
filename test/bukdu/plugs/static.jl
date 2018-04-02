@@ -22,8 +22,14 @@ routes(:c) do
 end
 result = Router.call(get, "/static.jl")
 @test startswith(String(result.got.body), "module test_bukdu_plugs_static")
-result = Router.call(get, "/csrf_protection.jl")
-@test result.resp.status == 404
+@test Router.call(get, "/csrf_protection.jl").resp.status == 404
+Routing.empty!()
+
+routes(:d) do
+    plug(Plug.Static, at="/", from=normpath(@__DIR__, "public"))
+end
+@test Router.call(get, "/a.html").resp.status == 200
+@test Router.call(get, "/b.wasm").resp.status == 200
 Routing.empty!()
 
 end # module test_bukdu_plugs_static

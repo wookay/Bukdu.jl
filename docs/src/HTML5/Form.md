@@ -8,7 +8,7 @@ change
 form_for
 label_for
 text_input
-textarea
+text_area
 radio_button
 checkbox
 submit

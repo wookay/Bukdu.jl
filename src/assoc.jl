@@ -43,7 +43,7 @@ function Base.getproperty(assoc::Assoc, prop::Symbol)
     end
 end
 
-function Base.length(assoc::Assoc)::Bool
+function Base.length(assoc::Assoc)
     length(assoc.__bukdu_assoc)
 end
 
@@ -73,18 +73,6 @@ end
 
 function Base.pairs(assoc::Assoc)::Base.Iterators.Pairs
     pairs(assoc.__bukdu_assoc)
-end
-
-function Base.start(assoc::Assoc)
-    start(assoc.__bukdu_assoc)
-end
-
-function Base.next(assoc::Assoc, i::Int)
-    next(assoc.__bukdu_assoc, i)
-end
-
-function Base.done(assoc::Assoc, i::Int)
-    done(assoc.__bukdu_assoc, i)
 end
 
 function Base.push!(assoc::Assoc, kv::Pair{String,String})

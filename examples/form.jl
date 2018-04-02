@@ -1,7 +1,7 @@
 using Bukdu # ApplicationController Conn HTML Router CLI render routes get post
 using Bukdu.HTML5.Form # change
                        # form_for label_for
-                       # textarea text_input radio_button checkbox
+                       # text_area text_input radio_button checkbox
                        # submit
 import Documenter.Utilities.DOM: @tags
 
@@ -34,7 +34,7 @@ function index(c::FormController)
     form1 = form_for(changeset, (FormController, post_result), method=post, multipart=true) do f
         div(
             div.([
-                textarea(f, :name, placeholder="Name", rows="3", cols="50"),
+                text_area(f, :name, placeholder="Name", rows="3", cols="50"),
                 label_for(checkbox(f, :famous), "Famous"),
                 submit("Submit"),
                 " multipart/form-data",
@@ -44,7 +44,7 @@ function index(c::FormController)
     form2 = form_for(changeset, (FormController, post_result), method=post, multipart=false) do f
         div(
             div.([
-                textarea(f, :intro, placeholder="Intro", rows="5", cols="50"),
+                text_area(f, :intro, placeholder="Intro", rows="5", cols="50"),
                 [
                     label_for(radio_button(f, :season, "winter"), "Winter"),
                     label_for(radio_button(f, :season, "spring"), "Spring"),

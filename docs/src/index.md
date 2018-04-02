@@ -32,7 +32,7 @@ and check its [source code](https://github.com/wookay/heroku-sevenstars).
 
 ### Modifying actions at runtime
 
-```julia
+```sh
 Bukdu/examples $ julia -i welcome.jl
                _
    _       _ _(_)_     |  A fresh approach to technical computing

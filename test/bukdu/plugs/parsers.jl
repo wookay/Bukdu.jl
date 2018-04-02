@@ -3,6 +3,7 @@ module test_bukdu_plugs_parsers
 using Test
 using Bukdu
 import .Bukdu: Deps
+import .Bukdu.Plug: Parsers
 
 struct FC <: ApplicationController; conn::Conn; end
 
@@ -74,5 +75,9 @@ req = Deps.HTTP.Request(
 @test Router.call(req).got == Assoc("user_name"=>"", "user_famous"=>"false")
 
 Routing.empty!()
+
+
+@test  Parsers.rstripcrlf([0x0d, 0x0a]) == []      # CR LF
+@test  Parsers.rstripcrlf([0x0d])       == [0x0d]  # CR
 
 end # module test_bukdu_plugs_parsers

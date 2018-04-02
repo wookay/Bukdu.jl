@@ -13,7 +13,6 @@ BukduLogger(stream::IO=stderr, level=Debug) = BukduLogger(stream, level, Dict{An
 min_enabled_level(logger::BukduLogger) = logger.min_level
 
 
-
 # code from julia/base/logging.jl
 function handle_message(logger::BukduLogger, level, message, _module, group, id,
                         filepath, line; maxlog=nothing, kwargs...)
@@ -26,6 +25,7 @@ function handle_message(logger::BukduLogger, level, message, _module, group, id,
     iob = IOContext(buf, logger.stream)
     levelstr = uppercase(string(level))
     msglines = message
+    color = :normal
     if level == Info
         color = :cyan
     elseif level == Warn
@@ -34,8 +34,6 @@ function handle_message(logger::BukduLogger, level, message, _module, group, id,
         color = :magenta
     elseif level == Error
         color = :red
-    else
-        color = :normal
     end
     printstyled(iob, levelstr, ": ", msglines, color=color)
     for (key, val) in pairs(kwargs)
