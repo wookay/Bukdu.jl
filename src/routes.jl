@@ -83,7 +83,7 @@ end
 
 function request_handler(route::Route, req::Deps.Request)
     (rou, obj) = _proc_request(route, req)
-    if obj isa Render
+    if obj isa AbstractRender
         data = obj.body
         push!(req.response.headers, Pair("Content-Type", obj.content_type))
     else
@@ -91,7 +91,7 @@ function request_handler(route::Route, req::Deps.Request)
     end
     req.response.body = data
     _proc_response(rou, req)
-    req.response
+    (got=obj, resp=req.response, route=rou)
 end
 
 """

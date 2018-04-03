@@ -34,9 +34,16 @@ function render(::Type{JavaScript}, data)::Render
     Render("application/javascript; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
 end
 
+"""
+    render(::Type{EventStream})::EventStream
+"""
+function render(::Type{EventStream})::EventStream
+    EventStream("text/event-stream; charset=utf-8", [])
+end
+
 # application/wasm
 
-function render(m::Module, data)::Render # throw UnknownModuleError
+function render(m::Module, data)::AbstractRender # throw UnknownModuleError
     if nameof(m) == :JSON
         render(JSON, data)
     elseif nameof(m) == :HTML5

@@ -6,8 +6,6 @@
 struct Static <: AbstractPlug
 end
 
-import ..Bukdu: ApplicationController, Conn, Render
-
 struct StaticController <: ApplicationController
     conn::Conn
 end

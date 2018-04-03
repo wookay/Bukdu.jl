@@ -5,6 +5,7 @@ module Bukdu
 include("logging.jl")
 include("assoc.jl")
 include("Deps.jl")
+include("plugs.jl")
 include("types.jl")
 include("Naming.jl")
 include("render.jl")
@@ -23,7 +24,6 @@ include("pipelines.jl")
 include("Actions.jl")
 include("resources.jl")
 
-include("plugs.jl")
 
 include("changeset.jl")
 include("HTML5.jl")
@@ -36,7 +36,7 @@ include("CLI.jl")
 # include("Assembly.jl")
 
 function __init__()
-    global_logger(BukduLogger())
+    global_logger(Bukdu.Logger())
 end
 
 end # module Bukdu

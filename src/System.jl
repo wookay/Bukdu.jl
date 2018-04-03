@@ -152,7 +152,8 @@ end
 function info_response(route::Route, req, response)
     logger = Base.global_logger()
     buf = IOBuffer()
-    iob = IOContext(buf, logger.stream)
+    iocontext = IOContext(buf, logger.stream)
+    iob = IOContext(iocontext, :color => true)
     printstyled(iob, "INFO: ", color=:cyan)
     printstyled(iob, rpad(req.method, 6); req_method_style(req.method)...)
     printstyled(iob, string(' ',
