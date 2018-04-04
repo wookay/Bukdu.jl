@@ -3,6 +3,7 @@
 const env = Dict{Symbol, Any}(
     :server => nothing,
     :check_websocket => false,
+    :check_server_sent_events => false,
     :sse_streams => Dict(),
 )
 
@@ -23,16 +24,21 @@ function sse_streams()
     values(streams)
 end
 
-function routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
+function _base_routing_handle(http::Deps.HTTP.Stream) # result
     request::Deps.Request = http.message
     request.body = read(http)
     route = Routing.handle(request)
-    result = request_handler(route, request)
-    startwrite(http)
-    _ask_event_stream(result, http, request)
+    request_handler(route, request) # result
 end
 
-function websocket_routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
+function routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
+    _base_routing_handle(http)
+    startwrite(http)                   #
+    write(http, request.response.body) #
+    true
+end
+
+function full_routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
     if Deps.HTTP.WebSockets.is_upgrade(http.message)
         Deps.HTTP.WebSockets.upgrade(http) do ws
             while !eof(ws)
@@ -42,21 +48,20 @@ function websocket_routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
         end
         true
     else
-        routing_handle(http)
+        result = _base_routing_handle(http)
+        if result.got isa EventStream
+            fd = Base._fd(Deps.HTTP.IOExtras.tcpsocket(http.stream.c.io))
+            env[:sse_streams][fd] = http
+            needs_to_close = false
+        else
+            startwrite(http)              #
+            write(http, result.resp.body) #
+            needs_to_close = true
+        end
+        needs_to_close
     end
 end
 
-function _ask_event_stream(result, http, request)::Bool #needs_to_close
-    if result.got isa EventStream
-        fd = Base._fd(Deps.HTTP.IOExtras.tcpsocket(http.stream.c.io))
-        env[:sse_streams][fd] = http
-        needs_to_close = false
-    else
-        write(http, request.response.body)
-        needs_to_close = true
-    end
-    needs_to_close
-end
 
 import Sockets: @ip_str
 function start(port; host=ip"127.0.0.1")
@@ -73,6 +78,7 @@ function stop()
     server = env[:server]
     env[:server] = nothing
     env[:check_websocket] = false
+    env[:check_server_sent_events] = false
     env[:sse_streams] = Dict()
     server isa HTTP.Servers.Server && put!(server.in, HTTP.Servers.KILL)
     nothing
@@ -102,11 +108,7 @@ import Sockets: accept, IPAddr
 function _handle_stream(f::Function, http::Stream)::Nothing
     needs_to_close = true
     try
-        if applicable(f, http)
-            needs_to_close = f(http) # routing_handle(http)
-        else
-            routing_handle(http)
-        end
+        needs_to_close = f(http) # routing_handle full_routing_handle
     catch e
         if isopen(http) && !iswritable(http)
             @error e stacktrace(catch_backtrace())
@@ -140,7 +142,7 @@ function serve(server::Server{T, H}, host, port, verbose) where {T, H}
         end
     end
 
-    f = env[:check_websocket] ? websocket_routing_handle : routing_handle
+    f = env[:check_websocket] || env[:check_server_sent_events] ? full_routing_handle : routing_handle
     listen(f, host, port;
            tcpref=tcpserver,
            ssl=(T == https),

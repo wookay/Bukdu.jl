@@ -73,6 +73,7 @@ global_logger(Bukdu.Logger(
 routes() do
     get("/", SSEController, index)
     get("/sse", SSEController, sse)
+    plug(Plug.ServerSentEvents) #
 end
 
 Bukdu.start(8080)

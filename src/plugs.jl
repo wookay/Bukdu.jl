@@ -27,11 +27,12 @@ end
 
 include("plugs/Parsers.jl")
 include("plugs/static.jl")
+include("plugs/websocket.jl")
+include("plugs/server_sent_events.jl")
 
 # pipeline plugs
 include("plugs/csrf_protection.jl")
 include("plugs/auth.jl")
-include("plugs/websocket.jl")
 
 
 function plug(::Type{T}; kwargs...) where {T <: AbstractPlug}
