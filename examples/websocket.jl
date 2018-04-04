@@ -50,7 +50,7 @@ function index(c::WSController)
   function onMessage(evt)
   {
     writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
-    websocket.close();
+    // websocket.close();
   }
 
   function onError(evt)
@@ -81,6 +81,15 @@ function index(c::WSController)
   <h2>WebSocket Test</h2>
 
   <div id="output"></div>
+
+<pre style="background-color: #ffffcc;">
+julia> ws = first(Bukdu.websockets())
+HTTP.WebSockets.WebSocket{Sockets.TCPSocket}(Sockets.TCPSocket(RawFD(0x0000001a) active, 0 bytes waiting), 0x01, true, UInt8[0x57, 0x65, 0x62, 0x53, 0x6f, 0x63, 0x6b, 0x65, 0x74, 0x20, 0x72, 0x6f, 0x63, 0x6b, 0x73], UInt8[], false, false)
+
+julia> write(ws, "hello")
+5
+</pre>
+
 </body>
 </html>
 """)

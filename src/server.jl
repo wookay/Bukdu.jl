@@ -4,14 +4,15 @@ const env = Dict{Symbol, Any}(
     :server => nothing,
     :check_websocket => false,
     :check_server_sent_events => false,
-    :sse_streams => Dict(),
+    :sse_streams => Dict{RawFD,Any}(),
+    :websockets => Dict{RawFD,Any}(),
 )
 
 function sse_streams()
-    streams = Dict()
+    streams = Dict{RawFD,Any}()
     dirty = false
     for (key, http) in pairs(env[:sse_streams])
-         s = Base.uv_status_string(HTTP.IOExtras.tcpsocket(http.stream.c.io))
+         s = Base.uv_status_string(http.stream.c.io)
          if s == "paused"
              streams[key] = http
          else
@@ -22,6 +23,23 @@ function sse_streams()
         env[:sse_streams] = streams
     end
     values(streams)
+end
+
+function websockets()
+    sockets = Dict{RawFD,Any}()
+    dirty = false
+    for (key, ws) in pairs(env[:websockets])
+         s = Base.uv_status_string(ws.io)
+         if s == "active"
+             sockets[key] = ws
+         else
+             dirty = true
+         end
+    end
+    if dirty
+        env[:websockets] = sockets
+    end
+    values(sockets)
 end
 
 function _base_routing_handle(http::Deps.HTTP.Stream) # result
@@ -40,7 +58,9 @@ end
 
 function full_routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
     if Deps.HTTP.WebSockets.is_upgrade(http.message)
-        Deps.HTTP.WebSockets.upgrade(http) do ws
+        Deps.HTTP.WebSockets.upgrade(http) do ws::Deps.HTTP.WebSockets.WebSocket
+            fd = Base._fd(Deps.HTTP.IOExtras.tcpsocket(ws.io))
+            env[:websockets][fd] = ws
             while !eof(ws)
                 data = readavailable(ws)
                 write(ws,data)
@@ -65,7 +85,7 @@ end
 
 import Sockets: @ip_str
 function start(port; host=ip"127.0.0.1")
-    server = HTTP.Servers.Server(routing_handle, stdout)
+    server = Deps.HTTP.Servers.Server(routing_handle, stdout)
     env[:server] = server
     @async serve(
                 server,
@@ -79,8 +99,9 @@ function stop()
     env[:server] = nothing
     env[:check_websocket] = false
     env[:check_server_sent_events] = false
-    env[:sse_streams] = Dict()
-    server isa HTTP.Servers.Server && put!(server.in, HTTP.Servers.KILL)
+    env[:sse_streams] = Dict{RawFD,Any}()
+    env[:websockets] = Dict{RawFD,Any}()
+    server isa Deps.HTTP.Servers.Server && put!(server.in, Deps.HTTP.Servers.KILL)
     nothing
 end
 
