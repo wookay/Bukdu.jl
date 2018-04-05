@@ -50,9 +50,9 @@ function _base_routing_handle(http::Deps.HTTP.Stream) # result
 end
 
 function routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
-    _base_routing_handle(http)
+    result = _base_routing_handle(http)
     startwrite(http)                   #
-    write(http, request.response.body) #
+    write(http, result.resp.body) #
     true
 end
 
