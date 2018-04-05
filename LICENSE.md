@@ -20,3 +20,7 @@ The Bukdu.jl package is licensed under the MIT "Expat" License:
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 > SOFTWARE.
 >
+
+Bukdu.jl includes borrowed code from the following projects, which have their own licenses:
+
+HTTP.jl https://github.com/JuliaWeb/HTTP.jl [MIT].
