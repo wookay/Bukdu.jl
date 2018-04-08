@@ -17,7 +17,6 @@ function fetch_query_params(req::Deps.Request)::Vector{Pair{String,String}}
 end
 
 function _build_conn_and_pipelines(route::Route, req::Deps.Request)
-    # cookies #
     body_params = Plug.Parsers.fetch_body_params(req)
     query_params = fetch_query_params(req)
     path_params = route.path_params

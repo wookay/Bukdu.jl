@@ -12,14 +12,27 @@ function index(c::SSEController)
     render(HTML, """
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>Server Sent Events</title>
-    </head>
-    <body>
-        <div id="time">
-            Time
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Server Sent Events</title>
+  <style>
+div#console {
+  color: red;
+}
+  </style>
+  <script>
+function console_out() {
+  let LF = "\\n";
+  var text = "";
+  var c = document.getElementById('console');
+  for(var i = 0; i < arguments.length; i++) {
+    text += arguments[i];
+  }
+  c.innerText += text + LF;
+}
+  </script>
+</head>
+<body>
 <pre style="background-color: #ffffcc;">
 julia> h = first(Bukdu.sse_streams())
 HTTP.Streams.Stream{HTTP.Messages.Request,HTTP.ConnectionPool.Transaction{Sockets.TCPSocket}}(HTTP.Messages.Request:
@@ -36,19 +49,18 @@ Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
 
 \"\"\", T1  ⏸    1↑🔒    1↓🔒   127.0.0.1:8080:8080 ≣16 inactive 10.4s, true, false, 0)
 
-julia> import JSON2
-
-julia> write(h, string("data: ", JSON2.write("Hello"), "\\r\\n\\r\\n"))
+julia> write(h, string("data: ", repr("Hello"), "\\r\\n\\r\\n"))
 23
 </pre>
-        <script>
-            let eventSource = new EventSource('/sse');
-            eventSource.addEventListener('message', function(e) {
-                console.log(e)
-                document.getElementById('time').textContent = e.data;
-            }, false);
-        </script>
-    </body>
+  <script>
+    let eventSource = new EventSource('/sse');
+    eventSource.addEventListener('message', function(e) {
+      console_out(e.data)
+    }, false);
+  </script>
+  <div id="console">
+  </div>
+</body>
 </html>""")
 end
 
