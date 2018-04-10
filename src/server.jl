@@ -120,7 +120,6 @@ import .HTTP.Servers: Stream, ConnectionPool, iswritable, hasheader, setheader, 
 import .HTTP.Streams: messagetowrite
 import .HTTP.IOExtras: startwrite
 import .HTTP.Servers: Server, https, RateLimit, Transaction, Streams, Stream, KILL, nosslconfig, Connection, nolimit, startread, closeread, closewrite, hasheader, isioerror, update!
-import .HTTP.Servers: check_rate_limit
 import Sockets # Sockets.TCPServer
 import Sockets: accept, IPAddr
 
@@ -132,7 +131,7 @@ function _handle_stream(f::Function, http::Stream)::Nothing
         needs_to_close = f(http) # routing_handle full_routing_handle
     catch e
         if isopen(http) && !iswritable(http)
-            @error e stacktrace(catch_backtrace())
+            @error Symbol(:server, :_handle_stream) e stacktrace(catch_backtrace())
             http.message.response.status = 500
             startwrite(http)
             write(http, sprint(showerror, e))
@@ -147,6 +146,27 @@ function _handle_stream(f::Function, http::Stream)::Nothing
     nothing
 end
 
+import Dates: now
+# HTTP.jl - Servers.jl
+function _check_rate_limit(tcp;
+                          ratelimits=nothing,
+                          ratelimit::Rational{Int}=Int(10)//Int(1), kw...)
+    ip = Sockets.getsockname(tcp)[1]
+    rate = Float64(ratelimit.num)
+    rl = get!(ratelimits, ip, RateLimit(rate, now()))
+    update!(rl, ratelimit)
+    if rl.allowance > rate
+        # @warn Symbol(:server, :_check_rate_limit) "throttling $ip" ## bukdu
+        rl.allowance = rate
+    end
+    if rl.allowance < 1.0
+        @warn Symbol(:server, :_check_rate_limit) "discarding connection from $ip due to rate limiting"
+        return false
+    else
+        rl.allowance -= 1.0
+    end
+    return true
+end
 
 # HTTP.jl - Servers.jl
 function serve(server::Server{T, H}, host, port, verbose) where {T, H}
@@ -163,13 +183,13 @@ function serve(server::Server{T, H}, host, port, verbose) where {T, H}
         end
     end
 
-    f = env[:check_websocket] || env[:check_server_sent_events] ? full_routing_handle : routing_handle
+    f = env[:check_websocket] || env[:check_server_sent_events] ? full_routing_handle : routing_handle ## bukdu
     listen(f, host, port;
            tcpref=tcpserver,
            ssl=(T == https),
            sslconfig=server.options.sslconfig,
            verbose=verbose,
-           tcpisvalid=server.options.ratelimit > 0 ? check_rate_limit :
+           tcpisvalid=server.options.ratelimit > 0 ? _check_rate_limit :
                                                      (tcp; kw...) -> true,
            ratelimits=Dict{IPAddr, RateLimit}(),
            ratelimit=server.options.ratelimit)
@@ -205,7 +225,7 @@ function listen(f::Function,
                 io = accept(tcpserver)
             catch e
                 if e isa Base.UVError
-                    @warn "$e"
+                    @warn Symbol(:server, :listen) "$e"
                     break
                 else
                     rethrow(e)
@@ -221,7 +241,7 @@ function listen(f::Function,
                 @async try
                     _handle_connection(f, io; kw...)
                 catch e
-                    @error "Error:   $io" e stacktrace(catch_backtrace()) ##
+                    @error Symbol(:server, :listen) "Error:   $io" e stacktrace(catch_backtrace()) ##
                 finally
                     close(io)
                     # @info "Closed:  $io" ##
@@ -230,7 +250,7 @@ function listen(f::Function,
         end
     catch e
         if typeof(e) <: InterruptException
-            @warn "Interrupted: listen($host,$port)"
+            @warn Symbol(:server, :listen) "Interrupted: listen($host,$port)"
         else
             rethrow(e)
         end
@@ -252,7 +272,7 @@ function _handle_connection(f::Function, c::Connection;
         @async while wait_for_timeout[]
             @show inactiveseconds(c)
             if inactiveseconds(c) > readtimeout
-                @warn "Timeout: $c"
+                @warn Symbol(:server, :_handle_connection) "Timeout: $c"
                 writeheaders(c.io, Response(408, ["Connection" => "close"]))
                 close(c)
                 break
@@ -300,7 +320,7 @@ function _handle_transaction(f::Function, t::Transaction;
 #            @warn "Connection closed"
 #            return
         elseif e isa HTTP.ParseError
-            @error e
+            # @error Symbol(:server, :_handle_transaction) e ## bukdu WebSocketError
             status = e.code == :HEADER_SIZE_EXCEEDS_LIMIT  ? 413 : 400
             write(t, Response(status, body = string(e.code)))
             close(t)
@@ -324,9 +344,11 @@ function _handle_transaction(f::Function, t::Transaction;
         _handle_stream(f, http)
     catch e
         if isioerror(e)
-            @warn e
+            @warn Symbol(:server, :_handle_transaction) e
+            #   ArgumentError("stream is closed or unusable")
+            #   write: broken pipe (EPIPE)
         else
-            @error e stacktrace(catch_backtrace())
+            # @error Symbol(:server, :_handle_transaction) e stacktrace(catch_backtrace()) ## bukdu WebSocketError
         end
         close(t)
     end

@@ -1,6 +1,6 @@
 module System # Bukdu
 
-import ..Bukdu: ApplicationController, Conn, Route, Deps, render
+import ..Bukdu: ApplicationController, Conn, Route, Deps, Plug, render
 import Documenter.Utilities.DOM: @tags
 
 struct HaltedError <: Exception
@@ -154,7 +154,9 @@ function info_response(route::Route, req, response)
     buf = IOBuffer()
     iocontext = IOContext(buf, logger.stream)
     iob = IOContext(iocontext, :color => true)
-    printstyled(iob, "INFO: ", color=:cyan)
+    printstyled(iob, "INFO:", color=:cyan)
+    logger isa Plug.Logger && logger.formatter(iob)
+    printstyled(iob, ' ')
     printstyled(iob, rpad(req.method, 6); req_method_style(req.method)...)
     printstyled(iob, string(' ',
                             rpad(nameof(route.C), controller_rpad),

@@ -2,7 +2,6 @@ __precompile__(true)
 
 module Bukdu
 
-include("logging.jl")
 include("assoc.jl")
 include("Deps.jl")
 include("plugs.jl")
@@ -14,7 +13,6 @@ include("System.jl")
 export Routing
 include("Routing.jl")
 include("server.jl")
-include("repr.jl")
 include("controller.jl")
 include("routes.jl")
 
@@ -35,8 +33,10 @@ export CLI
 include("CLI.jl")
 # include("Assembly.jl")
 
+import Base.CoreLogging: global_logger
+
 function __init__()
-    global_logger(Bukdu.Logger())
+    global_logger(Plug.Logger())
 end
 
 end # module Bukdu

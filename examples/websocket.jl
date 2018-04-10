@@ -103,11 +103,8 @@ if PROGRAM_FILE == basename(@__FILE__)
 
 using Bukdu
 import .ExampleWebSocket: WSController, ServerHost, ServerPort, index
-import Base.CoreLogging: global_logger
 
-global_logger(Bukdu.Logger(
-    access_log=(path=normpath(@__DIR__, "access.log"),)
-))
+plug(Plug.Logger, access_log=(path=normpath(@__DIR__, "access.log"),), formatter=Plug.LoggerFormatter.datetime_message)
 
 routes() do
     get("/", WSController, index)

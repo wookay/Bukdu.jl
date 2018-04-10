@@ -2,9 +2,6 @@
 
 import ..Bukdu
 
-"""
-    Plug.ServerSentEvents
-"""
 struct ServerSentEvents <: AbstractPlug
 end
 

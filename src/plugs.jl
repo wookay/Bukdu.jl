@@ -18,6 +18,7 @@ struct Render <: AbstractRender
     body::Vector{UInt8}
 end
 
+include("plugs/logger.jl")
 include("plugs/conn.jl")
 
 struct EventStream <: AbstractRender

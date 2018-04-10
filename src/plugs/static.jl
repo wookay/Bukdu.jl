@@ -1,8 +1,5 @@
 # module Bukdu.Plug
 
-"""
-    Plug.Static
-"""
 struct Static <: AbstractPlug
 end
 

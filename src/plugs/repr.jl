@@ -1,4 +1,4 @@
-# module Bukdu
+# module Bukdu.Plug
 
 function simple_el(x::AbstractString)::String
     string('"', x, '"')
@@ -20,4 +20,4 @@ function simple_repr(x)
     x
 end
 
-# module Bukdu
+# module Bukdu.Plug

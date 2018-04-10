@@ -1,11 +1,11 @@
 module test_bukdu_logging
 
 using Test
-import Bukdu
-import .Bukdu: handle_message
+import Bukdu: Plug
+import .Plug: handle_message
 import Base.CoreLogging: Debug, Info, Warn, Error
 
-logger = Bukdu.Logger()
+logger = Plug.Logger()
 @test logger.min_level == Debug
 
 _module = nothing

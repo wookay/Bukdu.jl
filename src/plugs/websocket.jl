@@ -2,9 +2,6 @@
 
 import ..Bukdu
 
-"""
-    Plug.WebSocket
-"""
 struct WebSocket <: AbstractPlug
 end
 
