@@ -23,8 +23,12 @@ end
     Plug.LoggerFormatter.datetime_message(io)
 """
 function datetime_message(io)
-    datetime = format(now(), "yyyy-mm-ddTHH:MM:SS.sss")
-    printstyled(io, ' ', datetime, color=:normal)
+    dt = now()
+    date = format(dt, "yyyy-mm-dd")
+    time = format(dt, "HH:MM:SS.sss")
+    printstyled(io, ' ', date, color=:normal)
+    printstyled(io, 'T', color=:light_black)
+    printstyled(io, time, color=:normal)
 end
 
 end # module Bukdu.Plug.LoggerFormatter
