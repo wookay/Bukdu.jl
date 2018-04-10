@@ -55,6 +55,7 @@ end
 function internal_error(c::SystemController)
     @tags h3 p
     c.conn.request.response.status = 500 # 500 Internal Server Error
+    @error Symbol(:System_, :internal_error) c.err.exception c.err.stackframes 
     render(HTML, string(
         h3(string(InternalError)),
         p(string(c.err.exception)),

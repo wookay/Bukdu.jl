@@ -6,7 +6,7 @@ module NAStuff
 using Bukdu
 struct NA <: ApplicationController; conn::Conn end
 index(c::NA) = nothing
-hello(c::NA) = err
+hello(c::NA) = TEST_INTERNAL_ERROR
 
 end # module NAStuff
 
