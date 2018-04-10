@@ -49,9 +49,7 @@ end
 
 min_enabled_level(logger::Logger) = logger.min_level
 
-if isdefined(CoreLogging, :shouldlog)
-    CoreLogging.shouldlog(::Logger, ::LogLevel, ::Module, ::Symbol, ::Symbol) = true
-end
+CoreLogging.shouldlog(::Logger, ::LogLevel, ::Module, ::Symbol, ::Symbol) = true
 
 # code from julia/base/logging.jl
 function handle_message(logger::Logger, level, message, _module, group, id,
