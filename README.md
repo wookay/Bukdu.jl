@@ -48,7 +48,7 @@ Bukdu/examples $ julia -i welcome.jl
  _/ |\__'_|_|_|\__'_|  |  Commit 8a5f74724c (0 days old master)
 |__/                   |  x86_64-apple-darwin17.4.0
 
-INFO: Listening on: 127.0.0.1:8080
+INFO: Bukdu Listening on: 127.0.0.1:8080
 julia> function index(c::WelcomeController)
            render(JSON, "Love")
        end

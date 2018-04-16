@@ -12,8 +12,17 @@ end
 
 const routing_verbs = [:get, :post, :delete, :patch, :put]
 
+# HTTP.URIs: queryparams
+# HTTP.jl - URIs.jl
+function queryparams(q::AbstractString)
+    Dict(Deps.HTTP.URIs.unescapeuri(k) => Deps.HTTP.URIs.unescapeuri(v)
+        for (k,v) in ([split(e, "=")..., ""][1:2]
+            for e in split(q, "&", keepempty=false)))
+end
+
 function fetch_query_params(req::Deps.Request)::Vector{Pair{String,String}}
-    collect(Deps.HTTP.queryparams(Deps.HTTP.URIs.URI(req.target)))
+    params = queryparams(Deps.HTTP.URIs.URI(req.target).query)
+    collect(params)
 end
 
 function _build_conn_and_pipelines(route::Route, req::Deps.Request)

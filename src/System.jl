@@ -137,10 +137,10 @@ const style_request_action = Dict{String,Symbol}(
 
 const style_response_status_others = :red
 const style_response_status = Dict{Int,Symbol}(
-    200 => :normal,  # 200 OK
-    401 => :magenta, # 401 Unauthorized
-    404 => :blue,    # 404 Not Found
-    500 => :red,     # 500 Internal Server Error
+    200 => :normal,     # 200 OK
+    401 => :magenta,    # 401 Unauthorized
+    404 => :light_blue, # 404 Not Found
+    500 => :red,        # 500 Internal Server Error
 )
 
 function req_method_style(method::String)
