@@ -20,18 +20,26 @@ end
 """
     plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing)
 """
-function plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing)
-    function readfile(c::StaticController)
+function plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing, indexfile="index.html")
+
+    function _readfile_base(c::StaticController, f)
         reqpath = c.conn.request.target
         offset = isdirpath(at) ? 1 : 2
         targetpath = reqpath[length(at)+offset:end]
-        filepath = joinpath(from, targetpath)
+        filepath = joinpath(f(from, targetpath)...)
         (_, fileext) = splitext(filepath)
         ext = lowercase(fileext)
-        # FIXME: stream
-        s = open(read, filepath)
-        Render(content_type_for_file_extionsion(ext), s)
+        Render(content_type_for_file_extionsion(ext), read(filepath))
+    end # function _readfile_base
+
+    function readfile(c::StaticController)
+        _readfile_base(c, (from, targetpath) -> (from, targetpath))
     end # function readfile
+
+    function readindexfile(c::StaticController)
+        _readfile_base(c, (from, targetpath) -> (from, targetpath, indexfile))
+    end # function readindexfile
+
     has_only = only isa Vector{String} && !isempty(only)
     for (root, dirs, files) in walkdir(from)
          subpath = root[length(from)+1:end]
@@ -39,6 +47,10 @@ function plug(::Type{Static}; at::String, from::String, only::Union{Vector{Strin
              if has_only
                  subfilepath = normpath(subpath, filename)
                  !any(x->startswith(subfilepath, x), only) && continue # for filename
+             end
+             if filename == indexfile
+                 reqindex = normpath(at, subpath)
+                 get(reqindex, StaticController, readindexfile)
              end
              reqpath = normpath(at, subpath, filename)
              get(reqpath, StaticController, readfile)
