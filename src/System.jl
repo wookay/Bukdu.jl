@@ -160,10 +160,15 @@ function info_response(route::Route, req, response)
     logger isa Plug.Logger && logger.formatter(iob)
     printstyled(iob, ' ')
     printstyled(iob, rpad(req.method, 6); req_method_style(req.method)...)
-    printstyled(iob, string(' ',
-                            rpad(nameof(route.C), controller_rpad),
-                            rpad(nameof(route.action), action_rpad)
-    ))
+    printstyled(iob, ' ')
+    controller_name = String(nameof(route.C))
+    if endswith(controller_name, "Controller")
+        printstyled(iob, controller_name[1:end-10])
+        printstyled(iob, rpad("Controller", controller_rpad-(length(controller_name)-10)), color=248)
+    else
+        printstyled(iob, rpad(controller_name, controller_rpad))
+    end
+    printstyled(iob, rpad(nameof(route.action), action_rpad))
     printstyled(iob, response.status; resp_status_style(response.status)...)
     printstyled(iob, ' ', _unescape_req_target(req))
     println(iob)

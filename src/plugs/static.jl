@@ -7,6 +7,16 @@ struct StaticController <: ApplicationController
     conn::Conn
 end
 
+function content_type_for_file_extionsion(ext)::String
+    mimes = Dict(
+        ".html" => "text/html; charset=utf-8",
+        ".htm"  => "text/html; charset=utf-8",
+        ".wasm" => "application/wasm",
+        ".css"  => "text/css",
+    )
+    get(mimes, ext, "application/octet-stream")
+end
+
 """
     plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing)
 """
@@ -18,18 +28,9 @@ function plug(::Type{Static}; at::String, from::String, only::Union{Vector{Strin
         filepath = joinpath(from, targetpath)
         (_, fileext) = splitext(filepath)
         ext = lowercase(fileext)
-        if ext in (".html", ".htm")
-            s = open(read, filepath)
-            Render("text/html; charset=utf-8", s)
-        else
-            # FIXME: stream
-            s = open(read, filepath)
-            if ext in (".wasm",)
-                Render("application/wasm", s)
-            else
-                Render("application/octet-stream", s)
-            end
-        end
+        # FIXME: stream
+        s = open(read, filepath)
+        Render(content_type_for_file_extionsion(ext), s)
     end # function readfile
     has_only = only isa Vector{String} && !isempty(only)
     for (root, dirs, files) in walkdir(from)

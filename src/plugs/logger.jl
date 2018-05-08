@@ -1,7 +1,7 @@
 # module Bukdu.Plug
 
 import Base: CoreLogging
-import .CoreLogging: AbstractLogger, global_logger, handle_message, min_enabled_level
+import .CoreLogging: AbstractLogger, global_logger, handle_message, min_enabled_level, shouldlog
 import .CoreLogging: LogLevel, Debug, Info, Warn, Error
 
 include("repr.jl") # simple_repr
@@ -52,8 +52,7 @@ function Logger(; access_log::Union{Nothing,<:NamedTuple}=nothing, stream::IO=st
 end
 
 min_enabled_level(logger::Logger) = logger.min_level
-
-CoreLogging.shouldlog(::Logger, ::LogLevel, ::Module, ::Symbol, ::Symbol) = true
+shouldlog(logger::Logger, level, _module, group, id) = get(logger.message_limits, id, 1) > 0
 
 # code from julia/base/logging.jl
 function handle_message(logger::Logger, level, message, _module, group, id,
