@@ -43,7 +43,7 @@ function _build_conn_and_pipelines(route::Route, req::Deps.Request)
         obj = halted_error(SystemController(conn, err))
         (rou, obj)
     else
-        controller = route.C(conn)
+        controller = invoke(route.C, Tuple{Conn}, conn)
         if applicable(route.action, controller)
             obj = route.action(controller)
             (route, obj)

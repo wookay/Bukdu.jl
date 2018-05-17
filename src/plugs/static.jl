@@ -18,7 +18,7 @@ function content_type_for_file_extionsion(ext)::String
 end
 
 """
-    plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing)
+    plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing, indexfile="index.html")
 """
 function plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing, indexfile="index.html")
 
