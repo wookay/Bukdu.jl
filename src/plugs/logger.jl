@@ -46,6 +46,7 @@ function Logger(; access_log::Union{Nothing,<:NamedTuple}=nothing, stream::IO=st
     if access_log isa Nothing
         Logger(stream, level, message_limits, formatter)
     else
+        @info :access_log access_log.path
         io = open(access_log.path, "a")
         Logger(io, level, message_limits, formatter)
     end
