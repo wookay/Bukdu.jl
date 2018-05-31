@@ -27,7 +27,7 @@ function Base.setindex!(assoc::Assoc, value::String, key::Symbol)
 end
 
 function Base.setindex!(assoc::Assoc, value::String, key::String)
-    ind = coalesce(findfirst(isequal(key), keys(assoc)), 0)
+    ind = something(findfirst(isequal(key), keys(assoc)), 0)
     if ind > 0
         assoc.__bukdu_assoc[ind] = Pair(key, value)
     else
