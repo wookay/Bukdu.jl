@@ -1,6 +1,8 @@
-julia 0.7.0-DEV
+julia 0.7.0-alpha
 HTTP
+JSON2
 MbedTLS
 URIParser
-JSON2
 Documenter
+Sockets
+InteractiveUtils

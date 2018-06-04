@@ -59,12 +59,13 @@ That's it! Refresh your page of the web browser.
 
 ### Requirements
 
-The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl) in [Julia 0.7 DEV](https://julialang.org/downloads/nightlies.html).
+The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl) in [Julia 0.7 alpha](https://julialang.org/downloads/nightlies.html).
+
+`julia>` type `]` key
 
 ```julia
-using Pkg
-Pkg.clone("https://github.com/wookay/Bukdu.jl.git")
-Pkg.checkout("Bukdu", "sevenstars")
+(v0.7) pkg> add HTTP#master
+(v0.7) pkg> add https://github.com/wookay/Bukdu.jl.git#sevenstars
 ```
 
 

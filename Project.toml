@@ -1,0 +1,14 @@
+authors = ["WooKyoung Noh <wookay.noh@gmail.com>"]
+name = "Bukdu"
+uuid = "3e78a19a-cc83-51d8-955b-515f39fd7955"
+version = "0.2.0"
+
+[deps]
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+JSON2 = "2535ab7d-5cd8-5a07-80ac-9b1792aadce3"
+MbedTLS = "739be429-bea8-5141-9913-cc70e7f3736d"
+URIParser = "30578b45-9adc-5946-b283-645ec420af67"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
+InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"

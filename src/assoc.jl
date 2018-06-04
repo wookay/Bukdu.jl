@@ -107,6 +107,12 @@ function Base.show(io::IO, mime::MIME"text/plain", assoc::Assoc)
     println(io, Assoc, '(', body, ')')
 end
 
+function Base.iterate(assoc::Assoc, v::Int=1)
+    iterate(assoc.__bukdu_assoc, v)
+end
+
+Base.lastindex(assoc::Assoc) = lastindex(assoc.__bukdu_assoc)
+
 import JSON2
 JSON2.write(io::IO, assoc::Assoc) = JSON2.write(io, assoc.__bukdu_assoc)
 

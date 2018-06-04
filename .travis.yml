@@ -8,8 +8,16 @@ julia:
 notifications:
   email: false
 script:
-  # - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --color=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.checkout("Bukdu", "sevenstars"); Pkg.checkout("HTTP", "master"); Pkg.build("Bukdu"); Pkg.test("Bukdu"; coverage=true)'
+  - pwd
+  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add HTTP#master")'
+  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add JSON2#master")'
+  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add URIParser#master")'
+  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add Documenter#master")'
+  - julia --color=yes -e 'using Bukdu'
+  - cd test
+  - julia --color=yes --depwarn=no runtests.jl
+  # TODO: coverage
+
 after_success:
   # push coverage results to Codecov
-  - if [[ "$TRAVIS_OS_NAME" == linux ]]; then julia -e 'using Pkg; cd(Pkg.dir("Bukdu")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'   ; fi
+  #- if [[ "$TRAVIS_OS_NAME" == linux ]]; then julia -e 'using Pkg; Pkg.REPLMode.pkgstr("add Coverage#master"); using Coverage; Codecov.submit(Codecov.process_folder())'   ; fi
