@@ -15,9 +15,10 @@ script:
   - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add Documenter#master")'
   - julia --color=yes -e 'using Bukdu'
   - cd test
-  - julia --color=yes --depwarn=no runtests.jl
-  # TODO: coverage
+  - julia --color=yes runtests.jl
+  - cd
 
 after_success:
   # push coverage results to Codecov
-  #- if [[ "$TRAVIS_OS_NAME" == linux ]]; then julia -e 'using Pkg; Pkg.REPLMode.pkgstr("add Coverage#master"); using Coverage; Codecov.submit(Codecov.process_folder())'   ; fi
+  - if [[ "$TRAVIS_OS_NAME" == osx ]]; then julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("dev Bukdu#sevenstars"); Pkg.REPLMode.pkgstr("test --coverage Bukdu")' ; fi
+  - if [[ "$TRAVIS_OS_NAME" == osx ]]; then julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add Coverage#master"); using Coverage; Codecov.submit(Codecov.process_folder(normpath(Pkg.devdir(), "Bukdu", "src")))' ; fi
