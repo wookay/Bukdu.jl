@@ -188,11 +188,11 @@ function checkbox(f::Changeset, field::Symbol, value::Union{Bool,Nothing}=nothin
 end
 
 """
-    submit(block_option)::Node
+    submit(block_option; kwargs...)::Node
 """
-function submit(block_option)::Node
+function submit(block_option; kwargs...)::Node
     @tags button
-    button[:type => "submit"](block_option)
+    button[:type => "submit", kwargs...](block_option)
 end
 
 
