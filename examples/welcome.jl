@@ -1,22 +1,28 @@
-importall Bukdu
+using Bukdu
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
+    conn::Conn
 end
 
-index(::WelcomeController) = "Hello Bukdu"
+function index(c::WelcomeController)
+    render(JSON, "Hello World")
+end
 
-Router() do
+
+
+if PROGRAM_FILE == basename(@__FILE__)
+
+routes() do
     get("/", WelcomeController, index)
 end
 
 Bukdu.start(8080)
 
-Endpoint() do
-    plug(Plug.Logger)
-    plug(Router)
-end
+# Router.call(get, "/") #
+# CLI.routes()
 
-(Endpoint)("/")
 Base.JLOptions().isinteractive==0 && wait()
 
 # Bukdu.stop()
+
+end # if

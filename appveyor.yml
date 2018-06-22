@@ -1,12 +1,21 @@
+clone_folder: c:\projects\bukdu_jl
+
 environment:
   matrix:
-  - JULIA_URL: "https://julialang-s3.julialang.org/bin/winnt/x86/0.6/julia-0.6.2-win32.exe"
-  - JULIA_URL: "https://julialang-s3.julialang.org/bin/winnt/x64/0.6/julia-0.6.2-win64.exe"
+  - JULIA_URL: "https://julialangnightlies-s3.julialang.org/bin/winnt/x64/julia-latest-win64.exe"
+
+## uncomment the following lines to allow failures on nightly julia
+## (tests will run but not make your overall status red)
+#matrix:
+#  allow_failures:
+#  - JULIA_URL: "https://julialangnightlies-s3.julialang.org/bin/winnt/x86/julia-latest-win32.exe"
+#  - JULIA_URL: "https://julialangnightlies-s3.julialang.org/bin/winnt/x64/julia-latest-win64.exe"
 
 branches:
   only:
-    - master
-    - /release-.*/
+    - sevenstars
+    # - master
+    # - /release-.*/
 
 notifications:
   - provider: Email
@@ -16,6 +25,11 @@ notifications:
 
 install:
   - ps: "[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12"
+# If there's a newer build queued for the same PR, cancel this one
+  - ps: if ($env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_BUILD_NUMBER -ne ((Invoke-RestMethod `
+        https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
+        Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
+        throw "There are newer queued builds for this pull request, failing early." }
 # Download most recent Julia Windows binary
   - ps: (new-object net.webclient).DownloadFile(
         $env:JULIA_URL,
@@ -25,9 +39,15 @@ install:
 
 build_script:
 # Need to convert from shallow to complete for Pkg.clone to work
-  # - IF EXIST .git\shallow (git fetch --unshallow)
-  - C:\projects\julia\bin\julia --color=yes -e "versioninfo();
-      Pkg.clone(pwd(), \"Bukdu\"); Pkg.build(\"Bukdu\")"
+  - C:\projects\julia\bin\julia --color=yes -e "using InteractiveUtils; versioninfo()"
+  - CD c:\projects\bukdu_jl
+  - IF EXIST .git\shallow (git fetch --unshallow)
+  - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.REPLMode.pkgstr(\"add HTTP#master\")"
+  - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.REPLMode.pkgstr(\"add JSON2#master\")"
+  - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.REPLMode.pkgstr(\"add URIParser#master\")"
+  - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.REPLMode.pkgstr(\"add Documenter#master\")"
+  - C:\projects\julia\bin\julia --color=yes -e "using Bukdu"
 
 test_script:
-  - C:\projects\julia\bin\julia --color=yes -e "Pkg.test(\"Bukdu\")"
+  - CD test
+  - C:\projects\julia\bin\julia --color=yes --depwarn=no runtests.jl

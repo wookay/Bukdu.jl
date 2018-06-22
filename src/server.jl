@@ -1,174 +1,358 @@
 # module Bukdu
 
-include("server/error.jl")
-include("server/handler.jl")
+const env = Dict{Symbol, Any}(
+    :server => nothing,
+    :check_websocket => false,
+    :check_server_sent_events => false,
+    :sse_streams => Dict{RawFD,Any}(),
+    :websockets => Dict{RawFD,Any}(),
+)
 
-module Farm
-
-import HttpServer
-servers = Vector{Tuple{Type,Int,HttpServer.Server}}()
-
-end # module Bukdu.Farm
-
-
-import HttpServer
-import HttpCommon: Request, Response
-
-"""
-    Bukdu.start(port::Int; host=getaddrinfo("localhost"))
-
-Start Bukdu server with port.
-
-```jula
-julia> Bukdu.start(8080)
-Listening on 127.0.0.1:8080...
-```
-"""
-function start(port::Int, host=getaddrinfo("localhost"); kw...)::Void
-    Bukdu.start([port], host; kw...)
+function sse_streams()
+    streams = Dict{RawFD,Any}()
+    dirty = false
+    for (key, http) in pairs(env[:sse_streams])
+         s = Base.uv_status_string(http.stream.c.io)
+         if s == "paused"
+             streams[key] = http
+         else
+             dirty = true
+         end
+    end
+    if dirty
+        env[:sse_streams] = streams
+    end
+    values(streams)
 end
 
-"""
-    Bukdu.start(ports::Vector{Int}; host=getaddrinfo("localhost"))
-
-Start Bukdu server with multiple ports.
-
-```jula
-julia> Bukdu.start([8080, 8081])
-Listening on 127.0.0.1:8080...
-```
-"""
-function start(ports::Vector{Int}, host=getaddrinfo("localhost"); kw...)::Void
-    Bukdu.start(Endpoint, ports, host; kw...)
+function websockets()
+    sockets = Dict{RawFD,Any}()
+    dirty = false
+    for (key, ws) in pairs(env[:websockets])
+         s = Base.uv_status_string(ws.io)
+         if s == "active"
+             sockets[key] = ws
+         else
+             dirty = true
+         end
+    end
+    if dirty
+        env[:websockets] = sockets
+    end
+    values(sockets)
 end
 
-function start{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getaddrinfo("localhost"); kw...)::Void
-    Bukdu.start(AE, [port], host; kw...)
+function _base_routing_handle(http::Deps.HTTP.Stream) # result
+    request::Deps.Request = http.message
+    request.body = read(http)
+    route = Routing.handle(request)
+    request_handler(route, request) # result
 end
 
-function start{AE<:ApplicationEndpoint}(::Type{AE}, ports::Vector{Int}, host=getaddrinfo("localhost"); kw...)::Void
-    for port in ports
-        start_server(AE, port, host; kw...)
+function routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
+    result = _base_routing_handle(http)
+    startwrite(http)                   #
+    write(http, result.resp.body) #
+    true
+end
+
+function full_routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
+    if Deps.HTTP.WebSockets.is_upgrade(http.message)
+        Deps.HTTP.WebSockets.upgrade(http) do ws::Deps.HTTP.WebSockets.WebSocket
+            fd = Base._fd(Deps.HTTP.IOExtras.tcpsocket(ws.io))
+            env[:websockets][fd] = ws
+            while !eof(ws)
+                data = readavailable(ws)
+                write(ws,data)
+            end
+        end
+        true
+    else
+        result = _base_routing_handle(http)
+        if result.got isa EventStream
+            fd = Base._fd(Deps.HTTP.IOExtras.tcpsocket(http.stream.c.io))
+            env[:sse_streams][fd] = http
+            needs_to_close = false
+        else
+            startwrite(http)              #
+            write(http, result.resp.body) #
+            needs_to_close = true
+        end
+        needs_to_close
+    end
+end
+
+
+import Sockets: @ip_str
+function start(port; host=ip"127.0.0.1")
+    server = Deps.HTTP.Servers.Server(routing_handle, stdout)
+    env[:server] = server
+    @async serve(
+                server,
+                host,
+                port,
+                false) # verbose
+end
+
+function stop()
+    server = env[:server]
+    env[:server] = nothing
+    env[:check_websocket] = false
+    env[:check_server_sent_events] = false
+    env[:sse_streams] = Dict{RawFD,Any}()
+    env[:websockets] = Dict{RawFD,Any}()
+    server isa Deps.HTTP.Servers.Server && put!(server.in, Deps.HTTP.Servers.KILL)
+    nothing
+end
+
+print_listening_on(host, port) = @info "Bukdu Listening on: $host:$port"
+
+
+
+#########################################################################
+#
+#  customizing HTTP.jl
+#
+#  original code from https://github.com/JuliaWeb/HTTP.jl/tree/master/src
+
+import .Deps: HTTP
+import .HTTP.Servers: Stream, ConnectionPool, iswritable, hasheader, setheader, writeheaders
+import .HTTP.Streams: messagetowrite
+import .HTTP.IOExtras: startwrite
+import .HTTP.Servers: Server, https, RateLimit, Transaction, Streams, Stream, KILL, nosslconfig, Connection, nolimit, startread, closeread, closewrite, hasheader, isioerror, update!
+import Sockets # Sockets.TCPServer
+import Sockets: accept, IPAddr
+
+# HTTP.jl - Servers.jl
+# doesn't need to be closed when EventStream has set
+function _handle_stream(f::Function, http::Stream)::Nothing
+    needs_to_close = true
+    try
+        needs_to_close = f(http) # routing_handle full_routing_handle
+    catch e
+        if isopen(http) && !iswritable(http)
+            @error Symbol(:server_, :_handle_stream) e stacktrace(catch_backtrace())
+            http.message.response.status = 500
+            startwrite(http)
+            write(http, sprint(showerror, e))
+        else
+            rethrow(e)
+        end
+    end
+    if needs_to_close # SSE
+        closeread(http)
+        closewrite(http)
     end
     nothing
 end
 
-function start(any_port::Symbol, host=getaddrinfo("localhost"); kw...)::Int
-    start(Endpoint, any_port, host; kw...)
-end
-
-function start{AE<:ApplicationEndpoint}(::Type{AE}, any_port::Symbol, host=getaddrinfo("localhost"); kw...)::Int
-    if :any==any_port
-        start_server(AE, 9100, host; any_port=true, kw...)
+import Dates: now
+# HTTP.jl - Servers.jl
+function _check_rate_limit(tcp;
+                          ratelimits=nothing,
+                          ratelimit::Rational{Int}=Int(10)//Int(1), kw...)
+    ip = Sockets.getsockname(tcp)[1]
+    rate = Float64(ratelimit.num)
+    rl = get!(ratelimits, ip, RateLimit(rate, now()))
+    update!(rl, ratelimit)
+    if rl.allowance > rate
+        # @warn Symbol(:server_, :_check_rate_limit) "throttling $ip" ## bukdu
+        rl.allowance = rate
+    end
+    if rl.allowance < 1.0
+        @warn Symbol(:server_, :_check_rate_limit) "discarding connection from $ip due to rate limiting"
+        return false
     else
-        -1
+        rl.allowance -= 1.0
     end
+    return true
 end
 
-if isdefined(Base, :trylisten)
-    import Base: trylisten
-else
-    # from julia/base/stream.jl
-    function trylisten(sock::Base.LibuvServer; backlog::Integer=Base.BACKLOG_DEFAULT)
-        Base.check_open(sock)
-        err = ccall(:uv_listen, Cint, (Ptr{Void}, Cint, Ptr{Void}),
-                    sock, backlog, Base.uv_jl_connectioncb::Ptr{Void})
-        sock.status = Base.StatusActive
-        return err
+# HTTP.jl - Servers.jl
+function serve(server::Server{T, H}, host, port, verbose) where {T, H}
+
+    tcpserver = Ref{Sockets.TCPServer}()
+
+    @async begin
+        while !isassigned(tcpserver)
+            sleep(1)
+        end
+        while true
+            val = take!(server.in)
+            val == KILL && close(tcpserver[])
+        end
     end
+
+    f = env[:check_websocket] || env[:check_server_sent_events] ? full_routing_handle : routing_handle ## bukdu
+    listen(f, host, port;
+           tcpref=tcpserver,
+           ssl=(T == https),
+           sslconfig=server.options.sslconfig,
+           verbose=verbose,
+           tcpisvalid=server.options.ratelimit > 0 ? _check_rate_limit :
+                                                     (tcp; kw...) -> true,
+           ratelimits=Dict{IPAddr, RateLimit}(),
+           ratelimit=server.options.ratelimit)
+
+    return
 end
 
-function start_server{AE<:ApplicationEndpoint}(::Type{AE}, port::Int, host=getaddrinfo("localhost"); any_port=false, kw...)::Int
-    function listening(addr)
-        use_https = haskey(Dict(kw), :ssl)
-        address = Logger.with_color(:bold, string(use_https ? "https" : "http", "://", addr))
-        Logger.info("Listening on $address"; LF=!isdefined(:Juno))
+
+# HTTP.jl - Servers.jl
+listen(f, host, port; kw...) = listen(f, string(host), Int(port); kw...)
+function listen(f::Function,
+                host::String="127.0.0.1", port::Int=8081;
+                ssl::Bool=false,
+                require_ssl_verification::Bool=true,
+                sslconfig::Deps.MbedTLS.SSLConfig=nosslconfig,
+                pipeline_limit::Int=ConnectionPool.default_pipeline_limit,
+                tcpisvalid::Function=(tcp; kw...)->true,
+                tcpref::Ref{Sockets.TCPServer}=Ref{Sockets.TCPServer}(),
+                kw...)
+
+    if sslconfig === nosslconfig
+        sslconfig = Deps.MbedTLS.SSLConfig(require_ssl_verification)
     end
-    function http_server(port::Int)::HttpServer.Server
-        handler = (req::Request, res::Response) -> Server.handler(AE, port, req, res)
-        server = HttpServer.Server(handler)
-        server.http.events["listen"] = listening
-        server
-    end
-    local server = nothing
-    tc = Condition()
-    task = @async begin
-        if any_port
-            while true
-                addr = Base.InetAddr(host, port)
-                sock = Base.TCPServer()
-                if bind(sock, addr) && trylisten(sock) == 0
-                    close(sock)
-                    port = Int(addr.port)
-                    server = http_server(port)
-                    notify(tc)
-                    HttpServer.run(server, host=host, port=port; kw...)
+
+    print_listening_on(host, port) ##
+    tcpserver = Sockets.listen(Sockets.getaddrinfo(host), port)
+
+    tcpref[] = tcpserver
+
+    try
+        while isopen(tcpserver)
+            try
+                io = accept(tcpserver)
+            catch e
+                if e isa Base.UVError
+                    @warn Symbol(:server_, :listen) "$e"
                     break
                 else
-                    close(sock)
-                    port = Int(addr.port) + 1
+                    rethrow(e)
                 end
             end
-        else
-            server = http_server(port)
-            notify(tc)
-            HttpServer.run(server, host=host, port=port; kw...)
-        end
-    end
-    wait(tc)
-    if task.state in [:queued, :runnable]
-        push!(Farm.servers, (AE, port, server))
-    end
-    port
-end
-
-"""
-    Bukdu.stop()
-
-Stop the Bukdu server.
-"""
-function stop()::Void
-    stop_servers([port for (E,port,server) in Farm.servers])
-end
-
-function stop(port::Int)::Void
-    stop_servers([port])
-end
-
-function stop{AE<:ApplicationEndpoint}(::Type{AE})::Void
-    stop_servers([port for (E,port,server) in Farm.servers if AE==E])
-end
-
-function stop_servers(ports::Vector{Int})::Void
-    inds = []
-    stopped = []
-    for (idx, (E,port,server)) in enumerate(Farm.servers)
-        try
-            if port in ports && Base.StatusActive == server.http.sock.status
-                push!(inds, idx)
-                push!(stopped, port)
-                close(server)
+            if !tcpisvalid(io; kw...)
+                close(io)
+                continue
             end
-        catch ex
+            io = ssl ? getsslcontext(io, sslconfig) : io
+            let io = Connection(host, string(port), pipeline_limit, 0, io)
+                # @info "Accept:  $io" ##
+                @async try
+                    _handle_connection(f, io; kw...)
+                catch e
+                    @error Symbol(:server_, :listen) "Error:   $io" e stacktrace(catch_backtrace()) ##
+                finally
+                    close(io)
+                    # @info "Closed:  $io" ##
+                end
+            end
         end
+    catch e
+        if typeof(e) <: InterruptException
+            @warn Symbol(:server_, :listen) "Interrupted: listen($host,$port)"
+        else
+            rethrow(e)
+        end
+    finally
+        close(tcpserver)
     end
-    if !isempty(inds)
-        deleteat!(Farm.servers, inds)
-        Logger.info(string("Stopped ", "(", join(stopped, ", "), ")"))
-    end
-    nothing
+
+    return
 end
 
-function reset()
-    for x in [Routing.routes,
-              Routing.router_routes,
-              Routing.endpoint_routes,
-              Routing.endpoint_contexts,
-              RouterScope.stack,
-              RouterScope.pipes,
-              ViewFilter.filters
-              ]
-        empty!(x)
+
+# HTTP.jl - Servers.jl
+function _handle_connection(f::Function, c::Connection;
+                           reuse_limit::Int=nolimit,
+                           readtimeout::Int=0, kw...)
+
+    wait_for_timeout = Ref{Bool}(true)
+    if readtimeout > 0
+        @async while wait_for_timeout[]
+            @show inactiveseconds(c)
+            if inactiveseconds(c) > readtimeout
+                @warn Symbol(:server_, :_handle_connection) "Timeout: $c"
+                writeheaders(c.io, Response(408, ["Connection" => "close"]))
+                close(c)
+                break
+            end
+            sleep(8 + rand() * 4)
+        end
     end
-    Logger.have_color(Base.have_color)
+
+    try
+        count = 0
+        while isopen(c)
+            io = Transaction(c)
+            final = count == reuse_limit
+            _handle_transaction(f, io; final_transaction=final,
+                                      kw...)
+            if count == reuse_limit
+                @info "close " count reuse_limit
+                close(c)
+            end
+            count += 1
+        end
+    finally
+        wait_for_timeout[] = false
+    end
+    return
 end
+
+
+# HTTP.jl - Servers.jl
+function _handle_transaction(f::Function, t::Transaction;
+                            final_transaction::Bool=false,
+                            verbose::Bool=false, kw...)
+    request = HTTP.Request()
+    http = Streams.Stream(request, t)
+
+    try
+        startread(http)
+    catch e
+        # @show typeof(e)
+        # @show fieldnames(e)
+        if e isa EOFError && isempty(request.method)
+            return
+# FIXME https://github.com/JuliaWeb/HTTP.jl/pull/178#pullrequestreview-92547066
+#        elseif !isopen(http)
+#            @warn "Connection closed"
+#            return
+        elseif e isa HTTP.ParseError
+            # @error Symbol(:server_, :_handle_transaction) e ## bukdu WebSocketError
+            status = e.code == :HEADER_SIZE_EXCEEDS_LIMIT  ? 413 : 400
+            write(t, Response(status, body = string(e.code)))
+            close(t)
+            return
+        else
+            rethrow(e)
+        end
+    end
+
+    if verbose
+        @info http.message
+    end
+
+    response = request.response
+    #response.status = 200
+    if final_transaction || hasheader(request, "Connection", "close")
+        setheader(response, "Connection" => "close")
+    end
+
+    @async try
+        _handle_stream(f, http)
+    catch e
+        if isioerror(e)
+            @warn Symbol(:server_, :_handle_transaction) e
+            #   ArgumentError("stream is closed or unusable")
+            #   write: broken pipe (EPIPE)
+        else
+            # @error Symbol(:server_, :_handle_transaction) e stacktrace(catch_backtrace()) ## bukdu WebSocketError
+        end
+        close(t)
+    end
+    return
+end
+
+# module Bukdu

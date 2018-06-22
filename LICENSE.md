@@ -1,6 +1,6 @@
 The Bukdu.jl package is licensed under the MIT "Expat" License:
 
-> Copyright (c) 2016: WooKyoung Noh.
+> Copyright (c) 2016, 2017, 2018: WooKyoung Noh.
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy
 > of this software and associated documentation files (the "Software"), to deal
@@ -20,3 +20,7 @@ The Bukdu.jl package is licensed under the MIT "Expat" License:
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 > SOFTWARE.
 >
+
+Bukdu.jl includes borrowed code from the following projects, which have their own licenses:
+
+HTTP.jl https://github.com/JuliaWeb/HTTP.jl [MIT].

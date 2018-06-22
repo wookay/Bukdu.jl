@@ -1,14 +1,21 @@
-layout(::Layout, body) =
-    """
+module Layout
+
+using Bukdu
+
+function layout(title, script, style, body)
+    render(HTML, """
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Hello Livecoding</title>
-    <link rel="stylesheet" href="/css/style.css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Bukdu sevenstars$title</title>
+  $script
+  $style
 </head>
 <body>
-<div>
 $body
-</div>
 </body>
-</html>"""
+</html>
+""")
+end
+
+end # module Layout
