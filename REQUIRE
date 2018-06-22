@@ -1,6 +1,10 @@
-julia 0.7-
-HTTP
-JSON2
-MbedTLS
+julia 0.6
+HttpCommon
+HttpServer
 URIParser
-Documenter
+Mustache
+JSON
+Requests
+MbedTLS
+Libz
+Compat 0.37.0

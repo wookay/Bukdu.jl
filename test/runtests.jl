@@ -1,5 +1,3 @@
-using Test
-
 all_tests = []
 for (root, dirs, files) in walkdir(".")
     for filename in files
@@ -13,7 +11,8 @@ end
 
 for (idx, filepath) in enumerate(all_tests)
     numbering = string(idx, /, length(all_tests))
-    ts = @testset "$numbering $filepath" begin
+    ts = Base.Test.@testset "$numbering $filepath" begin
         include(filepath)
+        Bukdu.reset()
     end
 end

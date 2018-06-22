@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Hello Vue.js</title>
+    <script type="text/javascript" src="/js/vue.min.js"></script>
+    <link rel="stylesheet" href="/css/style.css"/>
+  </head>
+  <body>
+    <div id="app">
+      {{ message }}
+    </div>
+
+    <script type="text/javascript">
+    new Vue({
+       el: '#app',
+       data: {
+           message: 'Hello Vue.js!'
+       }
+    })
+    </script>
+
+    <div>
+      <p>Vue.js v1.0.26 (c) 2016 Evan You</p>
+      <p>Go to <a href="http://vuejs.org/">http://vuejs.org/</a></p>
+    </div>
+  </body>
+</html>

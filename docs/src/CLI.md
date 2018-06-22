@@ -1,5 +1,0 @@
-# CLI
-
-```@docs
-CLI.routes()
-```
