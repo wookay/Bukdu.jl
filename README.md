@@ -1,25 +1,26 @@
 # Bukdu 🌌
 
-  [![Travis CI](https://api.travis-ci.org/wookay/Bukdu.jl.svg?branch=master)](https://travis-ci.org/wookay/Bukdu.jl)
-  [![CircleCI](https://circleci.com/gh/wookay/Bukdu.jl.svg?style=svg)](https://circleci.com/gh/wookay/Bukdu.jl)
-  [![AppVeyor](https://ci.appveyor.com/api/projects/status/v1af95637qm7j582?svg=true)](https://ci.appveyor.com/project/wookay/bukdu-jl)
-  [![Codecov](https://codecov.io/gh/wookay/Bukdu.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/wookay/Bukdu.jl)
-  [![Coveralls](https://coveralls.io/repos/github/wookay/Bukdu.jl/badge.svg?branch=master)](https://coveralls.io/github/wookay/Bukdu.jl?branch=master)
+|  **Documentation**                        |  **Build Status**                                                                                 |
+|:-----------------------------------------:|:-------------------------------------------------------------------------------------------------:|
+|  [![][docs-latest-img]][docs-latest-url]  |  [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url] [![][codecov-img]][codecov-url]  |
 
 
-Bukdu is a web development framework for Julia (http://julialang.org).
+Bukdu 🌌 is a web development framework for Julia (https://julialang.org).
 
 It's influenced by Phoenix framework (http://phoenixframework.org).
 
 ```julia
-importall Bukdu
+using Bukdu
 
-type WelcomeController <: ApplicationController
+struct WelcomeController <: ApplicationController
+    conn::Conn
 end
 
-index(::WelcomeController) = "hello world"
+function index(c::WelcomeController)
+    render(JSON, "Hello World")
+end
 
-Router() do
+routes() do
     get("/", WelcomeController, index)
 end
 
@@ -27,56 +28,56 @@ Bukdu.start(8080)
 ```
 
 
-### Endpoint
+### RESTful API Demo
 
-Use `Endpoint` to define the plug pipelines.
+Visit [Bukdu sevenstars on Heroku](https://sevenstars.herokuapp.com)
+and check its [source code](https://github.com/wookay/heroku-sevenstars).
+(A sleeping heroku page, it will become active again after a short delay.)
 
-* plug `Plug.Logger` to write the event logs.
-* plug `Plug.Static` to serve the static files.
-* plug `Router` to give the routes into the Endpoint.
+
+### Modifying actions at runtime
+
+```sh
+Bukdu/examples $ julia -i welcome.jl
+               _
+   _       _ _(_)_     |  A fresh approach to technical computing
+  (_)     | (_) (_)    |  Documentation: https://docs.julialang.org
+   _ _   _| |_  __ _   |  Type "?help" for help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 0.7.0-DEV.4722 (2018-03-29 19:53 UTC)
+ _/ |\__'_|_|_|\__'_|  |  Commit 8a5f74724c (0 days old master)
+|__/                   |  x86_64-apple-darwin17.4.0
+
+INFO: Bukdu Listening on: 127.0.0.1:8080
+julia> function index(c::WelcomeController)
+           render(JSON, "Love")
+       end
+index (generic function with 1 method)
+```
+That's it! Refresh your page of the web browser.
+
+
+### Requirements
+
+The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl) in [Julia 0.7 alpha](https://julialang.org/downloads/nightlies.html).
+
+`julia>` type `]` key
 
 ```julia
-Endpoint() do
-    plug(Plug.Logger)
-    plug(Plug.Static, at="/", from="public")
-    plug(Router)
-end
+(v0.7) pkg> add HTTP#master
+(v0.7) pkg> add https://github.com/wookay/Bukdu.jl.git#sevenstars
 ```
 
 
-### Working with params
 
-Put `conn::Conn` to the controller.
-Now, `params` could be accessed by indexing the controller. For example
+[docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
+[docs-latest-url]: https://wookay.github.io/docs/Bukdu.jl/
 
-```julia
-importall Bukdu
+[travis-img]: https://api.travis-ci.org/wookay/Bukdu.jl.svg?branch=sevenstars
+[travis-url]: https://travis-ci.org/wookay/Bukdu.jl
 
-type CalculateController <: ApplicationController
-    conn::Conn
-end
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/v1af95637qm7j582/branch/sevenstars?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/wookay/bukdu-jl/branch/sevenstars
 
-function my_fn(c::CalculateController)
-    q = c[:params]
-    x, y = map(v -> parse(Int, v), (q[:x], q[:y]))
-    render(JSON, x + 2*y)
-end
-
-Router() do
-    get("/my_fn", CalculateController, my_fn)
-end
-
-Bukdu.start(8080)
-```
-
-Check it by querying with parameters.
-http://localhost:8080/my_fn?x=2&y=3
-
-
-### Deploy on Heroku
-
-Bukdu can be deployed on Heroku. Go to the demo site (https://bukdu.herokuapp.com).
-
-
-### Jupyter notebook
-* [Bukdu.ipynb](https://github.com/wookay/Bukdu.jl/blob/master/examples/jupyter/Bukdu.ipynb)
+[codecov-img]: https://codecov.io/gh/wookay/Bukdu.jl/branch/sevenstars/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/wookay/Bukdu.jl/branch/sevenstars
