@@ -13,8 +13,7 @@ environment:
 
 branches:
   only:
-    - sevenstars
-    # - master
+    - master
     # - /release-.*/
 
 notifications:

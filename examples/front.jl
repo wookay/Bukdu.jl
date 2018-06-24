@@ -31,7 +31,7 @@ function Front.index(::Front.WelcomeController)
     body = """
 <h3>Welcome</h3>
 
-<p>Bukdu sevenstars demo on Heroku</p>
+<p>Bukdu demo on Heroku</p>
   <li>Visit Bukdu.jl Github Repository => <a href="$bukdu_git_url">$bukdu_git_url</a></li>
   <p />
   <li>Heroku example. Get full code of this page => <a href="https://github.com/wookay/heroku-sevenstars">https://github.com/wookay/heroku-sevenstars</a></li>

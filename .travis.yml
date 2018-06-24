@@ -20,5 +20,5 @@ script:
 
 after_success:
   # push coverage results to Codecov
-  - if [[ "$TRAVIS_OS_NAME" == osx ]]; then julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("dev Bukdu#sevenstars"); Pkg.REPLMode.pkgstr("test --coverage Bukdu")' ; fi
+  - if [[ "$TRAVIS_OS_NAME" == osx ]]; then julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("dev Bukdu"); Pkg.REPLMode.pkgstr("test --coverage Bukdu")' ; fi
   - if [[ "$TRAVIS_OS_NAME" == osx ]]; then julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add Coverage#master"); using Coverage; Codecov.submit(Codecov.process_folder(normpath(Pkg.devdir(), "Bukdu", "src")))' ; fi

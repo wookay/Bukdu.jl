@@ -7,7 +7,7 @@ function layout(title, script, style, body)
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>Bukdu sevenstars$title</title>
+  <title>Bukdu $title</title>
   $script
   $style
 </head>
