@@ -1,5 +1,6 @@
 # Bukdu 🌌
 
+
 Bukdu 🌌 is a web development framework for Julia (https://julialang.org).
 
 It's influenced by Phoenix framework (http://phoenixframework.org).
@@ -21,6 +22,11 @@ end
 
 Bukdu.start(8080)
 ```
+
+
+### Bukdu versions
+  - Bukdu v0.2.0 for Julia 0.6 (https://github.com/wookay/Bukdu.jl/tree/v0.2.0)
+  - Bukdu v0.3.0 for Julia 0.7 (https://github.com/wookay/Bukdu.jl/tree/master)
 
 
 ### RESTful API Demo
@@ -59,6 +65,6 @@ The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl)
 `julia>` type `]` key
 
 ```julia
-(v0.7) pkg> add HTTP#master
+(v0.7) pkg> add HTTP
 (v0.7) pkg> add https://github.com/wookay/Bukdu.jl.git#master
 ```

@@ -69,7 +69,7 @@ The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl)
 `julia>` type `]` key
 
 ```julia
-(v0.7) pkg> add HTTP#master
+(v0.7) pkg> add HTTP
 (v0.7) pkg> add https://github.com/wookay/Bukdu.jl.git#master
 ```
 

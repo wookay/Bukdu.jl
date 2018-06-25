@@ -1,9 +1,4 @@
-if haskey(ENV, "PRIVATE_DOCUMENTER")
-    include("../../PrivateDocumenter/src/Documenter.jl")
-    using .Documenter
-else
-    using Documenter
-end
+using Documenter
 using Bukdu
 using Bukdu.HTML5.Form
 
