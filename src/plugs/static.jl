@@ -21,7 +21,6 @@ end
     plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing, indexfile="index.html")
 """
 function plug(::Type{Static}; at::String, from::String, only::Union{Vector{String},Nothing}=nothing, indexfile="index.html")
-
     function _readfile_base(c::StaticController, f)
         reqpath = c.conn.request.target
         offset = isdirpath(at) ? 1 : 2
@@ -53,6 +52,10 @@ function plug(::Type{Static}; at::String, from::String, only::Union{Vector{Strin
                  get(reqindex, StaticController, readindexfile)
              end
              reqpath = normpath(at, subpath, filename)
+             if Sys.iswindows()
+                 path_arr = split(reqpath, Base.Filesystem.path_separator)
+                 reqpath = join(path_arr, '/')
+             end
              get(reqpath, StaticController, readfile)
         end
     end

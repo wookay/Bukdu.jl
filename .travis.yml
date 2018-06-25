@@ -9,10 +9,7 @@ notifications:
   email: false
 script:
   - pwd
-  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add HTTP#master")'
-  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add JSON2#master")'
-  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add URIParser#master")'
-  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add Documenter#master")'
+  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add HTTP")'
   - julia --color=yes -e 'using Bukdu'
   - cd test
   - julia --color=yes runtests.jl
