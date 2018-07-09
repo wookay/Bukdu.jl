@@ -41,9 +41,9 @@ build_script:
   - C:\projects\julia\bin\julia --color=yes -e "using InteractiveUtils; versioninfo()"
   - CD c:\projects\bukdu_jl
   - IF EXIST .git\shallow (git fetch --unshallow)
-  - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.REPLMode.pkgstr(\"add HTTP\")"
-  - C:\projects\julia\bin\julia --color=yes -e "using Bukdu"
+  - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.REPLMode.pkgstr(\"add HTTP JSON2 URIParser Documenter\")"
+  - C:\projects\julia\bin\julia --color=yes -e "using Pkg; Pkg.instantiate()"
+  - C:\projects\julia\bin\julia --color=yes -e "pushfirst!(LOAD_PATH, \"@.\"); using Bukdu"
 
 test_script:
-  - CD test
-  - C:\projects\julia\bin\julia --color=yes --depwarn=no runtests.jl
+  - C:\projects\julia\bin\julia --color=yes --depwarn=no -e "pushfirst!(LOAD_PATH, \"@.\"); cd(\"test\"); include(\"runtests.jl\")"
