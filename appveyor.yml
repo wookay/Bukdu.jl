@@ -2,6 +2,7 @@ clone_folder: c:\projects\bukdu_jl
 
 environment:
   matrix:
+  - JULIA_URL: "https://julialang-s3.julialang.org/bin/winnt/x64/1.0/julia-1.0.0-win64.exe"
   - JULIA_URL: "https://julialangnightlies-s3.julialang.org/bin/winnt/x64/julia-latest-win64.exe"
 
 ## uncomment the following lines to allow failures on nightly julia
@@ -46,4 +47,4 @@ build_script:
   - C:\projects\julia\bin\julia --color=yes -e "pushfirst!(LOAD_PATH, \"@.\"); using Bukdu"
 
 test_script:
-  - C:\projects\julia\bin\julia --color=yes --depwarn=no -e "pushfirst!(LOAD_PATH, \"@.\"); cd(\"test\"); include(\"runtests.jl\")"
+  - C:\projects\julia\bin\julia --color=yes -e "pushfirst!(LOAD_PATH, \"@.\"); cd(\"test\"); include(\"runtests.jl\")"
