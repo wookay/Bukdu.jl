@@ -8,14 +8,13 @@ julia:
   - nightly
 notifications:
   email: false
-script:
-  - pwd
-  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add HTTP")'
-  - julia --color=yes -e 'using Bukdu'
-  - cd test
-  - julia --color=yes runtests.jl
-  - cd
-
+#script:
+#  - pwd
+#  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add HTTP")'
+#  - julia --color=yes -e 'using Bukdu'
+#  - cd test
+#  - julia --color=yes runtests.jl
+#  - cd
 after_success:
   # push coverage results to Codecov
   - if [[ "$TRAVIS_OS_NAME" == osx ]]; then julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("dev Bukdu"); Pkg.REPLMode.pkgstr("test --coverage Bukdu")' ; fi
