@@ -1,7 +1,7 @@
 authors = ["WooKyoung Noh <wookay.noh@gmail.com>"]
 name = "Bukdu"
 uuid = "3e78a19a-cc83-51d8-955b-515f39fd7955"
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
@@ -12,3 +12,4 @@ Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

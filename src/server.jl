@@ -224,7 +224,7 @@ function listen(f::Function,
             try
                 io = accept(tcpserver)
             catch e
-                if e isa Base.UVError
+                if e isa Base.IOError
                     @warn Symbol(:server_, :listen) "$e"
                     break
                 else

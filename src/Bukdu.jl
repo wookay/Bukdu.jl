@@ -1,5 +1,3 @@
-__precompile__(true)
-
 module Bukdu
 
 include("assoc.jl")
