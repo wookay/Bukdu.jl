@@ -1,6 +1,5 @@
 # Bukdu 🌌
 
-
 Bukdu 🌌 is a web development framework for Julia (https://julialang.org).
 
 It's influenced by Phoenix framework (http://phoenixframework.org).
@@ -23,12 +22,12 @@ end
 Bukdu.start(8080)
 ```
 
-![hello.svg](./assets/bukdu/hello.svg)
+![hello.svg](https://wookay.github.io/docs/Bukdu.jl/assets/bukdu/hello.svg)
 
 
 ### Bukdu versions
   - Bukdu v0.2.0 for Julia 0.6 (https://github.com/wookay/Bukdu.jl/tree/v0.2.0)
-  - Bukdu v0.3.0 for Julia 0.7 (https://github.com/wookay/Bukdu.jl/tree/v0.3.0)
+  - Bukdu v0.3.1 for Julia 1.0 (https://github.com/wookay/Bukdu.jl/tree/v0.3.1)
 
 
 ### RESTful API Demo
@@ -42,14 +41,13 @@ and check its [source code](https://github.com/wookay/heroku-sevenstars).
 
 ```sh
 Bukdu/examples $ julia -i welcome.jl
-               _
-   _       _ _(_)_     |  A fresh approach to technical computing
-  (_)     | (_) (_)    |  Documentation: https://docs.julialang.org
+   _       _ _(_)_     |  Documentation: https://docs.julialang.org
+  (_)     | (_) (_)    |
    _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
   | | | | | | |/ _` |  |
-  | | |_| | | | (_| |  |  Version 0.7.0-beta.3 (2018-06-24 10:12 UTC)
- _/ |\__'_|_|_|\__'_|  |  Commit c4d24e60f1* (0 days old master)
-|__/                   |  x86_64-apple-darwin17.4.0
+  | | |_| | | | (_| |  |  Version 1.0.0 (2018-08-08)
+ _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
+|__/
 
 INFO: Bukdu Listening on: 127.0.0.1:8080
 julia> function index(c::WelcomeController)
@@ -62,10 +60,10 @@ That's it! Refresh your page of the web browser.
 
 ### Requirements
 
-The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl) in [Julia 0.7 beta](https://julialang.org/downloads/nightlies.html).
+The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl) in [Julia 1.0](https://julialang.org/downloads/).
 
 `julia>` type `]` key
 
 ```julia
-(v0.7) pkg> add Bukdu
+(v1.0) pkg> add Bukdu
 ```
