@@ -119,7 +119,8 @@ import .Deps: HTTP
 import .HTTP.Servers: Stream, ConnectionPool, iswritable, hasheader, setheader, writeheaders
 import .HTTP.Streams: messagetowrite
 import .HTTP.IOExtras: startwrite
-import .HTTP.Servers: Server, https, RateLimit, Transaction, Streams, Stream, KILL, nosslconfig, Connection, nolimit, startread, closeread, closewrite, hasheader, isioerror, update!
+import .HTTP.Servers: Server, https, RateLimit, Transaction, Streams, Stream, KILL, nolimit, startread, closeread, closewrite, hasheader, isioerror, update!
+import .HTTP.ConnectionPool: nosslconfig, Connection
 import Sockets # Sockets.TCPServer
 import Sockets: accept, IPAddr
 
