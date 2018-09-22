@@ -3,7 +3,7 @@ using Bukdu.HTML5.Form # change
                        # form_for label_for
                        # text_area text_input radio_button checkbox
                        # submit
-import Documenter.Utilities.DOM: @tags
+using Documenter.Utilities.DOM: @tags
 
 struct FormController <: ApplicationController
     conn::Conn

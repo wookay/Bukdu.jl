@@ -1,8 +1,8 @@
 module test_bukdu_plugs_conn
 
 using Test
-import HTTP
-import Dates: DateTime
+using HTTP
+using Dates: DateTime
 
 @testset "cookies" begin
     req = HTTP.Messages.Request()

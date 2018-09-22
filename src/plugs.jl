@@ -1,7 +1,7 @@
 module Plug # module Bukdu
 
-import ..Deps
-import ..Assoc
+using ..Deps
+using ..Bukdu: Assoc
 
 """
     ApplicationController
@@ -43,6 +43,7 @@ end # module Bukdu.Plug
 
 export Plug, Conn, ApplicationController, Render, EventStream, plug
 
-import .Plug: Conn, ApplicationController, AbstractPlug, AbstractRender, Render, EventStream, plug
+using .Plug: Conn, ApplicationController, AbstractPlug, AbstractRender, Render, EventStream
+import .Plug: plug
 
 # module Bukdu

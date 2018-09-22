@@ -3,8 +3,8 @@ module WelcomeStuff
 export WelcomeController
 
 using Bukdu
-import Bukdu.Actions: index
-import Documenter.Utilities.DOM: @tags
+using Documenter.Utilities.DOM: @tags
+import .Bukdu.Actions: index
 
 struct WelcomeController <: ApplicationController
     conn::Conn
@@ -31,8 +31,8 @@ module CalculatorStuff
 export Calculator
 
 using Bukdu
-import Bukdu.Actions: index
-import Documenter.Utilities.DOM: @tags
+using Documenter.Utilities.DOM: @tags
+import .Bukdu.Actions: index
 
 struct Calculator <: ApplicationController
     conn::Conn
@@ -68,8 +68,8 @@ module MainStuff
 export MainController
 
 using Bukdu
-import Bukdu.Actions: index
-import Documenter.Utilities.DOM: @tags
+using Documenter.Utilities.DOM: @tags
+import .Bukdu.Actions: index
 
 struct MainController <: ApplicationController
     conn::Conn
@@ -95,7 +95,7 @@ end # module MainStuff
 if PROGRAM_FILE == basename(@__FILE__)
 
 using Bukdu
-import Bukdu.Actions: index
+import .Bukdu.Actions: index
 
 using .WelcomeStuff
 using .CalculatorStuff

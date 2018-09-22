@@ -1,7 +1,7 @@
 module Parsers # Bukdu.Plug
 
-import ...Deps: HTTP, URIParser, Request
-import .HTTP.Messages: hasheader, header
+using ...Deps: HTTP, URIParser, Request
+using .HTTP.Messages: hasheader, header
 
 
 # getindex_header

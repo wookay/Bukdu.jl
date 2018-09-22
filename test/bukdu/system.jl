@@ -13,7 +13,7 @@ end # module NAStuff
 
 using Test
 using Bukdu
-import .Bukdu: System
+using .Bukdu: System
 
 function index
 end

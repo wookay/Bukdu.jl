@@ -8,8 +8,8 @@ module WASM
 export WasmController
 
 using Bukdu # ApplicationController Conn JavaScript Plug.Static Router Utils CLI render routes get plug
-import Bukdu.Actions: index
-import ..Layout: layout
+using ..Layout: layout
+import .Bukdu.Actions: index
 
 #=
 using Charlotte # @code_wasm
@@ -111,8 +111,8 @@ end
 end # module WASM
 
 
-import .Layout: layout
-import .WASM: get_banner_versioninfo
+using .Layout: layout
+using .WASM: get_banner_versioninfo
 function WASM.index(::WASM.WasmController)
     title = " - web assembly demo"
     script = """

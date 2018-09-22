@@ -2,7 +2,7 @@
 
 module CSRF # Bukdu.Plug
 
-import ..AbstractPlug
+using ..Plug: AbstractPlug
 
 struct Protection <: AbstractPlug
 end

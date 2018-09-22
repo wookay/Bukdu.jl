@@ -9,9 +9,9 @@ module Front
 export WelcomeController
 
 using Bukdu
-import Bukdu.Actions: index
-import ..Layout: layout
-import ..WASM: WasmController
+using ..Layout: layout
+using ..WASM: WasmController
+import .Bukdu.Actions: index
 
 struct WelcomeController <: ApplicationController
     conn::Conn

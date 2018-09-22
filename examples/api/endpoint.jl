@@ -3,7 +3,7 @@ module Endpoint
 export CustomerController
 
 using Bukdu
-import Bukdu.Actions: index, show, new, edit, create, delete, update
+import .Bukdu.Actions: index, show, new, edit, create, delete, update
 # using Octo.Adapters.PostgreSQL
 
 struct CustomerController <: ApplicationController
@@ -64,7 +64,7 @@ if PROGRAM_FILE == basename(@__FILE__)
 
 using .Endpoint
 using Bukdu
-import Bukdu.Actions: index, show, new, edit, create, delete, update
+import .Bukdu.Actions: index, show, new, edit, create, delete, update
 
 pipeline(:api) do conn::Conn
 end

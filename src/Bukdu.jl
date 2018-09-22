@@ -31,7 +31,7 @@ export CLI
 include("CLI.jl")
 # include("Assembly.jl")
 
-import Base.CoreLogging: global_logger
+using Base.CoreLogging: global_logger
 
 function __init__()
     global_logger(Plug.Logger())

@@ -113,7 +113,7 @@ end
 
 Base.lastindex(assoc::Assoc) = lastindex(assoc.__bukdu_assoc)
 
-import JSON2
+using JSON2
 JSON2.write(io::IO, assoc::Assoc) = JSON2.write(io, assoc.__bukdu_assoc)
 
 # module Bukdu

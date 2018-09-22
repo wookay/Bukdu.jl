@@ -8,10 +8,10 @@ include("front.jl")                     # Front
 if PROGRAM_FILE == basename(@__FILE__)
 
 using Bukdu
-import Bukdu.Actions: index, show, new, edit, create, delete, update
+import .Bukdu.Actions: index, show, new, edit, create, delete, update
 using .Front # WelcomeController
 using .Endpoint # CustomerController
-import .WASM: WasmController, hello_js, hello_wast
+using .WASM: WasmController, hello_js, hello_wast
 using Sockets
 
 pipeline(:api) do conn::Conn

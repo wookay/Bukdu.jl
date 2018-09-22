@@ -75,7 +75,8 @@ end # module ExampleSSE
 if PROGRAM_FILE == basename(@__FILE__)
 
 using Bukdu
-import .ExampleSSE: SSEController, index, sse
+using .ExampleSSE: SSEController, sse
+import .ExampleSSE: index
 
 plug(Plug.Logger, access_log=(path=normpath(@__DIR__, "access.log"),), formatter=Plug.LoggerFormatter.datetime_message)
 

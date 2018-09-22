@@ -29,7 +29,7 @@ function websockets()
     sockets = Dict{RawFD,Any}()
     dirty = false
     for (key, ws) in pairs(env[:websockets])
-         s = Base.uv_status_string(ws.io)
+         s = Base.uv_status_string(ws.io.c.io)
          if s == "active"
              sockets[key] = ws
          else
@@ -59,18 +59,18 @@ end
 function full_routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
     if Deps.HTTP.WebSockets.is_upgrade(http.message)
         Deps.HTTP.WebSockets.upgrade(http) do ws::Deps.HTTP.WebSockets.WebSocket
-            fd = Base._fd(Deps.HTTP.IOExtras.tcpsocket(ws.io))
+            fd = Base._fd(ws.io.c.io)
             env[:websockets][fd] = ws
             while !eof(ws)
                 data = readavailable(ws)
-                write(ws,data)
+                write(ws, data)
             end
         end
         true
     else
         result = _base_routing_handle(http)
         if result.got isa EventStream
-            fd = Base._fd(Deps.HTTP.IOExtras.tcpsocket(http.stream.c.io))
+            fd = Base._fd(http.stream.c.io)
             env[:sse_streams][fd] = http
             needs_to_close = false
         else
@@ -83,7 +83,7 @@ function full_routing_handle(http::Deps.HTTP.Stream)::Bool # needs_to_close
 end
 
 
-import Sockets: @ip_str
+using Sockets: @ip_str
 function start(port; host=ip"127.0.0.1")
     server = Deps.HTTP.Servers.Server(routing_handle, stdout)
     env[:server] = server
@@ -115,14 +115,13 @@ print_listening_on(host, port) = @info "Bukdu Listening on: $host:$port"
 #
 #  original code from https://github.com/JuliaWeb/HTTP.jl/tree/master/src
 
-import .Deps: HTTP
-import .HTTP.Servers: Stream, ConnectionPool, iswritable, hasheader, setheader, writeheaders
-import .HTTP.Streams: messagetowrite
-import .HTTP.IOExtras: startwrite
-import .HTTP.Servers: Server, https, RateLimit, Transaction, Streams, Stream, KILL, nolimit, startread, closeread, closewrite, hasheader, isioerror, update!
-import .HTTP.ConnectionPool: nosslconfig, Connection
-import Sockets # Sockets.TCPServer
-import Sockets: accept, IPAddr
+using .Deps: HTTP
+using .HTTP.Servers: Stream, ConnectionPool, iswritable, hasheader, setheader, writeheaders
+using .HTTP.Servers: Server, https, RateLimit, Transaction, Streams, Stream, KILL, nolimit, startread, closeread, closewrite, isioerror, update!
+using .HTTP.IOExtras: startwrite
+using .ConnectionPool: nosslconfig, Connection
+using Sockets # Sockets.TCPServer
+using .Sockets: accept, IPAddr
 
 # HTTP.jl - Servers.jl
 # doesn't need to be closed when EventStream has set
@@ -147,7 +146,7 @@ function _handle_stream(f::Function, http::Stream)::Nothing
     nothing
 end
 
-import Dates: now
+using Dates: now
 # HTTP.jl - Servers.jl
 function _check_rate_limit(tcp;
                           ratelimits=nothing,

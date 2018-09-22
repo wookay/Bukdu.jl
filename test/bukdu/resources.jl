@@ -2,7 +2,7 @@ module test_bukdu_resources
 
 using Test
 using Bukdu # ApplicationController Conn Router Utils routes resources
-import Bukdu.Actions: index, show, new, edit, create, delete, update
+import .Bukdu.Actions: index, show, new, edit, create, delete, update
 
 struct ArticleController <: ApplicationController
     conn::Conn

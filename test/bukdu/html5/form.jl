@@ -2,10 +2,10 @@ module test_bukdu_html5_form
 
 using Test # @test
 using Bukdu # Changeset
-import Bukdu.HTML5.Form: @tags
-import Bukdu.HTML5.Form: form_for, label_for
-import Bukdu.HTML5.Form: text_input, text_area, radio_button, checkbox
-import Bukdu.HTML5.Form: submit
+using .Bukdu.HTML5.Form: @tags
+using .Bukdu.HTML5.Form: form_for, label_for
+using .Bukdu.HTML5.Form: text_input, text_area, radio_button, checkbox
+using .Bukdu.HTML5.Form: submit
 
 @tags input button form label textarea
 

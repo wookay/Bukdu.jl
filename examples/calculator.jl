@@ -1,5 +1,5 @@
 using Bukdu
-import Documenter.Utilities.DOM: @tags
+using Documenter.Utilities.DOM: @tags
 
 struct Calculator <: ApplicationController
     conn::Conn

@@ -1,7 +1,7 @@
 module System # Bukdu
 
-import ..Bukdu: ApplicationController, Conn, Route, Deps, Plug, render
-import Documenter.Utilities.DOM: @tags
+using ..Bukdu: ApplicationController, Conn, Route, Deps, Plug, render
+using Documenter.Utilities.DOM: @tags
 
 struct HaltedError <: Exception
     msg

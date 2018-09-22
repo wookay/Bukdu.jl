@@ -1,8 +1,8 @@
 # module Bukdu.Plug
 
-import Base: CoreLogging
-import .CoreLogging: AbstractLogger, global_logger, handle_message, min_enabled_level, shouldlog
-import .CoreLogging: LogLevel, Debug, Info, Warn, Error
+using Base: CoreLogging
+using .CoreLogging: AbstractLogger, LogLevel, Debug, Info, Warn, Error, global_logger
+import .CoreLogging: handle_message, min_enabled_level, shouldlog
 
 include("repr.jl") # simple_repr
 
@@ -11,7 +11,7 @@ include("repr.jl") # simple_repr
 """
 module LoggerFormatter # Bukdu.Plug
 
-import Dates: now, format
+using Dates: now, format
 
 """
     Plug.LoggerFormatter.basic_message(io)

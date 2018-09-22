@@ -1,5 +1,6 @@
 using Bukdu
-import Bukdu.System: MissingController, not_found
+using .Bukdu.System: MissingController
+import .Bukdu.System: not_found
 
 function not_found(c::MissingController)
     c.conn.request.response.status = 404 # 404 Not Found

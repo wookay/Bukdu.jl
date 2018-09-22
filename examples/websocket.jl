@@ -102,7 +102,8 @@ end # module ExampleWebSocket
 if PROGRAM_FILE == basename(@__FILE__)
 
 using Bukdu
-import .ExampleWebSocket: WSController, ServerHost, ServerPort, index
+using .ExampleWebSocket: WSController, ServerHost, ServerPort
+import .ExampleWebSocket: index
 
 plug(Plug.Logger, access_log=(path=normpath(@__DIR__, "access.log"),), formatter=Plug.LoggerFormatter.datetime_message)
 

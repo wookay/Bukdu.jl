@@ -5,8 +5,8 @@ export form_for, label_for
 export text_input, text_area, radio_button, checkbox
 export submit
 
-import ...Bukdu: ApplicationController, Assoc, Changeset, Router, Naming, post
-import Documenter.Utilities.DOM: @tags, Node
+using ...Bukdu: ApplicationController, Assoc, Changeset, Router, Naming, post
+using Documenter.Utilities.DOM: @tags, Node
 
 """
     change(M::Type, params::Assoc)::Changeset
@@ -196,7 +196,7 @@ function submit(block_option; kwargs...)::Node
 end
 
 
-import Documenter.Utilities.DOM: TEXT
+using Documenter.Utilities.DOM: TEXT
 
 function _flatten(a, n::Node)::Vector
     if n.name === TEXT

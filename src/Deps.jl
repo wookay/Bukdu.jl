@@ -1,8 +1,8 @@
 module Deps # Bukdu
 
-import HTTP
-import MbedTLS
-import URIParser
+using HTTP
+using MbedTLS
+using URIParser
 
 const Request = HTTP.Messages.Request
 

@@ -4,7 +4,7 @@ export routes
 
 export get, post, delete, patch, put
 import Base: get
-import .System: HaltedError, NotApplicableError, InternalError, SystemController, internal_error, halted_error, not_applicable, info_response
+using .System: HaltedError, NotApplicableError, InternalError, SystemController, internal_error, halted_error, not_applicable, info_response
 
 struct DirectRequest
     _req

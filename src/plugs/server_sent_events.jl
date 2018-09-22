@@ -1,6 +1,6 @@
 # module Bukdu.Plug
 
-import ..Bukdu
+using ..Bukdu
 
 struct ServerSentEvents <: AbstractPlug
 end

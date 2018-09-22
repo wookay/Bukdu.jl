@@ -2,7 +2,7 @@
 
 export resources
 
-import .Actions: routing_actions
+using .Actions: routing_actions
 import .Actions: index, edit, new, show, create, update, delete
 
 const default_param_key = "id"
