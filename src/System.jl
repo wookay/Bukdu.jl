@@ -164,7 +164,15 @@ function info_response(route::Route, req, response)
     controller_name = String(nameof(route.C))
     if endswith(controller_name, "Controller")
         printstyled(iob, controller_name[1:end-10])
-        printstyled(iob, rpad("Controller", controller_rpad-(length(controller_name)-10)), color=248)
+        pad_length = controller_rpad - length(controller_name)
+        if pad_length > 0
+            printstyled(iob, "Controller", color=248)
+            printstyled(iob, repeat(' ', pad_length))
+        elseif pad_length < -10
+        else
+            printstyled(iob, "Controller"[1:10+pad_length-1], color=248)
+            printstyled(iob, ' ')
+        end
     else
         printstyled(iob, rpad(controller_name, controller_rpad))
     end

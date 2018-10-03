@@ -33,4 +33,24 @@ Routing.empty!()
 
 @test System._regularize_text("가1", 1) == "가"
 
+
+struct Controller <: ApplicationController
+    conn::Conn
+end
+function index(::Controller)
+end
+
+struct VeryLongNamedController <: ApplicationController
+    conn::Conn
+end
+function index(::VeryLongNamedController)
+end
+
+routes() do
+    get("/just", Controller, index)
+    get("/long", VeryLongNamedController, index)
+end
+Router.call(get, "/just")
+Router.call(get, "/long")
+
 end # module test_bukdu_system
