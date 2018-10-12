@@ -2,7 +2,7 @@
 
 module ExampleSSE
 
-using Bukdu
+using Bukdu # ApplicationController Conn render HTML EventStream
 
 struct SSEController <: ApplicationController
     conn::Conn
@@ -74,9 +74,9 @@ end # module ExampleSSE
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-using Bukdu
+using Bukdu # plug Plug routes get
 using .ExampleSSE: SSEController, sse
-import .ExampleSSE: index
+using .ExampleSSE: index
 
 plug(Plug.Logger, access_log=(path=normpath(@__DIR__, "access.log"),), formatter=Plug.LoggerFormatter.datetime_message)
 

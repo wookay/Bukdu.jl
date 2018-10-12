@@ -2,7 +2,7 @@ module WelcomeStuff
 
 export WelcomeController
 
-using Bukdu
+using Bukdu # ApplicationController Conn render HTML
 using Documenter.Utilities.DOM: @tags
 import .Bukdu.Actions: index
 
@@ -30,7 +30,7 @@ module CalculatorStuff
 
 export Calculator
 
-using Bukdu
+using Bukdu # ApplicationController Conn render HTML
 using Documenter.Utilities.DOM: @tags
 import .Bukdu.Actions: index
 
@@ -67,7 +67,7 @@ module MainStuff
 
 export MainController
 
-using Bukdu
+using Bukdu # ApplicationController Conn render HTML
 using Documenter.Utilities.DOM: @tags
 import .Bukdu.Actions: index
 
@@ -94,7 +94,7 @@ end # module MainStuff
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-using Bukdu
+using Bukdu # routes get Router
 import .Bukdu.Actions: index
 
 using .WelcomeStuff

@@ -2,7 +2,7 @@ module Endpoint
 
 export CustomerController
 
-using Bukdu
+using Bukdu # ApplicationController Conn render JSON
 import .Bukdu.Actions: index, show, new, edit, create, delete, update
 # using Octo.Adapters.PostgreSQL
 
@@ -63,7 +63,7 @@ end # module Endpoint
 if PROGRAM_FILE == basename(@__FILE__)
 
 using .Endpoint
-using Bukdu
+using Bukdu # pipeline routes resources
 import .Bukdu.Actions: index, show, new, edit, create, delete, update
 
 pipeline(:api) do conn::Conn

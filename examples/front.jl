@@ -8,7 +8,7 @@ module Front
 
 export WelcomeController
 
-using Bukdu
+using Bukdu # ApplicationController Conn
 using ..Layout: layout
 using ..WASM: WasmController
 import .Bukdu.Actions: index

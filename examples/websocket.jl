@@ -2,7 +2,7 @@
 
 module ExampleWebSocket
 
-using Bukdu
+using Bukdu # ApplicationController Conn render HTML
 const ServerHost = "localhost"
 const ServerPort = 8080
 
@@ -101,9 +101,9 @@ end # module ExampleWebSocket
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-using Bukdu
+using Bukdu # plug Plug routes get
 using .ExampleWebSocket: WSController, ServerHost, ServerPort
-import .ExampleWebSocket: index
+using .ExampleWebSocket: index
 
 plug(Plug.Logger, access_log=(path=normpath(@__DIR__, "access.log"),), formatter=Plug.LoggerFormatter.datetime_message)
 

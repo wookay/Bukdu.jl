@@ -1,4 +1,4 @@
-using FileWatching
+using FileWatching # FolderMonitor
 
 dir = "."
 fm = FolderMonitor(dir)

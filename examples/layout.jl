@@ -1,6 +1,6 @@
 module Layout
 
-using Bukdu
+using Bukdu # render HTML
 
 function layout(title, script, style, body)
     render(HTML, """

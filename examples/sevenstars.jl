@@ -7,7 +7,7 @@ include("front.jl")                     # Front
 
 if PROGRAM_FILE == basename(@__FILE__)
 
-using Bukdu
+using Bukdu # pipeline Conn routes resources get plug Router
 import .Bukdu.Actions: index, show, new, edit, create, delete, update
 using .Front # WelcomeController
 using .Endpoint # CustomerController
