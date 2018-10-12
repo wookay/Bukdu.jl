@@ -26,8 +26,7 @@ Bukdu.start(8080)
 
 
 ### Bukdu versions
-  - Bukdu v0.2.0 for Julia 0.6 (https://github.com/wookay/Bukdu.jl/tree/v0.2.0)
-  - Bukdu v0.3.2 for Julia 1.0 (https://github.com/wookay/Bukdu.jl/tree/v0.3.2)
+  - Bukdu v0.3.3 for Julia 1.0 (https://github.com/wookay/Bukdu.jl/tree/v0.3.3)
 
 
 ### RESTful API Demo
