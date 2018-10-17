@@ -1,6 +1,9 @@
 module Router # Bukdu
 
-using ..Bukdu: Naming, Deps, Routing, DirectRequest, request_handler
+using ..Bukdu.Naming
+using ..Bukdu.Deps
+using ..Bukdu.Routing
+using ..Bukdu: DirectRequest, request_handler
 
 """
     Router.call
@@ -32,7 +35,8 @@ end
 
 module Helpers # Bukdu.Router
 
-using ...Bukdu: ApplicationController, Routing
+using ...Bukdu.Routing
+using ...Bukdu: ApplicationController
 
 struct URLPathError <: Exception
     msg

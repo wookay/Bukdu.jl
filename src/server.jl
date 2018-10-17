@@ -115,9 +115,11 @@ print_listening_on(host, port) = @info "Bukdu Listening on: $host:$port"
 #
 #  original code from https://github.com/JuliaWeb/HTTP.jl/tree/master/src
 
-using .Deps: HTTP
-using .HTTP.Servers: Stream, ConnectionPool, iswritable, hasheader, setheader, writeheaders
-using .HTTP.Servers: Server, https, RateLimit, Transaction, Streams, Stream, KILL, nolimit, startread, closeread, closewrite, isioerror, update!
+using .Deps.HTTP
+using .HTTP.Servers.ConnectionPool
+using .HTTP.Servers.Streams
+using .HTTP.Servers: iswritable, hasheader, setheader, writeheaders
+using .HTTP.Servers: Server, RateLimit, Transaction, Stream, KILL, https, nolimit, startread, closeread, closewrite, isioerror, update!
 using .HTTP.IOExtras: startwrite
 using .ConnectionPool: nosslconfig, Connection
 using Sockets # Sockets.TCPServer

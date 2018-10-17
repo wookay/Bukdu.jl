@@ -5,7 +5,9 @@ export form_for, label_for
 export text_input, text_area, radio_button, checkbox
 export submit
 
-using ...Bukdu: ApplicationController, Assoc, Changeset, Router, Naming, post
+using ...Bukdu.Router
+using ...Bukdu.Naming
+using ...Bukdu: ApplicationController, Assoc, Changeset, post
 using Documenter.Utilities.DOM: @tags, Node
 
 """

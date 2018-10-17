@@ -2,7 +2,7 @@ module test_bukdu_plugs_csrf_protection
 
 using Test
 using Bukdu
-using .Bukdu: Deps
+using .Bukdu.Deps
 
 req = Deps.Request()
 conn = Conn(req)

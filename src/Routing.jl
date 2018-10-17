@@ -1,6 +1,9 @@
 module Routing # Bukdu
 
-using ..Bukdu: ApplicationController, Naming, System, Deps, Route
+using ..Bukdu: ApplicationController, Route
+using ..Bukdu.Deps
+using ..Bukdu.Naming
+using ..Bukdu.System
 
 store = Dict{Symbol, Any}(
     :pipe => nothing,

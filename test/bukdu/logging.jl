@@ -1,7 +1,7 @@
 module test_bukdu_logging
 
 using Test
-using Bukdu: Plug
+using Bukdu.Plug
 using .Plug: handle_message
 using Base.CoreLogging: Debug, Info, Warn, Error
 

@@ -2,8 +2,8 @@ module test_bukdu_plugs_parsers
 
 using Test
 using Bukdu
-using .Bukdu: Deps
-using .Bukdu.Plug: Parsers
+using .Bukdu.Deps
+using .Bukdu.Plug.Parsers
 
 struct FC <: ApplicationController; conn::Conn; end
 

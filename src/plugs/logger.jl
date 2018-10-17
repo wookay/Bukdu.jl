@@ -1,6 +1,6 @@
 # module Bukdu.Plug
 
-using Base: CoreLogging
+using Base.CoreLogging
 using .CoreLogging: AbstractLogger, LogLevel, Debug, Info, Warn, Error, global_logger
 import .CoreLogging: handle_message, min_enabled_level, shouldlog
 

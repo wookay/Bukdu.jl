@@ -1,6 +1,7 @@
 module CLI # Bukdu
 
-using ..Bukdu: Routing, Naming
+using ..Bukdu.Routing
+using ..Bukdu.Naming
 
 """
     CLI.routes()

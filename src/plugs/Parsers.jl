@@ -1,6 +1,8 @@
 module Parsers # Bukdu.Plug
 
-using ...Deps: HTTP, URIParser, Request
+using ...Deps.HTTP
+using ...Deps.URIParser
+using ...Deps: Request
 using .HTTP.Messages: hasheader, header
 
 
