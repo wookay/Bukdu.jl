@@ -11,6 +11,8 @@ include("System.jl")
 export Routing
 include("Routing.jl")
 include("server.jl")
+
+export redirect_to
 include("controller.jl")
 include("routes.jl")
 

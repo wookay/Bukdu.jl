@@ -11,6 +11,7 @@ function content_type_for_file_extionsion(ext)::String
     mimes = Dict(
         ".html" => "text/html; charset=utf-8",
         ".htm"  => "text/html; charset=utf-8",
+        ".js"   => "text/javascript",
         ".wasm" => "application/wasm",
         ".css"  => "text/css",
     )
