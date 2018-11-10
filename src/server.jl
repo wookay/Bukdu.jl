@@ -346,7 +346,7 @@ function _handle_transaction(f::Function, t::Transaction;
         _handle_stream(f, http)
     catch e
         if isioerror(e)
-            @warn Symbol(:server_, :_handle_transaction) e
+            # @warn Symbol(:server_, :_handle_transaction) e
             #   ArgumentError("stream is closed or unusable")
             #   write: broken pipe (EPIPE)
         else
