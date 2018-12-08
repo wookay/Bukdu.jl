@@ -1,21 +1,35 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
+notifications:
+  email: false
+
 language: julia
-os:
-  - linux
-  - osx
+
 julia:
   - 1.0
   - nightly
-notifications:
-  email: false
-#script:
-#  - pwd
-#  - julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add HTTP")'
-#  - julia --color=yes -e 'using Bukdu'
-#  - cd test
-#  - julia --color=yes runtests.jl
-#  - cd
+
+matrix:
+  exclude:
+    - os: osx
+      julia: nightly
+
+    - os: windows
+      julia: nightly
+      language: julia
+
+  include:
+    - os: osx
+
+    - os: windows
+      language: sh
+      before_install:
+        - choco install julia
+      script:
+        - julia --color=yes -e 'using InteractiveUtils; versioninfo(verbose=true)'
+        - julia --color=yes --project=. -e 'using Pkg; Pkg.test()'
+
 after_success:
-  # push coverage results to Codecov
-  - if [[ "$TRAVIS_OS_NAME" == osx ]]; then julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("dev Bukdu"); Pkg.REPLMode.pkgstr("test --coverage Bukdu")' ; fi
-  - if [[ "$TRAVIS_OS_NAME" == osx ]]; then julia --color=yes -e 'using Pkg; Pkg.REPLMode.pkgstr("add Coverage#master"); using Coverage; Codecov.submit(Codecov.process_folder(normpath(Pkg.devdir(), "Bukdu", "src")))' ; fi
+  - if [[ "$TRAVIS_OS_NAME" == linux && "$TRAVIS_JULIA_VERSION" != nightly ]] ; then julia --project=. -e 'using Pkg;
+                                                                                                           Pkg.add("Coverage");
+                                                                                                           using Coverage;
+                                                                                                           Codecov.submit(process_folder())' ; fi
