@@ -1,8 +1,8 @@
 # Bukdu 🌌
 
-|  **Documentation**                        |  **Build Status**                                                                                 |
-|:-----------------------------------------:|:-------------------------------------------------------------------------------------------------:|
-|  [![][docs-latest-img]][docs-latest-url]  |  [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url] [![][codecov-img]][codecov-url]  |
+|  **Documentation**                        |  **Build Status**                                                |
+|:-----------------------------------------:|:----------------------------------------------------------------:|
+|  [![][docs-latest-img]][docs-latest-url]  |  [![][travis-img]][travis-url]  [![][codecov-img]][codecov-url]  |
 
 
 Bukdu 🌌 is a web development framework for Julia (https://julialang.org).
@@ -79,9 +79,6 @@ The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl)
 
 [travis-img]: https://api.travis-ci.org/wookay/Bukdu.jl.svg?branch=master
 [travis-url]: https://travis-ci.org/wookay/Bukdu.jl
-
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/v1af95637qm7j582/branch/master?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/wookay/bukdu-jl/branch/master
 
 [codecov-img]: https://codecov.io/gh/wookay/Bukdu.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/wookay/Bukdu.jl/branch/master
