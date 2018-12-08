@@ -1,5 +1,24 @@
 using Test
 
+function runtests(tests)
+    n_passed = 0
+    anynonpass = 0
+    for (idx, filepath) in enumerate(all_tests)
+        numbering = string(idx, /, length(all_tests))
+        ts = @testset "$numbering $filepath" begin
+            include(filepath)
+        end
+        n_passed += ts.n_passed
+        anynonpass += ts.anynonpass
+    end
+    if iszero(anynonpass)
+        printstyled("✅  ", color=:green)
+        print("All ")
+        printstyled(n_passed, color=:green)
+        println(" tests have been completed.")
+    end
+end
+
 all_tests = []
 for (root, dirs, files) in walkdir(".")
     for filename in files
@@ -10,10 +29,4 @@ for (root, dirs, files) in walkdir(".")
         push!(all_tests, filepath)
     end
 end
-
-for (idx, filepath) in enumerate(all_tests)
-    numbering = string(idx, /, length(all_tests))
-    ts = @testset "$numbering $filepath" begin
-        include(filepath)
-    end
-end
+runtests(all_tests)
