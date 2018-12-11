@@ -23,7 +23,7 @@ struct AbstractControllerError <: Exception
     msg
 end
 
-(::Type{Vector{Pair{String,String}}})(p::Pair{String,String}) = [p]
+(::Type{Vector{Pair{String,String}}})(p::Pair{String,String}...) = [p...]
 
 route(args...) = Route(System.MissingController, System.not_found, Vector{Pair{String,String}}(), Vector{Function}())
 

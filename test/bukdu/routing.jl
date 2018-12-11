@@ -20,10 +20,8 @@ function penetrate_segments(segments)
     return (vals, path_params)
 end
 
-struct Conn
-end
 
-abstract type ApplicationController end
+using Bukdu
 
 struct WelcomeController <: ApplicationController
     conn::Conn
@@ -55,5 +53,13 @@ r = route(Val(Symbol(method)), vals...)
 @test r.C == WelcomeController
 @test r.action == index
 @test r.path_params == Dict("c"=>"36","b"=>"25")
+
+
+# https://discourse.julialang.org/t/write-a-rest-interface-like-flask/18538
+function update(c::WelcomeController)
+    c.path_params
+end
+get("/update/region/:region/site/:site_id/channel/:channel_id/", WelcomeController, update)
+@test Router.call(get, "/update/region/west/site/1/channel/2").got == Assoc("region"=>"west", "site_id"=>"1", "channel_id"=>"2")
 
 end # module test_bukdu_routing
