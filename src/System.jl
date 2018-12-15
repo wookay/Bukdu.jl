@@ -130,12 +130,13 @@ end
 
 const style_request_action_others  = :red
 const style_request_action = Dict{String,Symbol}(
-    "GET"    => :normal,
-    "POST"   => :yellow,
-    "DELETE" => :magenta,
-    "PATCH"  => :blue,
-    "PUT"    => :cyan,
-    "HEAD"   => :green,
+    "GET"     => :normal,
+    "POST"    => :yellow,
+    "DELETE"  => :magenta,
+    "PATCH"   => :light_green,
+    "PUT"     => :green,
+    "HEAD"    => :light_cyan,
+    "OPTIONS" => :cyan,
 )
 
 const style_response_status_others = :red
@@ -164,7 +165,7 @@ function info_response(route::Route, req, response)
     printstyled(iob, "INFO:", color=:cyan)
     logger isa Plug.Logger && logger.formatter(iob)
     printstyled(iob, ' ')
-    printstyled(iob, rpad(req.method, 6); req_method_style(req.method)...)
+    printstyled(iob, rpad(req.method, 7); req_method_style(req.method)...)
     printstyled(iob, ' ')
     controller_name = String(nameof(route.C))
     if endswith(controller_name, "Controller")

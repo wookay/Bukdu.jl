@@ -10,7 +10,7 @@ struct DirectRequest
     _req
 end
 
-const routing_verbs = [:get, :post, :delete, :patch, :put]
+const routing_verbs = [:get, :post, :delete, :patch, :put, :options]
 
 # HTTP.URIs: queryparams
 # HTTP.jl - URIs.jl
@@ -156,6 +156,12 @@ function put
 end
 
 function head
+end
+
+"""
+    options(url::String, C::Type{<:ApplicationController}, action)
+"""
+function options
 end
 
 for verb in routing_verbs
