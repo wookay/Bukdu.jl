@@ -55,6 +55,14 @@ end
 @test Utils.read_stdout(CLI.routes) == """
 GET  /articles      ArticleController  index
 GET  /articles/:id  ArticleController  show"""
+
+
+result = Router.call(Bukdu.head, "/articles/1")
+@test result.resp.status == 200
+@test result.got == nothing
+@test result.route.action === show
+@test result.route.path_params == ["id"=>"1"]
+
 Routing.empty!()
 
 end # module test_bukdu_resources
