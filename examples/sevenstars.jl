@@ -32,11 +32,7 @@ routes(:front) do
     get("/", WelcomeController, index)
 end
 
-if haskey(ENV, "ON_HEROKU")
-    Bukdu.start(parse(Int, ENV["PORT"]); host=Sockets.IPAddr(0,0,0,0))
-else
-    Bukdu.start(8080)
-end
+Bukdu.start(Front.server.port; host=Front.server.host)
 
 Router.call(get, "/") #
 # CLI.routes()
