@@ -10,7 +10,7 @@ end
 
 
 struct RESTController <: ApplicationController
-   conn::Conn
+    conn::Conn
 end
 
 function index(c::RESTController)

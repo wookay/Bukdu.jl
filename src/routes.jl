@@ -46,7 +46,11 @@ function _build_conn_and_pipelines(route::Route, req::Deps.Request)
         controller = route.C(conn)
         if applicable(route.action, controller)
             obj = route.action(controller)
-            (route, obj)
+            if "HEAD" === req.method
+                (route, nothing)
+            else
+                (route, obj)
+            end
         else
             err = NotApplicableError(string(route.action, "(::", route.C, ")"))
             rou = Route(SystemController, not_applicable, route.path_params, route.pipelines)
@@ -94,6 +98,8 @@ function request_handler(route::Route, req::Deps.Request)
     if obj isa AbstractRender
         data = obj.body
         push!(req.response.headers, Pair("Content-Type", obj.content_type))
+    elseif obj isa Nothing
+        data = Vector{UInt8}()
     else
         data = unsafe_wrap(Vector{UInt8}, string(obj))
     end
@@ -147,6 +153,9 @@ end
     put(url::String, C::Type{<:ApplicationController}, action)
 """
 function put
+end
+
+function head
 end
 
 for verb in routing_verbs

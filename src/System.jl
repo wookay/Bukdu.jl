@@ -135,6 +135,7 @@ const style_request_action = Dict{String,Symbol}(
     "DELETE" => :magenta,
     "PATCH"  => :blue,
     "PUT"    => :cyan,
+    "HEAD"   => :green,
 )
 
 const style_response_status_others = :red

@@ -16,7 +16,9 @@ function handle(req::Deps.Request)
     uri = Deps.HTTP.URIs.URI(req.target)
     segments = split(uri.path, '/'; keepempty=false)
     vals = [Val(Symbol(seg)) for seg in segments]
-    route(Val(Symbol(req.method)), vals...)
+    meth = Symbol(req.method)
+    verb = Val(meth === :HEAD ? :GET : meth)
+    route(verb, vals...)
 end
 
 struct AbstractControllerError <: Exception
