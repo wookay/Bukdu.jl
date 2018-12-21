@@ -33,10 +33,8 @@ export CLI
 include("CLI.jl")
 # include("Assembly.jl")
 
-using Base.CoreLogging: global_logger
-
 function __init__()
-    global_logger(Plug.Logger())
+    plug(Plug.Logger)
 end
 
 end # module Bukdu

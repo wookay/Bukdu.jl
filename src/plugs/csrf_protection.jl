@@ -12,7 +12,7 @@ end # module Bukdu.Plug.CSRF
 
 function plug(::Type{CSRF.Protection}, conn::Conn)
     # TODO
-    @error CSRF.Protection @__FILE__
+    @error CSRF.Protection string(@__FILE__(), " #", @__LINE__())
     conn.request.response.status = 403 # 403 Forbidden
     conn.halted = true
 end

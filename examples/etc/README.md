@@ -38,15 +38,3 @@ not_found.jl
 ```
 fashion.jl
 ```
-
-
-*  websocket
-```
-websocket.jl
-```
-
-
-* server sent events
-```
-sse.jl
-```

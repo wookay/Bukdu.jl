@@ -40,15 +40,16 @@ struct Logger <: AbstractLogger
     stream::IO
     min_level::LogLevel
     message_limits::Dict{Any,Int}
+    access_log
     formatter
 end
-function Logger(; access_log::Union{Nothing,<:NamedTuple}=nothing, stream::IO=stderr, level=Debug, message_limits=Dict{Any,Int}(), formatter=LoggerFormatter.basic_message)
+function Logger(; access_log::Union{Nothing,<:NamedTuple}, formatter, stream::IO=stderr, level=Debug, message_limits=Dict{Any,Int}())
     if access_log isa Nothing
-        Logger(stream, level, message_limits, formatter)
+        Logger(stream, level, message_limits, access_log, formatter)
     else
         @info :access_log access_log.path
         io = open(access_log.path, "a")
-        Logger(io, level, message_limits, formatter)
+        Logger(io, level, message_limits, access_log, formatter)
     end
 end
 
@@ -80,9 +81,14 @@ function handle_message(logger::Logger, level, message, _module, group, id,
     end
     printstyled(iob, levelstr, ':', color=color)
     logger.formatter(iob)
-    printstyled(iob, ' ', msglines, color=color)
-    for (key, val) in pairs(kwargs)
-        printstyled(iob, "   ", simple_repr(val))
+    printstyled(iob, ' ', msglines)
+    if length(kwargs) == 1
+        val = first(kwargs).second
+        printstyled(iob, " ", simple_repr(val))
+    else
+        for (key, val) in pairs(kwargs)
+            printstyled(iob, "   ", simple_repr(val))
+        end
     end
     print(iob, '\n')
     print(logger.stream, String(take!(buf)))
@@ -91,16 +97,10 @@ function handle_message(logger::Logger, level, message, _module, group, id,
 end
 
 """
-    plug(::Type{Logger}; access_log::Union{Nothing,<:NamedTuple}=nothing, formatter=nothing)
+    plug(::Type{Logger}; access_log::Union{Nothing,<:NamedTuple}=nothing, formatter=LoggerFormatter.basic_message)
 """
-function plug(::Type{Logger}; access_log::Union{Nothing,<:NamedTuple}=nothing,
-                              formatter=nothing)
-    if !(access_log isa Nothing)
-        logger_formatter = formatter isa Nothing ? LoggerFormatter.basic_message : formatter
-        global_logger(Logger(access_log=access_log, formatter=logger_formatter))
-    elseif !(formatter isa Nothing)
-        global_logger(Logger(formatter=formatter))
-    end
+function plug(::Type{Logger}; access_log::Union{Nothing,<:NamedTuple}=nothing, formatter=LoggerFormatter.basic_message)
+    global_logger(Logger(access_log=access_log, formatter=formatter))
 end
 
 # module Bukdu.Plug

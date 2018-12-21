@@ -98,6 +98,7 @@ function request_handler(route::Route, req::Deps.Request)
     if obj isa AbstractRender
         data = obj.body
         push!(req.response.headers, Pair("Content-Type", obj.content_type))
+        push!(req.response.headers, Pair("Content-Length", string(length(data))))
     elseif obj isa Nothing
         data = Vector{UInt8}()
     else
