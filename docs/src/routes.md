@@ -11,6 +11,7 @@ post
 delete
 patch
 put
+options
 resources
 ```
 

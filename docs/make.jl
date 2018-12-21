@@ -6,7 +6,7 @@ makedocs(
     build = joinpath(@__DIR__, "local" in ARGS ? "build_local" : "build"),
     modules = [Bukdu],
     clean = false,
-    format = :html,
+    format = Documenter.HTML(),
     sitename = "Bukdu.jl 🌌",
     authors = "WooKyoung Noh",
     pages = Any[
@@ -28,5 +28,4 @@ makedocs(
         "Router" => "Router.md",           # Router
         "Utils" => "Utils.md",             # Utils
     ],
-    html_prettyurls = !("local" in ARGS),
 )

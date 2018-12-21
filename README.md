@@ -5,9 +5,9 @@
 |  [![][docs-latest-img]][docs-latest-url]  |  [![][travis-img]][travis-url]  [![][codecov-img]][codecov-url]  |
 
 
-Bukdu 🌌 is a web development framework for Julia (https://julialang.org).
+Bukdu 🌌 is a web development framework for [Julia](https://julialang.org).
 
-It's influenced by Phoenix framework (http://phoenixframework.org).
+It's influenced by [Phoenix framework](https://phoenixframework.org).
 
 ```julia
 using Bukdu
@@ -28,10 +28,6 @@ Bukdu.start(8080)
 ```
 
 ![hello.svg](https://wookay.github.io/docs/Bukdu.jl/assets/bukdu/hello.svg)
-
-
-### Bukdu versions
-  - Bukdu v0.3.4 for Julia 1.0 (https://github.com/wookay/Bukdu.jl/tree/v0.3.4)
 
 
 ### RESTful API Demo

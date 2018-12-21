@@ -1,8 +1,8 @@
 # Bukdu 🌌
 
-Bukdu 🌌 is a web development framework for Julia (https://julialang.org).
+Bukdu 🌌 is a web development framework for [Julia](https://julialang.org).
 
-It's influenced by Phoenix framework (http://phoenixframework.org).
+It's influenced by [Phoenix framework](https://phoenixframework.org).
 
 ```julia
 using Bukdu
@@ -25,14 +25,11 @@ Bukdu.start(8080)
 ![hello.svg](https://wookay.github.io/docs/Bukdu.jl/assets/bukdu/hello.svg)
 
 
-### Bukdu versions
-  - Bukdu v0.3.3 for Julia 1.0 (https://github.com/wookay/Bukdu.jl/tree/v0.3.3)
-
-
 ### RESTful API Demo
 
-Visit [Bukdu on Heroku](https://sevenstars.herokuapp.com)
-and check its [source code](https://github.com/wookay/heroku-sevenstars).
+There's [examples/rest](https://github.com/wookay/Bukdu.jl/tree/master/examples/rest) for RESTful API examples.
+
+Visit [Bukdu on Heroku](https://sevenstars.herokuapp.com) and check its [source code](https://github.com/wookay/heroku-sevenstars).
 (A sleeping heroku page, it will become active again after a short delay.)
 
 
@@ -49,11 +46,18 @@ Bukdu/examples $ julia -i welcome.jl
 |__/
 
 INFO: Bukdu Listening on: 127.0.0.1:8080
+julia> 
+```
+
+Visit http://127.0.0.1:8080 on your web browser.
+
+``` julia
 julia> function index(c::WelcomeController)
            render(JSON, "Love")
        end
 index (generic function with 1 method)
 ```
+
 That's it! Refresh your page of the web browser.
 
 
