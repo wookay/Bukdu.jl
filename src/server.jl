@@ -32,12 +32,18 @@ function stop()
     nothing
 end
 
-function Base.show(io::IO, host::Sockets.InetAddr)
+struct StyledInetAddr{T<:Sockets.IPAddr}
+    host::T
+    port::UInt16
+    StyledInetAddr(addr::Sockets.InetAddr) = new{typeof(addr.host)}(addr.host, addr.port)
+end
+
+function Base.show(io::IO, host::StyledInetAddr)
     printstyled(io, string(host.host,':',host.port), color=:green)
 end
 
 function print_listening_on(host::Sockets.InetAddr)
-    @info "Bukdu Listening on" host
+    @info "Bukdu Listening on" StyledInetAddr(host)
 end
 
 

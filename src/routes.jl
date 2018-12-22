@@ -10,6 +10,7 @@ struct DirectRequest
     _req
 end
 
+const server_info = string("Bukdu/", version)
 const routing_verbs = [:get, :post, :delete, :patch, :put, :options]
 
 # HTTP.URIs: queryparams
@@ -87,22 +88,30 @@ function _proc_response(route::Route, req::Deps.Request)
     System.catch_response(route, req.response) # System
 end
 
+function put_response_headers(req::Deps.Request, obj)
+    push!(req.response.headers, Pair("Server", server_info))
+    if obj isa Render
+        push!(req.response.headers, Pair("Content-Type", obj.content_type))
+        push!(req.response.headers, Pair("Content-Length", string(length(obj.body))))
+    end
+end
+
 function request_handler(route::Route, dreq::DirectRequest)
     (rou, obj) = _proc_request(route, dreq._req)
+    put_response_headers(dreq._req, obj)
     _proc_response(rou, dreq._req)
     (got=obj, resp=dreq._req.response, route=rou)
 end
 
 function request_handler(route::Route, req::Deps.Request)
     (rou, obj) = _proc_request(route, req)
-    if obj isa AbstractRender
+    put_response_headers(req, obj)
+    if obj isa Render
         data = obj.body
-        push!(req.response.headers, Pair("Content-Type", obj.content_type))
-        push!(req.response.headers, Pair("Content-Length", string(length(data))))
     elseif obj isa Nothing
         data = Vector{UInt8}()
     else
-        data = unsafe_wrap(Vector{UInt8}, string(obj))
+        data = Vector{UInt8}(string(obj))
     end
     req.response.body = data
     _proc_response(rou, req)

@@ -5,7 +5,7 @@ end
 
 function plug(::Type{Auth}, conn::Conn)
     # TODO
-    @error Auth @__FILE__
+    @error Auth string(@__FILE__(), " #", @__LINE__())
     conn.request.response.status = 401 # 401 Unauthorized
     conn.halted = true
 end

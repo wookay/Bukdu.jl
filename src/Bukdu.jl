@@ -1,5 +1,7 @@
 module Bukdu
 
+const version = v"0.3.5-DEV"
+
 include("assoc.jl")
 include("Deps.jl")
 include("plugs.jl")
