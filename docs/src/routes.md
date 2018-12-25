@@ -11,7 +11,7 @@ post
 delete
 patch
 put
-options
+Bukdu.options
 resources
 ```
 

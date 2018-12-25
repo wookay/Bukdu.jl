@@ -38,12 +38,12 @@ struct StyledInetAddr{T<:Sockets.IPAddr}
     StyledInetAddr(addr::Sockets.InetAddr) = new{typeof(addr.host)}(addr.host, addr.port)
 end
 
-function Base.show(io::IO, host::StyledInetAddr)
-    printstyled(io, string(host.host,':',host.port), color=:green)
+function Base.show(io::IO, saddr::StyledInetAddr)
+    printstyled(io, string(saddr.host, ':', saddr.port), color=:green)
 end
 
-function print_listening_on(host::Sockets.InetAddr)
-    @info "Bukdu Listening on" StyledInetAddr(host)
+function print_listening_on(addr::Sockets.InetAddr)
+    @info "Bukdu Listening on" StyledInetAddr(addr)
 end
 
 
