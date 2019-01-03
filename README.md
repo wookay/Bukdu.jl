@@ -51,7 +51,7 @@ Bukdu/examples $ julia -i welcome.jl
 |__/
 
 INFO: Bukdu Listening on: 127.0.0.1:8080
-julia> 
+julia>
 ```
 
 Visit http://127.0.0.1:8080 on your web browser.

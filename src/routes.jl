@@ -10,7 +10,7 @@ struct DirectRequest
     _req
 end
 
-const server_info = string("Bukdu/", version)
+const server_info = string("Bukdu/", BUKDU_VERSION)
 const routing_verbs = [:get, :post, :delete, :patch, :put, :options]
 
 # HTTP.URIs: queryparams
