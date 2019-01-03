@@ -15,10 +15,10 @@ function routing_handle(request::HTTP.Request)
     result.resp
 end
 
-function start(port::Integer; host::Sockets.IPAddr=Sockets.localhost)
+function start(port::Integer; host::String="localhost")
     server = Server(routing_handle, stdout)
     env[:server] = server
-    addr = Sockets.InetAddr(host, port)
+    addr = Sockets.InetAddr(Sockets.getaddrinfo(host), port)
     @async _serve(server, addr, false) # !verbose
 end
 
