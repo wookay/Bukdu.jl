@@ -11,6 +11,7 @@ makedocs(
     authors = "WooKyoung Noh",
     pages = Any[
         "Home" => "index.md",
+        "server" => "server.md",           # Bukdu.start Bukdu.stop
         "controllers" => "controllers.md", # ApplicationController Conn
                                            # Assoc
         "renders" => "renders.md",         # Render

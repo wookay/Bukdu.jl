@@ -15,6 +15,11 @@ function routing_handle(request::HTTP.Request)
     result.resp
 end
 
+"""
+    Bukdu.start(port::Integer; host::String="localhost")
+
+start the Bukdu server.
+"""
 function start(port::Integer; host::String="localhost")
     server = Server(routing_handle, stdout)
     env[:server] = server
@@ -22,6 +27,11 @@ function start(port::Integer; host::String="localhost")
     @async _serve(server, addr, false) # !verbose
 end
 
+"""
+    Bukdu.stop()
+
+stop the Bukdu server.
+"""
 function stop()
     server = env[:server]
     env[:server] = nothing
