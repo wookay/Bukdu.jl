@@ -27,6 +27,10 @@ struct MissingController <: ApplicationController
     conn::Conn
 end
 
+struct AnonymousController <: ApplicationController
+    conn::Conn
+end
+
 """
     halted_error(c::SystemController)
 """
