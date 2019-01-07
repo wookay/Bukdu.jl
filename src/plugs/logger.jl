@@ -81,7 +81,12 @@ function handle_message(logger::Logger, level, message, _module, group, id,
     end
     printstyled(iob, levelstr, ':', color=color)
     logger.formatter(iob)
-    printstyled(iob, ' ', msglines)
+    printstyled(iob, ' ')
+    if msglines isa Symbol
+        printstyled(iob, repr(msglines), color=:cyan)
+    else
+        printstyled(iob, msglines)
+    end
     if length(kwargs) == 1
         val = first(kwargs).second
         printstyled(iob, " ", simple_repr(val))

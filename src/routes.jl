@@ -178,9 +178,11 @@ for verb in routing_verbs
     @eval ($verb)(url::String, C::Type{<:ApplicationController}, action) = Routing.add_route($verb, url, C, action)
 end
 
-function get(f::Function, url::String)
-    index(c::System.AnonymousController) = f(c.conn)
-    Routing.add_route(get, url, System.AnonymousController, index)
+for (verb, action) in [(:get, :index), (:post, :create)]
+    @eval function ($verb)(f::Function, url::String)
+        $action(c::System.AnonymousController) = f(c.conn)
+        Routing.add_route($verb, url, System.AnonymousController, $action)
+    end
 end
 
 # module Bukdu
