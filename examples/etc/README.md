@@ -22,12 +22,6 @@ form.jl
 ```
 
 
-* plug usage example
-```
-plug.jl
-```
-
-
 * custom `not_found` example
 ```
 not_found.jl
