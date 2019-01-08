@@ -39,11 +39,7 @@ function Base.getproperty(assoc::Assoc, prop::Symbol)
     if :__bukdu_assoc == prop
         getfield(assoc, prop)
     else
-        key = String(prop)
-        for (k, v) in assoc.__bukdu_assoc
-            k == key && return v
-        end
-        nothing
+        getindex(assoc, String(prop))
     end
 end
 

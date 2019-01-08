@@ -18,7 +18,7 @@ params = Assoc("x" => "2")
 
 @test !haskey(params, :y)
 @test get(params, :y, 3) == 3
-@test something(params.y, "") === ""
+@test something(params.y, "") == ""
 @test params.y === nothing
 @test params[:y] === nothing
 @test params["y"] === nothing
