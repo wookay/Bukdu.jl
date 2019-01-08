@@ -4,6 +4,7 @@ using ..Bukdu: ApplicationController, Route
 using ..Bukdu.Deps
 using ..Bukdu.Naming
 using ..Bukdu.System
+using ..Bukdu.Plug
 
 store = Dict{Symbol, Any}(
     :pipe => nothing,
@@ -74,6 +75,7 @@ function empty!()
     store[:routing_tables] = Vector{Any}()
     store[:routing_path] = Dict{Tuple{Symbol,Symbol,Symbol},String}()
     Base.empty!(routing_pipelines)
+    Plug.Parsers.routing_parsers[:default] = Plug.Parsers.default_routing_parsers
     ms = methods(route)
     for m in ms
         Base.delete_method(m)

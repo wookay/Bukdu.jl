@@ -4,16 +4,15 @@ using ...Deps.HTTP
 using ...Deps.URIParser
 using ...Deps: Request
 using .HTTP.Messages: hasheader, header
+using ...Bukdu: Route
+using ..Plug
+using JSON2
 
+const default_routing_parsers = [:urlencoded, :multipart]
+routing_parsers = Dict{Symbol, Vector{Symbol}}(:default => default_routing_parsers)
 
-# getindex_header
-
-function getindex_header(headers::Vector{Pair{String,String}}, key::String)::Union{String,Nothing}
-    if hasheader(headers, key)
-        header(headers, key)
-    else
-        nothing
-    end
+function Plug.plug(::Module; parsers::Vector{Symbol})
+    routing_parsers[:default] = parsers
 end
 
 
@@ -104,13 +103,17 @@ function scan(s::FormScanner)::Vector{Pair{String,String}}
     ps
 end
 
-function fetch_body_params(req::Request)::Vector{Pair{String,String}}
+function fetch_body_params(route::Route, req::Request)::Vector{Pair{String,Any}}
     if hasheader(req.headers, "Content-Type")
         content_type = header(req.headers, "Content-Type")
-        if "application/x-www-form-urlencoded" == content_type
+        request_parsers = routing_parsers[:default]
+        if :urlencoded in request_parsers && "application/x-www-form-urlencoded" == content_type
             scanner = UrlEncodedScanner(req.body)
             return scan(scanner)
-        elseif startswith(content_type, "multipart/form-data")
+        elseif :json in request_parsers && "application/json" == content_type
+            nt = JSON2.read(String(req.body))
+            return [Pair(String(k),v) for (k,v) in pairs(nt)]
+        elseif :multipart in request_parsers && startswith(content_type, "multipart/form-data")
             pat = r"boundary=\"?([\W\w]*)\"?"
             m = match(pat, content_type)
             if m isa RegexMatch
@@ -120,7 +123,7 @@ function fetch_body_params(req::Request)::Vector{Pair{String,String}}
             end
         end
     end
-    Vector{Pair{String,String}}()
+    Vector{Pair{String,Any}}()
 end
 
 end # module Bukdu.Plug.Parsers

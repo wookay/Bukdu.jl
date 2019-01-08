@@ -6,40 +6,44 @@ export Assoc
     Assoc
 """
 struct Assoc
-    __bukdu_assoc::Vector{Pair{String,String}}
+    __bukdu_assoc::Vector{Pair{String,Any}}
 end
-Assoc(pair::Pair) = Assoc([pair])
+Assoc(pair::Pair{String,T}) where T = Assoc(Pair{String,Any}[pair])
 Assoc(ps...) = Assoc(collect(ps))
 
-function Base.getindex(assoc::Assoc, key::String)::String
-    for (k, v) in assoc.__bukdu_assoc
-        k == key && return v
-    end
-    string()
-end
-
-function Base.getindex(assoc::Assoc, key::Symbol)::String
+function Base.getindex(assoc::Assoc, key::Symbol)
     getindex(assoc, String(key))
 end
 
-function Base.setindex!(assoc::Assoc, value::String, key::Symbol)
+function Base.setindex!(assoc::Assoc, value, key::Symbol)
     setindex!(assoc, value, String(key))
 end
 
-function Base.setindex!(assoc::Assoc, value::String, key::String)
+function Base.setindex!(assoc::Assoc, value, key::String)
     ind = something(findfirst(isequal(key), keys(assoc)), 0)
     if ind > 0
-        assoc.__bukdu_assoc[ind] = Pair(key, value)
+        assoc.__bukdu_assoc[ind] = Pair{String,Any}(key, value)
     else
-        push!(assoc, Pair(key, value))
+        push!(assoc, Pair{String,Any}(key, value))
     end
+end
+
+function Base.getindex(assoc::Assoc, key::String)
+    for (k, v) in assoc.__bukdu_assoc
+        k == key && return v
+    end
+    nothing
 end
 
 function Base.getproperty(assoc::Assoc, prop::Symbol)
     if :__bukdu_assoc == prop
         getfield(assoc, prop)
     else
-        getindex(assoc, String(prop))
+        key = String(prop)
+        for (k, v) in assoc.__bukdu_assoc
+            k == key && return v
+        end
+        nothing
     end
 end
 
@@ -67,7 +71,7 @@ function Base.keys(assoc::Assoc)::Vector{String}
     getindex.(assoc.__bukdu_assoc, 1)
 end
 
-function Base.values(assoc::Assoc)::Vector{String}
+function Base.values(assoc::Assoc)::Vector{Any}
     getindex.(assoc.__bukdu_assoc, 2)
 end
 
@@ -75,7 +79,7 @@ function Base.pairs(assoc::Assoc)::Base.Iterators.Pairs
     pairs(assoc.__bukdu_assoc)
 end
 
-function Base.push!(assoc::Assoc, kv::Pair{String,String})
+function Base.push!(assoc::Assoc, kv::Pair{String,Any})
     push!(assoc.__bukdu_assoc, kv)
 end
 
@@ -86,13 +90,17 @@ end
 function Base.get(assoc::Assoc, key::Symbol, value::Any)
     if haskey(assoc, key)
         v = assoc[key]
-        value isa String ? v : parse(typeof(value), v)
+        if v isa String
+            value isa String ? v : parse(typeof(value), v)
+        else
+            v
+        end
     else
         value
     end
 end
 
-function Base.merge(ps::T...)::T where {T <: Vector{Pair{String,String}}}
+function Base.merge(ps::T...)::T where {T <: Vector{Pair{String,Any}}}
     assoc = Assoc()
     for p in ps
         for (k, v) in p

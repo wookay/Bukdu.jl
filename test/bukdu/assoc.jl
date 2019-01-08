@@ -12,7 +12,7 @@ params = Assoc("x" => "2")
 @test get(params, :x, 0) == 2
 @test get(params, :y, 3) == 3
 @test !haskey(params, :a)
-@test params.a == ""
+@test params.a == nothing
 
 params[:x] = "3"
 @test params.x == "3"
@@ -28,5 +28,8 @@ empty!(params)
 buf = IOBuffer()
 show(buf, MIME"text/plain"(), params)
 @test String(take!(buf)) == "Bukdu.Assoc()\n"
+
+assoc = Assoc("A" => 2)
+@test !isempty(assoc)
 
 end # module test_bukdu_assoc

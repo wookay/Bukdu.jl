@@ -1,22 +1,7 @@
 module Plug # module Bukdu
 
 using ..Deps
-using ..Bukdu: Assoc
-
-"""
-    ApplicationController
-"""
-abstract type ApplicationController end
-abstract type AbstractPlug end
-abstract type AbstractRender end
-
-"""
-    Render <: AbstractRender
-"""
-struct Render <: AbstractRender
-    content_type::String
-    body::Vector{UInt8}
-end
+using ..Bukdu: Assoc, AbstractPlug, ApplicationController, AbstractRender, Render
 
 include("plugs/logger.jl")
 include("plugs/conn.jl")

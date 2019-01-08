@@ -4,8 +4,8 @@ const BUKDU_VERSION = v"0.4.1-DEV"
 
 include("assoc.jl")
 include("Deps.jl")
-include("plugs.jl")
 include("types.jl")
+include("plugs.jl")
 include("Naming.jl")
 include("render.jl")
 include("System.jl")

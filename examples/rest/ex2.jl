@@ -1,18 +1,17 @@
 using Bukdu
-using JSON2
 
 struct RESTController <: ApplicationController
     conn::Conn
 end
 
 function create(c::RESTController)
-    m = JSON2.read(String(c.conn.request.body))
-    @info :message m.message
+    @info :message something(c.params.message, "emtpy")
     render(JSON, "OK")
 end
 
 routes() do
     post("/messages", RESTController, create)
+    plug(Plug.Parsers, parsers=[:json])
 end
 
 Bukdu.start(8080)

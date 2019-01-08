@@ -21,13 +21,13 @@ function queryparams(q::AbstractString)
             for e in split(q, "&", keepempty=false)))
 end
 
-function fetch_query_params(req::Deps.Request)::Vector{Pair{String,String}}
+function fetch_query_params(req::Deps.Request)::Vector{Pair{String,Any}}
     params = queryparams(Deps.HTTP.URIs.URI(req.target).query)
     collect(params)
 end
 
 function _build_conn_and_pipelines(route::Route, req::Deps.Request)
-    body_params = Plug.Parsers.fetch_body_params(req)
+    body_params = Plug.Parsers.fetch_body_params(route, req)
     query_params = fetch_query_params(req)
     path_params = route.path_params
     params = merge(body_params, query_params, path_params)
