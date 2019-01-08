@@ -172,15 +172,16 @@ function info_response(route::Route, req, response)
     printstyled(iob, rpad(req.method, 7); req_method_style(req.method)...)
     printstyled(iob, ' ')
     controller_name = String(nameof(route.C))
+    controller_color = Sys.iswindows() ? :normal : 248
     if endswith(controller_name, "Controller")
         printstyled(iob, controller_name[1:end-10])
         pad_length = config[:controller_pad] - length(controller_name)
         if pad_length > 0
-            printstyled(iob, "Controller", color=248)
+            printstyled(iob, "Controller", color=controller_color)
             printstyled(iob, repeat(' ', pad_length))
         elseif pad_length < -10
         else
-            printstyled(iob, "Controller"[1:10+pad_length-1], color=248)
+            printstyled(iob, "Controller"[1:10+pad_length-1], color=controller_color)
             printstyled(iob, ' ')
         end
     else
