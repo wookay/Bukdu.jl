@@ -1,3 +1,6 @@
+# https://discourse.julialang.org/t/write-a-rest-interface-like-flask/18538/16
+
+# Bukdu v0.4.1
 using Bukdu
 
 struct RESTController <: ApplicationController
@@ -16,4 +19,6 @@ end
 
 Bukdu.start(8080)
 
-# curl -H "Content-Type: application/json" http://127.0.0.1:8080/messages -d '{"message":"Hello Data"}'
+#=
+curl -H "Content-Type: application/json" http://127.0.0.1:8080/messages -d '{"message":"Hello Data"}'
+=#
