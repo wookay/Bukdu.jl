@@ -9,11 +9,6 @@ include("plugs/conn.jl")
 include("plugs/Parsers.jl")
 include("plugs/static.jl")
 
-# pipeline plugs
-include("plugs/auth.jl")
-include("plugs/csrf_protection.jl")
-
-
 function plug(::Type{T}; kwargs...) where {T <: AbstractPlug}
 end
 
