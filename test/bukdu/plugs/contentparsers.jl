@@ -1,9 +1,9 @@
-module test_bukdu_plugs_parsers
+module test_bukdu_plugs_contentparsers
 
 using Test
 using Bukdu
 using .Bukdu.Deps
-using .Bukdu.Plug.Parsers
+using .Bukdu.Plug.ContentParsers
 
 struct FC <: ApplicationController; conn::Conn; end
 
@@ -77,7 +77,7 @@ req = Deps.HTTP.Request(
 Routing.empty!()
 
 
-@test  Parsers.rstripcrlf([0x0d, 0x0a]) == []      # CR LF
-@test  Parsers.rstripcrlf([0x0d])       == [0x0d]  # CR
+@test  ContentParsers.rstripcrlf([0x0d, 0x0a]) == []      # CR LF
+@test  ContentParsers.rstripcrlf([0x0d])       == [0x0d]  # CR
 
-end # module test_bukdu_plugs_parsers
+end # module test_bukdu_plugs_contentparsers

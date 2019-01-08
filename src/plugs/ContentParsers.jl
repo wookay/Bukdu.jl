@@ -1,4 +1,4 @@
-module Parsers # Bukdu.Plug
+module ContentParsers # Bukdu.Plug
 
 using ...Deps.HTTP
 using ...Deps.URIParser
@@ -10,11 +10,6 @@ using JSON2
 
 const default_content_parsers = [:json, :urlencoded, :multipart]
 content_parsers = Dict{Symbol, Vector{Symbol}}(:default => default_content_parsers)
-
-function Plug.plug(::Module; parsers::Vector{Symbol})
-    content_parsers[:default] = parsers
-end
-
 
 # application/x-www-form-urlencoded
 
@@ -126,4 +121,4 @@ function fetch_body_params(route::Route, req::Request)::Vector{Pair{String,Any}}
     Vector{Pair{String,Any}}()
 end
 
-end # module Bukdu.Plug.Parsers
+end # module Bukdu.Plug.ContentParsers

@@ -6,7 +6,8 @@ using ..Bukdu: Assoc, AbstractPlug, ApplicationController, AbstractRender, Rende
 include("plugs/logger.jl")
 include("plugs/conn.jl")
 
-include("plugs/Parsers.jl")
+include("plugs/ContentParsers.jl")
+include("plugs/parsers.jl")
 include("plugs/static.jl")
 
 function plug(::Type{T}; kwargs...) where {T <: AbstractPlug}
