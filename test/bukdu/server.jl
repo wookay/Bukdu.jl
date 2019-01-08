@@ -23,6 +23,10 @@ sleep(0)
 @test HTTP.header(r, "Content-Type") == "application/json; charset=utf-8"
 @test HTTP.header(r, "Content-Length") == "1"
 @test r.body == Vector{UInt8}("3")
+
+@test_throws HTTP.ExceptionRequest.StatusError HTTP.post("http://127.0.0.1:8190/"; body=JSON2.write((k=2,)))
+@test_throws HTTP.ExceptionRequest.StatusError HTTP.post("http://127.0.0.1:8190/", ["Content-Type"=>"application/json"]; body=JSON2.write(2))
+
 Bukdu.stop()
 
 Routing.empty!()
