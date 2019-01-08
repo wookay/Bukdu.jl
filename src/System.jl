@@ -5,6 +5,12 @@ using ..Bukdu.Deps
 using ..Bukdu.Plug
 using Documenter.Utilities.DOM: @tags
 
+config = Dict{Symbol,Any}(
+    :controller_pad => 20,
+    :action_pad => 16,
+    :path_pad => 28,
+)
+
 struct HaltedError <: Exception
     msg
 end
@@ -81,12 +87,6 @@ function not_found(c::MissingController)
     ))
 end
 
-# info
-
-const controller_rpad  = 20
-const action_rpad      = 16
-const target_path_rpad = 28
-
 function _regularize_text(str::String, padding::Int)::String
     s = escape_string(str)
     if textwidth(s) < padding
@@ -129,7 +129,7 @@ function _unescape_req_target(req)
         str = Deps.HTTP.URIs.unescapeuri(req.target)
     catch
     end
-    _regularize_text(str, target_path_rpad)
+    _regularize_text(str, config[:path_pad])
 end
 
 const style_request_action_others  = :red
@@ -174,7 +174,7 @@ function info_response(route::Route, req, response)
     controller_name = String(nameof(route.C))
     if endswith(controller_name, "Controller")
         printstyled(iob, controller_name[1:end-10])
-        pad_length = controller_rpad - length(controller_name)
+        pad_length = config[:controller_pad] - length(controller_name)
         if pad_length > 0
             printstyled(iob, "Controller", color=248)
             printstyled(iob, repeat(' ', pad_length))
@@ -184,9 +184,9 @@ function info_response(route::Route, req, response)
             printstyled(iob, ' ')
         end
     else
-        printstyled(iob, rpad(controller_name, controller_rpad))
+        printstyled(iob, rpad(controller_name, config[:controller_pad]))
     end
-    printstyled(iob, rpad(nameof(route.action), action_rpad))
+    printstyled(iob, rpad(nameof(route.action), config[:action_pad]))
     printstyled(iob, response.status; resp_status_style(response.status)...)
     printstyled(iob, ' ', _unescape_req_target(req))
     println(iob)
