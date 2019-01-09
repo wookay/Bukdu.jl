@@ -20,3 +20,7 @@ julia> Bukdu.System.catch_response(route::Bukdu.Route, resp) = @debug "RESP" res
 Bukdu.System.catch_request
 Bukdu.System.catch_response
 ```
+
+```@docs
+Bukdu.System.config
+```

@@ -5,10 +5,20 @@ using ..Bukdu.Deps
 using ..Bukdu.Plug
 using Documenter.Utilities.DOM: @tags
 
+"""
+    Bukdu.System.config
+
+Logging options for System info and error messages.
+ - `:controller_pad`
+ - `:action_pad`
+ - `:path_pad`
+ - `:error_stackframes_range`
+"""
 config = Dict{Symbol,Any}(
     :controller_pad => 20,
     :action_pad => 16,
     :path_pad => 28,
+    :error_stackframes_range => :,
 )
 
 struct HaltedError <: Exception
@@ -67,11 +77,12 @@ end
 function internal_error(c::SystemController)
     @tags h3 p
     c.conn.request.response.status = 500 # 500 Internal Server Error
-    @error Symbol(:System_, :internal_error) c.err.exception string("\n    ", join(c.err.stackframes, "\n    "))
+    stackframes = c.err.stackframes[config[:error_stackframes_range]]
+    @error Symbol(:System_, :internal_error) c.err.exception string("\n    ", join(stackframes, "\n    "))
     render(HTML, string(
         h3(string(InternalError)),
         p(string(c.err.exception)),
-        (p ∘ string).(c.err.stackframes)...
+        (p ∘ string).(stackframes)...
     ))
 end
 
