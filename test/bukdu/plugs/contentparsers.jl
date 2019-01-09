@@ -2,10 +2,9 @@ module test_bukdu_plugs_contentparsers_json
 
 using Test
 using JSON2
-using Bukdu.Plug.ContentParsers: read_json_data
 
 body = Vector{UInt8}(JSON2.write((k=(l=3,),)))
-nt = read_json_data(body)
+nt = JSON2.read(IOBuffer(body))
 @test nt == (k = (l = 3,),)
 
 end # module test_bukdu_plugs_contentparsers_json
