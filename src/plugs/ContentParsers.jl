@@ -8,6 +8,7 @@ using ...Bukdu: Route
 using ..Plug
 using JSON2
 
+
 const default_content_parsers = [:json, :urlencoded, :multipart]
 content_parsers = Dict{Symbol, Vector{Symbol}}(:default => default_content_parsers)
 
@@ -98,12 +99,16 @@ function scan(s::FormScanner)::Vector{Pair{String,String}}
     ps
 end
 
+function read_json_data(data::Vector{UInt8}, T=Any, args...)
+    JSON2.read(IOBuffer(data), T, args...)
+end
+
 function fetch_body_params(route::Route, req::Request)::Vector{Pair{String,Any}}
     if hasheader(req.headers, "Content-Type")
         content_type = header(req.headers, "Content-Type")
         request_parsers = content_parsers[:default]
         if :json in request_parsers && "application/json" == content_type
-            nt = JSON2.read(String(req.body))
+            nt = read_json_data(req.body)
             return [Pair(String(k),v) for (k,v) in pairs(nt)]
         elseif :urlencoded in request_parsers && "application/x-www-form-urlencoded" == content_type
             scanner = UrlEncodedScanner(req.body)

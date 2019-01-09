@@ -1,4 +1,17 @@
-module test_bukdu_plugs_contentparsers
+module test_bukdu_plugs_contentparsers_json
+
+using Test
+using JSON2
+using Bukdu.Plug.ContentParsers: read_json_data
+
+body = Vector{UInt8}(JSON2.write((k=(l=3,),)))
+nt = read_json_data(body)
+@test nt == (k = (l = 3,),)
+
+end # module test_bukdu_plugs_contentparsers_json
+
+
+module test_bukdu_plugs_contentparsers_urlencoded_multipart
 
 using Test
 using Bukdu
@@ -80,4 +93,4 @@ Routing.empty!()
 @test  ContentParsers.rstripcrlf([0x0d, 0x0a]) == []      # CR LF
 @test  ContentParsers.rstripcrlf([0x0d])       == [0x0d]  # CR
 
-end # module test_bukdu_plugs_contentparsers
+end # module test_bukdu_plugs_contentparsers_urlencoded_multipart
