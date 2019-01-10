@@ -26,6 +26,7 @@ end
 result = Router.call(get, "/na")
 @test result.route.action === System.not_applicable
 
+Bukdu.System.config[:error_stackframes_range] = 1:2
 result = Router.call(post, "/hello")
 @test result.route.action === System.internal_error
 
