@@ -1,6 +1,5 @@
 # module Bukdu
 
-using Dates
 using .Deps.HTTP
 using .HTTP.Sockets
 

@@ -68,24 +68,27 @@ function handle_message(logger::Logger, level, message, _module, group, id,
     iocontext = IOContext(buf, logger.stream)
     iob = IOContext(iocontext, :color => true)
     levelstr = uppercase(string(level))
-    msglines = message
     color = :normal
     if level == Info
         color = :cyan
     elseif level == Warn
         color = :yellow
+        # HTTP.jl - Servers.jl - check_readtimeout
+        message isa String && startswith(message, "Connection Timeout: 🔁") && return
     elseif level == Debug
         color = :magenta
     elseif level == Error
         color = :red
+        # HTTP.jl - Servers.jl - handle_transaction
+        message isa String && message == "error handling request" && return
     end
     printstyled(iob, levelstr, ':', color=color)
     logger.formatter(iob)
     printstyled(iob, ' ')
-    if msglines isa Union{Symbol,Nothing}
-        printstyled(iob, repr(msglines), color=:cyan)
+    if message isa Union{Symbol,Nothing}
+        printstyled(iob, repr(message), color=:cyan)
     else
-        printstyled(iob, msglines)
+        printstyled(iob, message)
     end
     if length(kwargs) == 1
         val = first(kwargs).second
