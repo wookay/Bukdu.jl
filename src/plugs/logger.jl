@@ -69,15 +69,15 @@ function handle_message(logger::Logger, level, message, _module, group, id,
     iob = IOContext(iocontext, :color => true)
     levelstr = uppercase(string(level))
     color = :normal
-    if level == Info
+    if level === Info
         color = :cyan
-    elseif level == Warn
+    elseif level === Warn
         color = :yellow
         # HTTP.jl - Servers.jl - check_readtimeout
         message isa String && startswith(message, "Connection Timeout: 🔁") && return
-    elseif level == Debug
+    elseif level === Debug
         color = :magenta
-    elseif level == Error
+    elseif level === Error
         color = :red
         # HTTP.jl - Servers.jl - handle_transaction
         message isa String && message == "error handling request" && return

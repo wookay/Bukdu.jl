@@ -36,7 +36,7 @@ function Base.getindex(assoc::Assoc, key::String)
 end
 
 function Base.getproperty(assoc::Assoc, prop::Symbol)
-    if :__bukdu_assoc == prop
+    if :__bukdu_assoc === prop
         getfield(assoc, prop)
     else
         getindex(assoc, String(prop))

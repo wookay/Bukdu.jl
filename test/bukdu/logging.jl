@@ -6,7 +6,7 @@ using .Plug: LoggerFormatter, handle_message
 using Base.CoreLogging: Debug, Info, Warn, Error
 
 logger = Plug.Logger(access_log=nothing, formatter=LoggerFormatter.basic_message)
-@test logger.min_level == Debug
+@test logger.min_level === Debug
 
 _module = nothing
 group = nothing

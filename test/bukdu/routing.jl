@@ -50,8 +50,8 @@ segments = split(target_path, '/')
 vals = [Val(Symbol(seg)) for seg in segments]
 r = route(Val(Symbol(method)), vals...)
 
-@test r.C == WelcomeController
-@test r.action == index
+@test r.C === WelcomeController
+@test r.action === index
 @test r.path_params == Dict("c"=>"36","b"=>"25")
 
 

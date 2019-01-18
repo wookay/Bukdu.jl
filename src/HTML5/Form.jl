@@ -56,7 +56,7 @@ function change(changeset::Changeset, params::Assoc; primary_key::Union{String,N
                 val = parse(typ, v)
             end
             if val == nt[k]
-                if !(primary_key isa Nothing) && Symbol(primary_key) == k
+                if primary_key !== nothing && Symbol(primary_key) === k
                     push!(ntkeys, k)
                     push!(ntvalues, val)
                 end
