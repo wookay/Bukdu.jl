@@ -29,4 +29,6 @@ plug(Plug.Logger, access_log=(path=access_log_path,), formatter=Plug.LoggerForma
 
 plug(Plug.Logger, access_log=nothing)
 
+@info nothing nothing
+
 end # module test_bukdu_logging

@@ -82,7 +82,7 @@ function handle_message(logger::Logger, level, message, _module, group, id,
     printstyled(iob, levelstr, ':', color=color)
     logger.formatter(iob)
     printstyled(iob, ' ')
-    if msglines isa Symbol
+    if msglines isa Union{Symbol,Nothing}
         printstyled(iob, repr(msglines), color=:cyan)
     else
         printstyled(iob, msglines)
