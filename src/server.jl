@@ -24,7 +24,7 @@ function start(port::Integer; host::String="localhost", kwargs...)
     server = Sockets.listen(inetaddr)
     env[:server] = server
     task = @async HTTP.serve(ipaddr, port; server=server, verbose=false, kwargs...) do req
-        routing_handle(req)
+        env[:server] !== nothing && routing_handle(req)
     end
     print_listening_on(inetaddr)
     task
@@ -37,9 +37,9 @@ stop the Bukdu server.
 """
 function stop()
     server = env[:server]
-    env[:server] = nothing
     if server !== nothing
         close(server)
+        env[:server] = nothing
         @info "Stopped."
     end
     nothing
