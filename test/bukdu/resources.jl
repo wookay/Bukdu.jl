@@ -17,11 +17,11 @@ delete(c::ArticleController) = (:delete, c.params.id)
 update(c::ArticleController) = (:update, c.params.id)
 
 routes() do
-    resources("/articles", ArticleController)
+    resources("/articles", ArticleController, :id=>Int)
 end
 
 @test Router.call(get, "/articles").got   == (:index,)
-@test Router.call(get, "/articles/2").got == (:show, "2")
+@test Router.call(get, "/articles/2").got == (:show, 2)
 
 @test Utils.read_stdout(CLI.routes) == """
 GET     /articles           ArticleController  index
@@ -50,7 +50,7 @@ Routing.empty!()
 
 
 routes() do
-    resources("/articles", ArticleController, except=[new, edit, create, delete, update])
+    resources("/articles", ArticleController, :id=>Int, except=[new, edit, create, delete, update])
 end
 @test Utils.read_stdout(CLI.routes) == """
 GET  /articles      ArticleController  index
@@ -61,6 +61,7 @@ result = Router.call(Bukdu.head, "/articles/1")
 @test result.resp.status == 200
 @test result.got === nothing
 @test result.route.action === show
+@test result.route.param_types == Dict(:id=>Int)
 @test result.route.path_params == ["id"=>"1"]
 
 Routing.empty!()

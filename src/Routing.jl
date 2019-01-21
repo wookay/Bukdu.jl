@@ -28,7 +28,7 @@ end
 
 (::Type{Vector{Pair{String,Any}}})(p::Pair{String,T}...) where T = [p...]
 
-route(args...) = Route(System.MissingController, System.not_found, Vector{Pair{String,Any}}(), Vector{Function}())
+route(args...) = Route(System.MissingController, System.not_found, Dict{Symbol,DataType}(), Vector{Pair{String,Any}}(), Vector{Function}())
 
 # idea from HTTP.jl/src/Handlers.jl
 function penetrate_segments(segments)
@@ -49,14 +49,14 @@ function penetrate_segments(segments)
     return (vals, path_params)
 end
 
-function add_route(verb, url::String, C::Type{<:ApplicationController}, action) # throw AbstractControllerError
+function add_route(verb, url::String, C::Type{<:ApplicationController}, action, param_types::Dict{Symbol,DataType}) # throw AbstractControllerError
     isabstracttype(C) && throw(AbstractControllerError(string("use concrete type")))
     pipe = store[:pipe]
     pipelines = get(routing_pipelines, pipe, [])
     segments = split(url, '/'; keepempty=false)
     (vals, path_params) = penetrate_segments(segments) 
     method = Naming.verb_name(verb)
-    @eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, Vector{Pair{String,Any}}($(path_params...)), $pipelines)
+    @eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, $param_types, Vector{Pair{String,Any}}($(path_params...)), $pipelines)
     routing_tables = vcat(store[:routing_tables],
         Naming.verb_name(verb), url, nameof(C), nameof(action), (pipe isa Nothing ? "" : repr(pipe)))
     store[:routing_tables] = routing_tables
@@ -80,7 +80,7 @@ function empty!()
     for m in ms
         Base.delete_method(m)
     end
-    @eval route(args...) = Route(System.MissingController, System.not_found, Vector{Pair{String,Any}}(), Vector{Function}())
+    @eval route(args...) = Route(System.MissingController, System.not_found, Dict{Symbol,DataType}(), Vector{Pair{String,Any}}(), Vector{Function}())
 end
 
 end # module Bukdu.Routing

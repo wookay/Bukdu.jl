@@ -70,7 +70,7 @@ pipeline(:api) do conn::Conn
 end
 
 routes(:api) do
-    resources("/customers", CustomerController)
+    resources("/customers", CustomerController, :id=>Int)
 end
 
 Bukdu.start(8080)

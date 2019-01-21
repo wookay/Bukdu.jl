@@ -8,9 +8,9 @@ import .Actions: index, edit, new, show, create, update, delete
 const default_param_key = "id"
 
 """
-    resources(path::String, ::Type{C}; only=[], except=[]) where {C <: ApplicationController}
+    resources(path::String, ::Type{C}, param_types::Pair{Symbol,DataType}...; only=[], except=[]) where {C <: ApplicationController}
 """
-function resources(path::String, ::Type{C}; only=[], except=[]) where {C <: ApplicationController}
+function resources(path::String, ::Type{C}, param_types::Pair{Symbol,DataType}...; only=[], except=[]) where {C <: ApplicationController}
     param = default_param_key
     if !isempty(only)
         actions = only
@@ -29,7 +29,7 @@ function resources(path::String, ::Type{C}; only=[], except=[]) where {C <: Appl
                                       (update, put,    "/:$param")]
         !(action in actions) && continue
         url = string(path, routepath)
-        Routing.add_route(verb, url, C, action)
+        Routing.add_route(verb, url, C, action, Dict{Symbol,DataType}(param_types...))
     end
 end
 

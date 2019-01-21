@@ -14,12 +14,12 @@ function routing_handle(request::HTTP.Request)
 end
 
 """
-    Bukdu.start(port::Integer; host::String="localhost", kwargs...)
+    Bukdu.start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kwargs...)
 
 start the Bukdu server.
 """
-function start(port::Integer; host::String="localhost", kwargs...)
-    ipaddr = Sockets.getaddrinfo(host)
+function start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kwargs...)
+    ipaddr = host isa Sockets.IPAddr ? host : Sockets.getaddrinfo(host)
     inetaddr = Sockets.InetAddr(ipaddr, port)
     server = Sockets.listen(inetaddr)
     env[:server] = server

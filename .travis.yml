@@ -36,7 +36,7 @@ matrix:
 
 
 script:
-  -                 julia --color=yes -e 'using Pkg; pkg"dev HTTP"'
+  -                 julia --color=yes -e 'using Pkg; pkg"dev HTTP"; pkg"precompile"'
   -                 julia --color=yes --project=. -e 'using Pkg; Pkg.test()'
   - JIVE_PROCS=auto julia --color=yes --project=. -e 'using Pkg; Pkg.test()'
 

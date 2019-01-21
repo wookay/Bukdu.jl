@@ -26,6 +26,7 @@ end
 struct Route
     C::Type{<:ApplicationController}
     action
+    param_types::Dict{Symbol,DataType}
     path_params::Vector{Pair{String,Any}}
     pipelines::Vector{Function}
 end
