@@ -2,25 +2,6 @@ module test_bukdu_routing
 
 using Test
 
-function penetrate_segments(segments)
-    vals = Expr[]
-    path_params = Expr[]
-    for seg in segments
-        if startswith(seg, ':')
-            name = seg[2:end]
-            mangled = Symbol(name, :_)
-            pair = :(Pair($name, String(first(typeof($mangled).parameters))))
-            push!(path_params, pair)
-            expr = :($mangled::Any)
-        else
-            expr = :(::Val{Symbol($seg)})
-        end
-        push!(vals, expr)
-    end
-    return (vals, path_params)
-end
-
-
 using Bukdu
 
 struct WelcomeController <: ApplicationController
@@ -30,7 +11,8 @@ end
 struct Route
     C::Type{<:ApplicationController}
     action
-    path_params::Dict{String, String}
+    path_params::Vector{Pair{String,Any}}
+    pipelines::Vector{Function}
 end
 
 index(::WelcomeController) = "hello"
@@ -40,10 +22,10 @@ action = index
 
 url = "/a/:b/:c"
 segments = split(url, '/')
-(vals, path_params) = penetrate_segments(segments)
+(vals, path_params) = Bukdu.Routing.penetrate_segments(segments)
 method = "GET"
-@eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, Dict($(path_params...)))
-
+pipelines = []
+@eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, Vector{Pair{String,Any}}($(path_params...)), $pipelines)
 
 target_path = "/a/25/36"
 segments = split(target_path, '/')
@@ -52,7 +34,7 @@ r = route(Val(Symbol(method)), vals...)
 
 @test r.C === WelcomeController
 @test r.action === index
-@test r.path_params == Dict("c"=>"36","b"=>"25")
+@test r.path_params == Vector{Pair{String,Any}}(["b"=>"25", "c"=>"36"])
 
 
 # https://discourse.julialang.org/t/write-a-rest-interface-like-flask/18538
