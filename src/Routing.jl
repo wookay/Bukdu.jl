@@ -75,7 +75,8 @@ function empty!()
     store[:routing_tables] = Vector{Any}()
     store[:routing_path] = Dict{Tuple{Symbol,Symbol,Symbol},String}()
     Base.empty!(routing_pipelines)
-    Plug.ContentParsers.content_parsers[:default] = Plug.ContentParsers.default_content_parsers
+    Plug.ContentParsers.env[:decoders] = Plug.ContentParsers.default_content_decoders
+    Plug.ContentParsers.env[:parsers] = Plug.ContentParsers.default_content_parsers
     ms = methods(route)
     for m in ms
         Base.delete_method(m)

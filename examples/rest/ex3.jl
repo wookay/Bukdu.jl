@@ -1,5 +1,6 @@
 # https://discourse.julialang.org/t/switch-from-httpserver-jl-to-http-jl/19717
 
+# Bukdu v0.4.2
 using Bukdu
 using HTTP.Messages: setheader
 
@@ -16,14 +17,14 @@ function take_options(c::SimulationController)
     nothing
 end
 
-function run_simulation(inputs_string::String)
-    @info :inputs inputs_string
+function run_simulation(json)
+    @info :json json
     # work
 end
 
 function run_simulation(c::SimulationController)
-    inputs_string = String(c.conn.request.body)
-    output = run_simulation(inputs_string)
+    json = c.params.json
+    output = run_simulation(json)
     render(JSON, output)
 end
 
@@ -31,6 +32,7 @@ routes() do
     Bukdu.options("/", SimulationController, take_options)
     Bukdu.options("/run", SimulationController, take_options)
     post("/run", SimulationController, run_simulation)
+    plug(Plug.Parsers, :json => Plug.ContentParsers.JSONDecoder, parsers=[:json])
 end
 
 Bukdu.start(8080)
@@ -38,5 +40,5 @@ Bukdu.start(8080)
 #=
 curl -i -X OPTIONS http://localhost:8080/
 curl -i -X OPTIONS http://localhost:8080/run
-curl -i -H "Content-Type: text/plain" -d "data" http://localhost:8080/run
+curl -i -H "Content-Type: application/json" -d '{"message": "Hello Data"}' http://127.0.0.1:8080/run
 =#
