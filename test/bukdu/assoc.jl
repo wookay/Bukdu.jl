@@ -34,10 +34,6 @@ params[:y] = "5"
 empty!(params)
 @test !haskey(params, "x")
 
-buf = IOBuffer()
-show(buf, MIME"text/plain"(), params)
-@test String(take!(buf)) == "Bukdu.Assoc()\n"
-
 assoc = Assoc("a" => 2, "b" => [1,2])
 @test !isempty(assoc)
 @test assoc.a in assoc.b

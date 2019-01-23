@@ -25,8 +25,7 @@ matrix:
       before_install:
         - choco install julia
         - julia --color=yes -e 'using InteractiveUtils; versioninfo(verbose=true)'
-        - julia --color=yes -e 'using Pkg; pkg"add JSON2 MbedTLS URIParser Documenter Jive"'
-        - julia --color=yes -e 'using Pkg; pkg"dev HTTP"'
+        - julia --color=yes -e 'using Pkg; pkg"add HTTP JSON2 MbedTLS URIParser Documenter Jive"'
         - julia --color=yes -e 'using Pkg; pkg"dev ."'
         - julia --color=yes -e 'using Pkg; pkg"precompile"'
       script:
@@ -36,7 +35,6 @@ matrix:
 
 
 script:
-  -                 julia --color=yes -e 'using Pkg; pkg"dev HTTP"; pkg"precompile"'
   -                 julia --color=yes --project=. -e 'using Pkg; Pkg.test()'
   - JIVE_PROCS=auto julia --color=yes --project=. -e 'using Pkg; Pkg.test()'
 
