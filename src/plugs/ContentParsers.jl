@@ -8,9 +8,15 @@ using ...Bukdu: Route
 using ..Plug
 using JSON2
 
+struct JSONDecoder
+end
 
+struct MergedJSON
+end
+
+const default_content_decoders = Dict{Symbol,DataType}(:json => MergedJSON)
 const default_content_parsers = [:json, :urlencoded, :multipart]
-content_parsers = Dict{Symbol, Vector{Symbol}}(:default => default_content_parsers)
+env = Dict{Symbol, Union{Dict{Symbol,DataType}, Vector{Symbol}}}(:decoders => default_content_decoders, :parsers => default_content_parsers)
 
 # application/x-www-form-urlencoded
 
@@ -99,13 +105,23 @@ function scan(s::FormScanner)::Vector{Pair{String,String}}
     ps
 end
 
+function parse(::Type{JSONDecoder}, buf::IOBuffer)::Vector{Pair{String,Any}}
+    nt = JSON2.read(buf)
+    return [Pair("json", nt)]
+end
+
+function parse(::Type{MergedJSON}, buf::IOBuffer)::Vector{Pair{String,Any}}
+    nt = JSON2.read(buf)
+    return [Pair(String(k),v) for (k,v) in pairs(nt)]
+end
+
 function fetch_body_params(route::Route, req::Request)::Vector{Pair{String,Any}}
     if hasheader(req.headers, "Content-Type")
         content_type = header(req.headers, "Content-Type")
-        request_parsers = content_parsers[:default]
+        request_decoders = env[:decoders]
+        request_parsers = env[:parsers]
         if :json in request_parsers && "application/json" == content_type
-            nt = JSON2.read(IOBuffer(req.body))
-            return [Pair(String(k),v) for (k,v) in pairs(nt)]
+            return parse(request_decoders[:json], IOBuffer(req.body))
         elseif :urlencoded in request_parsers && "application/x-www-form-urlencoded" == content_type
             scanner = UrlEncodedScanner(req.body)
             return scan(scanner)

@@ -37,9 +37,9 @@ end
 # application/wasm
 
 function render(m::Module, data)::AbstractRender # throw UnknownModuleError
-    if nameof(m) == :JSON
+    if nameof(m) === :JSON
         render(JSON, data)
-    elseif nameof(m) == :HTML5
+    elseif nameof(m) === :HTML5
         render(HTML, data)
     else
         throw(UnknownModuleError(string(m)))

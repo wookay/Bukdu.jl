@@ -2,12 +2,16 @@ module test_bukdu_plugs_contentparsers_json
 
 using Test
 using JSON2
+using Bukdu
+using .Bukdu.Plug.ContentParsers
 
-body = Vector{UInt8}(JSON2.write((k=(l=3,),)))
-nt = JSON2.read(IOBuffer(body))
-@test nt == (k = (l = 3,),)
+buf = IOBuffer(JSON2.write((k=1,)))
+@test ContentParsers.parse(ContentParsers.MergedJSON, buf) == Pair{String,Any}["k"=>1]
 
-end # module test_bukdu_plugs_contentparsers_json
+buf = IOBuffer(JSON2.write((k=1,)))
+@test ContentParsers.parse(ContentParsers.JSONDecoder, buf) == Pair{String,Any}["json"=>(k=1,)]
+
+end
 
 
 module test_bukdu_plugs_contentparsers_urlencoded_multipart

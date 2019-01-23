@@ -6,7 +6,7 @@ using .Plug: LoggerFormatter, handle_message
 using Base.CoreLogging: Debug, Info, Warn, Error
 
 logger = Plug.Logger(access_log=nothing, formatter=LoggerFormatter.basic_message)
-@test logger.min_level == Debug
+@test logger.min_level === Debug
 
 _module = nothing
 group = nothing
@@ -28,5 +28,7 @@ plug(Plug.Logger, access_log=(path=access_log_path,), formatter=Plug.LoggerForma
 @test endswith(read(access_log_path, String), "access log file\n")
 
 plug(Plug.Logger, access_log=nothing)
+
+@info nothing nothing
 
 end # module test_bukdu_logging

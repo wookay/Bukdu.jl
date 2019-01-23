@@ -26,10 +26,21 @@ function fetch_query_params(req::Deps.Request)::Vector{Pair{String,Any}}
     collect(params)
 end
 
+function parsed_path_params(route::Route)::Vector{Pair{String,Any}}
+    if isempty(route.param_types)
+        route.path_params
+    else
+        map(route.path_params) do (name, val)
+            typ = get(route.param_types, Symbol(name), String)
+            Pair{String,Any}(name, typ === String ? val : parse(typ, val))
+        end
+    end
+end
+
 function _build_conn_and_pipelines(route::Route, req::Deps.Request)
     body_params = Plug.ContentParsers.fetch_body_params(route, req)
     query_params = fetch_query_params(req)
-    path_params = route.path_params
+    path_params = parsed_path_params(route)
     params = merge(body_params, query_params, path_params)
     halted = false
     conn = Conn(req, Assoc.((body_params, query_params, path_params, params))..., halted)
@@ -40,7 +51,7 @@ function _build_conn_and_pipelines(route::Route, req::Deps.Request)
     end
     if halted
         err = HaltedError("halted on pipelines")
-        rou = Route(SystemController, halted_error, route.path_params, route.pipelines)
+        rou = Route(SystemController, halted_error, route.param_types, route.path_params, route.pipelines)
         obj = halted_error(SystemController(conn, err))
         (rou, obj)
     else
@@ -54,7 +65,7 @@ function _build_conn_and_pipelines(route::Route, req::Deps.Request)
             end
         else
             err = NotApplicableError(string(route.action, "(::", route.C, ")"))
-            rou = Route(SystemController, not_applicable, route.path_params, route.pipelines)
+            rou = Route(SystemController, not_applicable, route.param_types, route.path_params, route.pipelines)
             obj = not_applicable(SystemController(conn, err))
             (rou, obj)
         end
@@ -68,7 +79,7 @@ function _catch_internal_error(block, route, req)
         stackframes = stacktrace(catch_backtrace())
         err = InternalError(ex, stackframes)
         conn = Conn(req)
-        rou = Route(SystemController, internal_error, route.path_params, route.pipelines)
+        rou = Route(SystemController, internal_error, route.param_types, route.path_params, route.pipelines)
         obj = internal_error(SystemController(conn, err))
         (rou, obj)
     end
@@ -136,31 +147,31 @@ end
 
 
 """
-    get(url::String, C::Type{<:ApplicationController}, action)
+    get(url::String, C::Type{<:ApplicationController}, action, param_types::Pair{Symbol,DataType}...)
 """
 function get
 end
 
 """
-    post(url::String, C::Type{<:ApplicationController}, action)
+    post(url::String, C::Type{<:ApplicationController}, action, param_types::Pair{Symbol,DataType}...)
 """
 function post
 end
 
 """
-    delete(url::String, C::Type{<:ApplicationController}, action)
+    delete(url::String, C::Type{<:ApplicationController}, action, param_types::Pair{Symbol,DataType}...)
 """
 function delete
 end
 
 """
-    patch(url::String, C::Type{<:ApplicationController}, action)
+    patch(url::String, C::Type{<:ApplicationController}, action, param_types::Pair{Symbol,DataType}...)
 """
 function patch
 end
 
 """
-    put(url::String, C::Type{<:ApplicationController}, action)
+    put(url::String, C::Type{<:ApplicationController}, action, param_types::Pair{Symbol,DataType}...)
 """
 function put
 end
@@ -169,19 +180,19 @@ function head
 end
 
 """
-    options(url::String, C::Type{<:ApplicationController}, action)
+    options(url::String, C::Type{<:ApplicationController}, action, param_types::Pair{Symbol,DataType}...)
 """
 function options
 end
 
 for verb in routing_verbs
-    @eval ($verb)(url::String, C::Type{<:ApplicationController}, action) = Routing.add_route($verb, url, C, action)
+    @eval ($verb)(url::String, C::Type{<:ApplicationController}, action, param_types::Pair{Symbol,DataType}...) = Routing.add_route($verb, url, C, action, Dict{Symbol,DataType}(param_types...))
 end
 
 for (verb, action) in [(:get, :index), (:post, :create)]
-    @eval function ($verb)(f::Function, url::String)
+    @eval function ($verb)(f::Function, url::String, param_types::Pair{Symbol,DataType}...)
         $action(c::System.AnonymousController) = f(c.conn)
-        Routing.add_route($verb, url, System.AnonymousController, $action)
+        Routing.add_route($verb, url, System.AnonymousController, $action, Dict{Symbol,DataType}(param_types...))
     end
 end
 

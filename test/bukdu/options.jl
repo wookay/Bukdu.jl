@@ -21,7 +21,7 @@ end
 result = Router.call(options, "/")
 @test result.resp.status == 200
 @test header(result.resp.headers, "Allow") == "OPTIONS, GET, HEAD, POST"
-@test result.got == nothing
+@test result.got === nothing
 
 result = Router.call(get, "/")
 @test result.resp.status == 404
