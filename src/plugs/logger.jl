@@ -1,8 +1,6 @@
 # module Bukdu.Plug
 
-using Base.CoreLogging
-using .CoreLogging: AbstractLogger, LogLevel, Debug, Info, Warn, Error, global_logger
-import .CoreLogging: handle_message, min_enabled_level, shouldlog
+using Logging
 
 include("repr.jl") # simple_repr
 
@@ -43,7 +41,7 @@ struct Logger <: AbstractLogger
     access_log
     formatter
 end
-function Logger(; access_log::Union{Nothing,<:NamedTuple}, formatter, stream::IO=stderr, level=Debug, message_limits=Dict{Any,Int}())
+function Logger(; access_log::Union{Nothing,<:NamedTuple}, formatter, stream::IO=stderr, level=Logging.Debug, message_limits=Dict{Any,Int}())
     if access_log isa Nothing
         Logger(stream, level, message_limits, access_log, formatter)
     else
@@ -53,11 +51,11 @@ function Logger(; access_log::Union{Nothing,<:NamedTuple}, formatter, stream::IO
     end
 end
 
-min_enabled_level(logger::Logger) = logger.min_level
-shouldlog(logger::Logger, level, _module, group, id) = get(logger.message_limits, id, 1) > 0
+Logging.min_enabled_level(logger::Logger) = logger.min_level
+Logging.shouldlog(logger::Logger, level, _module, group, id) = get(logger.message_limits, id, 1) > 0
 
 # code from julia/base/logging.jl
-function handle_message(logger::Logger, level, message, _module, group, id,
+function Logging.handle_message(logger::Logger, level, message, _module, group, id,
                         filepath, line; maxlog=nothing, kwargs...)
     if maxlog != nothing && maxlog isa Integer
         remaining = get!(logger.message_limits, id, maxlog)
@@ -69,15 +67,15 @@ function handle_message(logger::Logger, level, message, _module, group, id,
     iob = IOContext(iocontext, :color => true)
     levelstr = uppercase(string(level))
     color = :normal
-    if level === Info
+    if level === Logging.Info
         color = :cyan
-    elseif level === Warn
+    elseif level === Logging.Warn
         color = :yellow
         # HTTP.jl - Servers.jl - check_readtimeout
         message isa String && startswith(message, "Connection Timeout: 🔁") && return
-    elseif level === Debug
+    elseif level === Logging.Debug
         color = :magenta
-    elseif level === Error
+    elseif level === Logging.Error
         color = :red
         # HTTP.jl - Servers.jl - handle_transaction
         message isa String && message == "error handling request" && return
