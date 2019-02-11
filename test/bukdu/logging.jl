@@ -2,8 +2,8 @@ module test_bukdu_logging
 
 using Test
 using Bukdu.Plug
-using .Plug: LoggerFormatter, handle_message
-using Base.CoreLogging: Debug, Info, Warn, Error
+using Logging: handle_message, Debug, Info, Warn, Error
+using .Plug: LoggerFormatter
 
 logger = Plug.Logger(access_log=nothing, formatter=LoggerFormatter.basic_message)
 @test logger.min_level === Debug
