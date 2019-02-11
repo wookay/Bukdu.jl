@@ -162,6 +162,7 @@ const style_response_status = Dict{Int,Symbol}(
     401 => :magenta,      # 401 Unauthorized
     404 => :light_blue,   # 404 Not Found
     500 => :red,          # 500 Internal Server Error
+    503 => :red,          # 503 Service Unavailable
 )
 
 function req_method_style(method::String)
@@ -172,7 +173,7 @@ function resp_status_style(status::Int16)
     (color=get(style_response_status, status, style_response_status_others),)
 end
 
-function info_response(route::Route, req, response)
+function info_response(controller_name, action_name, req, response)
     logger = Base.global_logger()
     buf = IOBuffer()
     iocontext = IOContext(buf, logger.stream)
@@ -182,7 +183,6 @@ function info_response(route::Route, req, response)
     printstyled(iob, ' ')
     printstyled(iob, rpad(req.method, 7); req_method_style(req.method)...)
     printstyled(iob, ' ')
-    controller_name = String(nameof(route.C))
     controller_color = Sys.iswindows() ? :normal : 248
     if endswith(controller_name, "Controller")
         printstyled(iob, controller_name[1:end-10])
@@ -198,12 +198,18 @@ function info_response(route::Route, req, response)
     else
         printstyled(iob, rpad(controller_name, config[:controller_pad]))
     end
-    printstyled(iob, rpad(nameof(route.action), config[:action_pad]))
+    printstyled(iob, rpad(action_name, config[:action_pad]))
     printstyled(iob, response.status; resp_status_style(response.status)...)
     printstyled(iob, ' ', _unescape_req_target(req))
     println(iob)
     print(logger.stream, String(take!(buf)))
     flush(logger.stream)
+end
+
+function info_response(route::Route, req, response)
+    controller_name = String(nameof(route.C))
+    action_name = String(nameof(route.action))
+    info_response(controller_name, action_name, req, response)
 end
 
 """

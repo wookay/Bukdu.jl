@@ -24,7 +24,14 @@ function start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kw
     server = Sockets.listen(inetaddr)
     env[:server] = server
     task = @async HTTP.serve(ipaddr, port; server=server, verbose=false, kwargs...) do req
-        env[:server] !== nothing && routing_handle(req)
+        if env[:server] === nothing
+            req.response.status = 503
+            System.info_response("", "", req, req.response)
+            throw(ErrorException("503"))
+            req.response
+        else
+            routing_handle(req)
+        end
     end
     print_listening_on(inetaddr)
     task
