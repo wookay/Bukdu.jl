@@ -9,6 +9,9 @@ Bukdu 🌌 is a web development framework for [Julia](https://julialang.org).
 
 It's influenced by [Phoenix framework](https://phoenixframework.org).
 
+ * ☕️   You can [make a donation](https://wookay.github.io/donate/) to support this project.
+
+
 ```julia
 using Bukdu
 
