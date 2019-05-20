@@ -64,7 +64,7 @@ function Logging.handle_message(logger::Logger, level, message, _module, group, 
     end
     buf = IOBuffer()
     iocontext = IOContext(buf, logger.stream)
-    iob = IOContext(iocontext, :color => true)
+    iob = IOContext(iocontext, :color => Base.have_color)
     levelstr = uppercase(string(level))
     color = :normal
     if level === Logging.Info
