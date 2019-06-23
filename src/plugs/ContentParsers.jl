@@ -8,15 +8,17 @@ using ...Bukdu: Route
 using ..Plug
 using JSON2
 
-struct JSONDecoder
+abstract type AbstractDecoder end
+
+struct JSONDecoder <: AbstractDecoder
 end
 
-struct MergedJSON
+struct MergedJSON <: AbstractDecoder
 end
 
-const default_content_decoders = Dict{Symbol,DataType}(:json => MergedJSON)
+const default_content_decoders = Dict{Symbol,Type{<:AbstractDecoder}}(:json => MergedJSON)
 const default_content_parsers = [:json, :urlencoded, :multipart]
-env = Dict{Symbol, Union{Dict{Symbol,DataType}, Vector{Symbol}}}(:decoders => default_content_decoders, :parsers => default_content_parsers)
+env = Dict{Symbol, Union{Dict{Symbol,Type{<:AbstractDecoder}}, Vector{Symbol}}}(:decoders => default_content_decoders, :parsers => default_content_parsers)
 
 # application/x-www-form-urlencoded
 

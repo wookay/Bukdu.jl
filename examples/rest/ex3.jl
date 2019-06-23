@@ -1,6 +1,6 @@
 # https://discourse.julialang.org/t/switch-from-httpserver-jl-to-http-jl/19717
 
-# Bukdu v0.4.2
+# Bukdu v0.4.4
 using Bukdu
 using HTTP.Messages: setheader
 
@@ -32,7 +32,7 @@ routes() do
     Bukdu.options("/", SimulationController, take_options)
     Bukdu.options("/run", SimulationController, take_options)
     post("/run", SimulationController, run_simulation)
-    plug(Plug.Parsers, :json => Plug.ContentParsers.JSONDecoder, parsers=[:json])
+    plug(Plug.Parsers, json=Plug.ContentParsers.JSONDecoder)
 end
 
 Bukdu.start(8080)

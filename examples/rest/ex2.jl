@@ -1,6 +1,6 @@
 # https://discourse.julialang.org/t/write-a-rest-interface-like-flask/18538/16
 
-# Bukdu v0.4.1
+# Bukdu v0.4.4
 using Bukdu
 
 struct RESTController <: ApplicationController
@@ -14,7 +14,7 @@ end
 
 routes() do
     post("/messages", RESTController, create)
-    plug(Plug.Parsers, parsers=[:json])
+    plug(Plug.Parsers, [:json])
 end
 
 Bukdu.start(8080)

@@ -13,7 +13,7 @@ routes() do
     post("/") do conn::Conn
         render(JSON, conn.params.k + 1)
     end
-    plug(Plug.Parsers, parsers=[:json])
+    plug(Plug.Parsers, [:json])
 end
 
 Bukdu.start(8190, host="127.0.0.1")
