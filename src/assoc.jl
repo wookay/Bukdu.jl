@@ -19,7 +19,7 @@ function Base.setindex!(assoc::Assoc, value, key::Symbol)
     setindex!(assoc, value, String(key))
 end
 
-function Base.setindex!(assoc::Assoc, value, key::String)
+function Base.setindex!(assoc::Assoc, value, key::AbstractString)
     ind = something(findfirst(isequal(key), keys(assoc)), 0)
     if ind > 0
         assoc.__bukdu_assoc[ind] = Pair{String,Any}(key, value)
@@ -28,7 +28,7 @@ function Base.setindex!(assoc::Assoc, value, key::String)
     end
 end
 
-function Base.getindex(assoc::Assoc, key::String)
+function Base.getindex(assoc::Assoc, key::AbstractString)
     for (k, v) in assoc.__bukdu_assoc
         k == key && return v
     end
@@ -55,7 +55,7 @@ function Base.empty!(assoc::Assoc)
     empty!(assoc.__bukdu_assoc)
 end
 
-function Base.haskey(assoc::Assoc, key::String)::Bool
+function Base.haskey(assoc::Assoc, key::AbstractString)::Bool
     key in keys(assoc)
 end
 
@@ -83,11 +83,11 @@ function Base.:(==)(left::Assoc, right::Assoc)::Bool
     left.__bukdu_assoc == right.__bukdu_assoc
 end
 
-function Base.get(assoc::Assoc, key::Symbol, value::Any)
+function Base.get(assoc::Assoc, key::Symbol, value)
     if haskey(assoc, key)
         v = assoc[key]
-        if v isa String
-            value isa String ? v : parse(typeof(value), v)
+        if v isa AbstractString && !(value isa AbstractString)
+            parse(typeof(value), v)
         else
             v
         end
