@@ -2,11 +2,12 @@ module Form # Bukdu.HTML5
 
 export change
 export form_for, label_for
-export text_input, text_area, radio_button, checkbox
+export text_input, text_area, radio_button, checkbox, file_input
 export submit
 
 using ...Bukdu.Router
 using ...Bukdu.Naming
+using ...Bukdu.Deps.HTTP: Multipart
 using ...Bukdu: ApplicationController, Assoc, Changeset, post
 using Documenter.Utilities.DOM: @tags, Node
 
@@ -24,7 +25,7 @@ function change(M::Type, params::Assoc)::Changeset
             if key in modelfieldnames
                 typ = fieldtype(M, key)
                 push!(ntkeys, key)
-                if typ === Any || typ === String
+                if v isa Multipart || typ === Any || typ === String
                     push!(ntvalues, v)
                 else
                     push!(ntvalues, parse(typ, v))
@@ -50,19 +51,37 @@ function change(changeset::Changeset, params::Assoc; primary_key::Union{String,N
     for (k::Symbol, v) in pairs(p.changes)
         if haskey(nt, k)
             typ = typeof(nt[k])
-            if v isa typ
-                val = v
+            if v isa Multipart
+                multipart = nt[k]
+                if multipart isa Multipart
+                    mark(multipart)
+                    mark(v)
+                    if read(multipart) == read(v) && multipart.filename == v.filename && multipart.contenttype == v.contenttype
+                    else
+                        push!(ntkeys, k)
+                        push!(ntvalues, v)
+                    end
+                    reset(multipart)
+                    reset(v)
+                else
+                    push!(ntkeys, k)
+                    push!(ntvalues, v)
+                end
             else
-                val = parse(typ, v)
-            end
-            if val == nt[k]
-                if primary_key !== nothing && Symbol(primary_key) === k
+                if v isa typ
+                    val = v
+                else
+                    val = parse(typ, v)
+                end
+                if val == nt[k]
+                    if primary_key !== nothing && Symbol(primary_key) === k
+                        push!(ntkeys, k)
+                        push!(ntvalues, val)
+                    end
+                else
                     push!(ntkeys, k)
                     push!(ntvalues, val)
                 end
-            else
-                push!(ntkeys, k)
-                push!(ntvalues, val)
             end
         end
     end
@@ -187,6 +206,18 @@ function checkbox(f::Changeset, field::Symbol, value::Union{Bool,Nothing}=nothin
            :type => "checkbox",
            :value => "true",
            kwargs...]]
+end
+
+"""
+    file_input(f::Changeset, field::Symbol; kwargs...)::Node
+"""
+function file_input(f::Changeset, field::Symbol; kwargs...)::Node
+    @tags input
+    name = Naming.model_prefix(f.model, field)
+    input[:id => name,
+          :name => name,
+          :type => "file",
+          kwargs...]
 end
 
 """

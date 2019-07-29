@@ -11,5 +11,6 @@ text_input
 text_area
 radio_button
 checkbox
+file_input
 submit
 ```

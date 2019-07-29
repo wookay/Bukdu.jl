@@ -20,6 +20,7 @@ using Test
 using Bukdu
 using .Bukdu.Deps
 using .Bukdu.Plug.ContentParsers
+using .Deps.HTTP: Multipart
 
 struct FC <: ApplicationController; conn::Conn; end
 
@@ -36,6 +37,31 @@ routes() do
     post("/multipart", FC, multipart)
 end
 
+# https://discourse.julialang.org/t/http-multipart-form-data-processing-by-server/24076/3
+req = Deps.HTTP.Request(
+    "POST",
+    "/multipart",
+    ["Content-Type"=>"multipart/form-data; boundary=---------------------------182023285717490760841965583652"],
+    codeunits("""
+-----------------------------182023285717490760841965583652
+Content-Disposition: form-data; name="image"; filename="file1.jpg"
+Content-Type: image/jpeg
+
+......JFIF.............C..........
+-----------------------------182023285717490760841965583652
+Content-Disposition: form-data; name="num"
+
+2
+-----------------------------182023285717490760841965583652--""")
+)
+got = Router.call(req).got
+image = got["image"]
+@test image isa Multipart
+@test image.filename == "file1.jpg"
+@test image.contenttype == "image/jpeg"
+@test String(read(image.data)) == "......JFIF.............C.........."
+@test got["num"] == "2"
+
 req = Deps.HTTP.Request(
     "POST",
     "/urlencoded",
@@ -43,7 +69,6 @@ req = Deps.HTTP.Request(
     codeunits("q=5")
 )
 @test Router.call(req).got == "5"
-
 
 req = Deps.HTTP.Request(
     "POST",
@@ -60,8 +85,13 @@ Content-Disposition: form-data; name="field2"; filename="example.txt"
 value2
 --boundary--""")
 )
-@test Router.call(req).got == Assoc("field1"=>"value1", "field2"=>"value2")
-
+got = Router.call(req).got
+@test got["field1"] == "value1"
+field2 = got["field2"]
+@test field2 isa Multipart
+@test field2.filename == "example.txt"
+@test field2.contenttype == ""
+@test String(read(field2.data)) == "value2"
 
 req = Deps.HTTP.Request(
     "POST",
@@ -79,7 +109,13 @@ Content-Type: text/plain
 value2
 --boundary--""")
 )
-@test Router.call(req).got == Assoc("field1"=>"value1", "field2"=>"value2")
+got = Router.call(req).got
+@test got["field1"] == "value1"
+field2 = got["field2"]
+@test field2 isa Multipart
+@test field2.filename == "example.txt"
+@test field2.contenttype == "text/plain"
+@test String(read(field2.data)) == "value2"
 
 req = Deps.HTTP.Request(
     "POST",
@@ -91,7 +127,6 @@ req = Deps.HTTP.Request(
 @test Router.call(req).got == Assoc("user_name"=>"", "user_famous"=>"false")
 
 Routing.empty!()
-
 
 @test  ContentParsers.rstripcrlf([0x0d, 0x0a]) == []      # CR LF
 @test  ContentParsers.rstripcrlf([0x0d])       == [0x0d]  # CR
