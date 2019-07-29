@@ -4,6 +4,7 @@ using ...Deps.HTTP
 using ...Deps.URIParser
 using ...Deps: Request
 using .HTTP.Messages: hasheader, header
+using .HTTP: Multipart
 using ...Bukdu: Route
 using ..Plug
 using JSON2
@@ -86,21 +87,31 @@ function content_disposition_fields(io::IOBuffer)::Dict{String,String}
     fields
 end
 
-function scan(s::FormScanner)::Vector{Pair{String,String}}
-    ps = Vector{Pair{String, String}}()
+function scan(s::FormScanner)::Vector{Pair{String,Any}}
+    ps = Vector{Pair{String, Any}}()
     io = IOBuffer(s.data, read=true, truncate=false)
     while !eof(io)
         chunk = readuntil(io, s.boundary)
         if !isempty(chunk)
             chunkio = IOBuffer(chunk)
-            skip(chunkio, CR)
-            skip(chunkio, LF)
-            contentdisposition = readuntil(chunkio, ContentDisposition)
+            skipchars(==(Char(CR)), chunkio)
+            skipchars(==(Char(LF)), chunkio)
+            readuntil(chunkio, ContentDisposition)
+            contentdisposition = rstripcrlf(read(chunkio))
             if !isempty(contentdisposition)
-            contentio = IOBuffer(contentdisposition)
-            fields = content_disposition_fields(contentio)
-            value = String(rstripcrlf(read(contentio)))
-            push!(ps, Pair(fields["name"], value))
+                contentio = IOBuffer(contentdisposition)
+                fields = content_disposition_fields(contentio)
+                name = fields["name"]
+                if haskey(fields, "filename")
+                    filename = fields["filename"]
+                    contenttype = get(fields, "Content-Type", "")
+                    # contenttransferencoding
+                    multipart = Multipart(filename, contentio, contenttype)
+                    push!(ps, Pair(name, multipart))
+                else
+                    value = read(contentio)
+                    push!(ps, Pair(name, String(value)))
+                end
             end
         end
     end
