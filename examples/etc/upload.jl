@@ -1,3 +1,4 @@
+# # Bukdu v0.4.5
 using Bukdu # ApplicationController Conn HTML Router CLI render routes get post
 using Bukdu.HTML5.Form # change
                        # form_for label_for
@@ -35,7 +36,7 @@ function preview(multipart::Multipart)
     mark(multipart)
     data = read(multipart)
     if isempty(data)
-        "" 
+        ""
     else
         base64 = base64encode(data)
         reset(multipart)
