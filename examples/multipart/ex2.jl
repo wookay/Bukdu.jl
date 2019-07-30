@@ -12,9 +12,6 @@ struct FormController <: ApplicationController
     conn::Conn
 end
 
-struct User
-end
-
 function layout(body)
     """
 <html>
@@ -29,25 +26,35 @@ $body
 """
 end
 
-global changeset = Changeset(User, (name="", famous=false, season="summer", intro="", photo1=nothing, photo2=nothing))
-
 function preview(multipart::Multipart)
-    @tags img
-    mark(multipart)
-    data = read(multipart)
-    if isempty(data)
-        ""
+    if eof(multipart)
+        string("empty")
     else
-        base64 = base64encode(data)
+        @tags div img
+        mark(multipart)
+        data = read(multipart)
         reset(multipart)
-        img[:src => string("data:", multipart.contenttype, ";base64, ", base64),
-            :alt => multipart.filename]
+        contents = [
+            div(multipart.filename),
+            div(repr(length(data)), " bytes"),
+        ]
+        if startswith(multipart.contenttype, "image")
+            base64 = base64encode(data)
+            push!(contents, img[:src => string("data:", multipart.contenttype, ";base64, ", base64),
+                                :alt => multipart.filename])
+        end
+        div(contents)
     end
 end
 
 function preview(::Nothing)
     ""
 end
+
+struct User
+end
+
+global changeset = Changeset(User, (name="", famous=false, season="summer", intro="", photo1=nothing, photo2=nothing))
 
 function index(c::FormController)
     global changeset
@@ -88,7 +95,6 @@ function post_result(c::FormController)
     )
     render(HTML, layout(body))
 end
-
 
 
 if PROGRAM_FILE == basename(@__FILE__)

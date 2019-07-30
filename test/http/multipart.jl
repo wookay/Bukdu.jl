@@ -1,4 +1,15 @@
-module test_http_multipart
+module test_http_multipart_basic
+
+using Test
+using HTTP: Multipart
+
+part1 = Multipart("filename", IOBuffer())
+@test eof(part1)
+
+end # module test_http_multipart_basic
+
+
+module test_http_multipart_scanner
 
 using Test
 using HTTP: Multipart
@@ -101,4 +112,4 @@ multipart = body_params[1][2]
 
 @test body_params[2] == ("num" => "2")
 
-end # module test_http_multipart
+end # module test_http_multipart_scanner
