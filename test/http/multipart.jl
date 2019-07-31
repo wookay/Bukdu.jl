@@ -105,7 +105,7 @@ boundary = "---------------------------182023285717490760841965583652"
 scanner = FormScanner(Vector{UInt8}(reqbody), string("--", boundary))
 body_params = scan(scanner)
 
-@test  body_params[1][1] == "image"
+@test body_params[1][1] == "image"
 multipart = body_params[1][2]
 @test multipart isa Multipart
 @test String(read(multipart.data)) == "......JFIF.............C.........."
