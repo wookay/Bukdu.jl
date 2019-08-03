@@ -113,8 +113,7 @@ function printstyled(logger::DefaultLogger, args...; kwargs...)
     Base.printstyled(io, args...; kwargs...)
 end
 
-function info_response(logger::DefaultLogger, req, route::NamedTuple{(:controller, :action)})
-    io = logger.stream
+function default_info_response(io, req, route::NamedTuple{(:controller, :action)})
     controller_name = route.controller === nothing ? "" : String(nameof(route.controller))
     action_name = route.action === nothing ? "" : String(nameof(route.action))
     Base.printstyled(io, "INFO:", color=:cyan)
@@ -142,14 +141,25 @@ function info_response(logger::DefaultLogger, req, route::NamedTuple{(:controlle
     Base.println(io)
 end
 
-
-function println(logger::T, args...; kwargs...) where {T <: AbstractLogger}
+function info_response(logger::DefaultLogger, req, route::NamedTuple{(:controller, :action)})
+    io = logger.stream
+    default_info_response(io, req, route)
 end
 
-function printstyled(logger::T, args...; kwargs...) where {T <: AbstractLogger}
+
+function println(::T, args...; kwargs...) where {T <: AbstractLogger}
+    io = IOContext(Core.stdout, :color => have_color())
+    Base.println(io, args...; kwargs...)
 end
 
-function info_response(logger::T, req, route::NamedTuple{(:controller, :action)}) where {T <: AbstractLogger}
+function printstyled(::T, args...; kwargs...) where {T <: AbstractLogger}
+    io = IOContext(Core.stdout, :color => have_color())
+    Base.printstyled(io, args...; kwargs...)
+end
+
+function info_response(::T, req, route::NamedTuple{(:controller, :action)}) where {T <: AbstractLogger}
+    io = IOContext(Core.stdout, :color => have_color())
+    default_info_response(io, req, route)
 end
 
 
