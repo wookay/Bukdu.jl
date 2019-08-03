@@ -26,13 +26,13 @@ end
 result = Router.call(get, "/na")
 @test result.route.action === System.not_applicable
 
-Bukdu.System.config[:error_stackframes_range] = 1:2
+Plug.Logger.config[:error_stackframes_range] = 1:2
 result = Router.call(post, "/hello")
 @test result.route.action === System.internal_error
 
 Routing.empty!()
 
-@test System._regularize_text("가1", 1) == "가"
+@test Plug.Logger._regularize_text("가1", 1) == "가"
 
 
 struct Controller <: ApplicationController

@@ -1,6 +1,6 @@
 module Bukdu
 
-const BUKDU_VERSION = v"0.4.5"
+const BUKDU_VERSION = v"0.4.6-DEV"
 
 include("assoc.jl")
 include("Deps.jl")
@@ -34,9 +34,5 @@ include("Utils.jl")
 export CLI
 include("CLI.jl")
 # include("Assembly.jl")
-
-function __init__()
-    plug(Plug.Logger)
-end
 
 end # module Bukdu

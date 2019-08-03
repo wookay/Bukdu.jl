@@ -4,7 +4,7 @@ export routes
 
 export get, post, delete, patch, put
 import Base: get
-using .System: HaltedError, NotApplicableError, InternalError, SystemController, internal_error, halted_error, not_applicable, info_response
+using .System: HaltedError, NotApplicableError, InternalError, SystemController, internal_error, halted_error, not_applicable
 
 struct DirectRequest
     _req
@@ -95,7 +95,7 @@ function _proc_request(route::Route, req::Deps.Request)
 end
 
 function _proc_response(route::Route, req::Deps.Request)
-    info_response(route, req, req.response)
+    Plug.Logger.info_response(req, (controller=route.C, action=route.action))
     System.catch_response(route, req.response) # System
 end
 
