@@ -191,3 +191,12 @@ function info_response(req, route::NamedTuple{(:controller, :action)})
 end
 
 end # module Bukdu.Plug.Loggers
+
+"""
+    plug(::Type{T}, args...; kwargs...) where {T <: AbstractLogger}
+"""
+function plug(::Type{T}, args...; kwargs...) where {T <: AbstractLogger}
+    Loggers.current[:logger] = T(args...; kwargs...)
+end
+
+# module Bukdu.Plug
