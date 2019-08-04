@@ -26,7 +26,7 @@ function start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kw
     task = @async HTTP.serve(ipaddr, port; server=server, verbose=false, kwargs...) do req
         if env[:server] === nothing
             req.response.status = 503
-            Plug.Logger.println("503 Error ", req)
+            Plug.Loggers.print_message("503 Error", req)
             throw(ErrorException("503"))
             req.response
         else
@@ -47,7 +47,7 @@ function stop()
     if server !== nothing
         close(server)
         env[:server] = nothing
-        Plug.Logger.println("Stopped.")
+        Plug.Loggers.print_message("Stopped.")
     end
     nothing
 end
@@ -63,7 +63,7 @@ function Base.show(io::IO, saddr::StyledInetAddr)
 end
 
 function print_listening_on(addr::Sockets.InetAddr)
-    Plug.Logger.println("Bukdu Listening on ", StyledInetAddr(addr))
+    Plug.Loggers.print_message("Bukdu Listening on ", StyledInetAddr(addr))
 end
 
 # module Bukdu

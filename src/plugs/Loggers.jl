@@ -1,7 +1,7 @@
-module Logger # Bukdu.Plug
+module Loggers # Bukdu.Plug
 
 """
-    Plug.Logger.config
+    Plug.Loggers.config
 
 Logging options for System info and error messages.
  - `:controller_pad`
@@ -103,14 +103,15 @@ function _unescape_req_target(req)
 end
 
 
-function println(logger::DefaultLogger, args...; kwargs...)
-    io = logger.stream
+function default_print_message(io, args...; kwargs...)
     Base.println(io, args...; kwargs...)
 end
 
-function printstyled(logger::DefaultLogger, args...; kwargs...)
-    io = logger.stream
-    Base.printstyled(io, args...; kwargs...)
+function default_print_internal_error(io, name::Symbol, err)
+    Base.printstyled(io, name, color=:red)
+    r = config[:error_stackframes_range]
+    stackframes = err.stackframes[r]
+    Base.println(io, " ", err.exception, "\n    ", join(stackframes, "\n    "))
 end
 
 function default_info_response(io, req, route::NamedTuple{(:controller, :action)})
@@ -141,20 +142,31 @@ function default_info_response(io, req, route::NamedTuple{(:controller, :action)
     Base.println(io)
 end
 
+
+function print_message(logger::DefaultLogger, args...; kwargs...)
+    io = logger.stream
+    default_print_message(io, args...; kwargs...)
+end
+
+function print_internal_error(logger::DefaultLogger, name::Symbol, err)
+    io = logger.stream
+    default_print_internal_error(io, name, err)
+end
+
 function info_response(logger::DefaultLogger, req, route::NamedTuple{(:controller, :action)})
     io = logger.stream
     default_info_response(io, req, route)
 end
 
 
-function println(::T, args...; kwargs...) where {T <: AbstractLogger}
+function print_message(::T, args...; kwargs...) where {T <: AbstractLogger}
     io = IOContext(Core.stdout, :color => have_color())
-    Base.println(io, args...; kwargs...)
+    default_print_message(io, args...; kwargs...)
 end
 
-function printstyled(::T, args...; kwargs...) where {T <: AbstractLogger}
+function print_internal_error(::T, name::Symbol, err) where {T <: AbstractLogger}
     io = IOContext(Core.stdout, :color => have_color())
-    Base.printstyled(io, args...; kwargs...)
+    default_print_internal_error(io, name, err)
 end
 
 function info_response(::T, req, route::NamedTuple{(:controller, :action)}) where {T <: AbstractLogger}
@@ -163,14 +175,14 @@ function info_response(::T, req, route::NamedTuple{(:controller, :action)}) wher
 end
 
 
-function println(args...; kwargs...)
+function print_message(args...; kwargs...)
     logger = current[:logger]
-    println(logger, args...; kwargs...)
+    print_message(logger, args...; kwargs...)
 end
 
-function printstyled(args...; kwargs...)
+function print_internal_error(name::Symbol, err)
     logger = current[:logger]
-    printstyled(logger, args...; kwargs...)
+    print_internal_error(logger, name, err)
 end
 
 function info_response(req, route::NamedTuple{(:controller, :action)})
@@ -178,4 +190,4 @@ function info_response(req, route::NamedTuple{(:controller, :action)})
     info_response(logger, req, route)
 end
 
-end # module Bukdu.Plug.Logger
+end # module Bukdu.Plug.Loggers

@@ -4,7 +4,7 @@ using ..Deps
 using ..Bukdu: Assoc, AbstractPlug, ApplicationController, AbstractRender, Render
 using Logging: AbstractLogger
 
-include("plugs/Logger.jl")
+include("plugs/Loggers.jl")
 include("plugs/conn.jl")
 include("plugs/ContentParsers.jl")
 include("plugs/parsers.jl")
@@ -14,7 +14,7 @@ function plug(::Type{T}; kwargs...) where {T <: AbstractPlug}
 end
 
 function plug(::Type{T}, args...; kwargs...) where {T <: AbstractLogger}
-    Logger.current[:logger] = T(args...; kwargs...)
+    Loggers.current[:logger] = T(args...; kwargs...)
 end
 
 end # module Bukdu.Plug

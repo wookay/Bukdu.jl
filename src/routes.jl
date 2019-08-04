@@ -95,7 +95,7 @@ function _proc_request(route::Route, req::Deps.Request)
 end
 
 function _proc_response(route::Route, req::Deps.Request)
-    Plug.Logger.info_response(req, (controller=route.C, action=route.action))
+    Plug.Loggers.info_response(req, (controller=route.C, action=route.action))
     System.catch_response(route, req.response) # System
 end
 

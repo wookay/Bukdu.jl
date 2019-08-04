@@ -61,14 +61,11 @@ end
 function internal_error(c::SystemController)
     @tags h3 p
     c.conn.request.response.status = 500 # 500 Internal Server Error
-    r = Plug.Logger.config[:error_stackframes_range]
-    stackframes = c.err.stackframes[r]
-    Plug.Logger.printstyled(Symbol(:System_, :internal_error), color=:red)
-    Plug.Logger.println(" ", c.err.exception, "\n    ", join(stackframes, "\n    "))
+    Plug.Loggers.print_internal_error(Symbol(:System_, :internal_error), c.err)
     render(HTML, string(
         h3(string(InternalError)),
         p(string(c.err.exception)),
-        (p ∘ string).(stackframes)...
+        (p ∘ string).(c.err.stackframes)...
     ))
 end
 

@@ -1,7 +1,7 @@
 # plugs
 
 ```@autodocs
-Modules = [Bukdu.Plug.Logger]
+Modules = [Bukdu.Plug.Loggers]
 ```
 
 ```@docs

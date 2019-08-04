@@ -45,7 +45,7 @@ function update(c::WelcomeController)
 end
 get("/update/region/:region/site/:site_id/channel/:channel_id/", WelcomeController, update, :region=>String, :site_id=>Int, :channel_id=>Int)
 
-Plug.Logger.config[:path_pad] = 36
+Plug.Loggers.config[:path_pad] = 36
 @test Router.call(get, "/update/region/west/site/1/channel/2").got == Assoc("region"=>"west", "site_id"=>1, "channel_id"=>2)
 
 end # module test_bukdu_routing

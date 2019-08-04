@@ -1,4 +1,4 @@
-module test_bukdu_plugs_logger
+module test_bukdu_plugs_loggers
 
 using Test
 using Bukdu # Plug plug
@@ -9,28 +9,21 @@ struct MyLogger <: AbstractLogger
     stream
 end
 
-function Plug.Logger.println(logger::MyLogger, args...; kwargs...)
+function Plug.Loggers.print_message(logger::MyLogger, args...; kwargs...)
     io = logger.stream
     Base.printstyled(io, "MYLOG ", color=:yellow)
     Base.println(io, args...; kwargs...)
     Base.flush(io)
 end
 
-function Plug.Logger.printstyled(logger::MyLogger, args...; kwargs...)
+function Plug.Loggers.info_response(logger::MyLogger, req, route::NamedTuple{(:controller, :action)})
     io = logger.stream
     Base.printstyled(io, "MYLOG ", color=:yellow)
-    Base.printstyled(io, args...; kwargs...)
+    Plug.Loggers.default_info_response(io, req, route)
     Base.flush(io)
 end
 
-function Plug.Logger.info_response(logger::MyLogger, req, route::NamedTuple{(:controller, :action)})
-    io = logger.stream
-    Base.printstyled(io, "MYLOG ", color=:yellow)
-    Plug.Logger.default_info_response(io, req, route)
-    Base.flush(io)
-end
-
-plug(MyLogger, IOContext(Core.stdout, :color => Plug.Logger.have_color()))
+plug(MyLogger, IOContext(Core.stdout, :color => Plug.Loggers.have_color()))
 
 Bukdu.start(8191)
 @test_throws HTTP.ExceptionRequest.StatusError HTTP.get("http://localhost:8191/")
@@ -51,4 +44,4 @@ MYLOG Stopped.
 """
 rm(access_log_path)
 
-end # module test_bukdu_plugs_logger
+end # module test_bukdu_plugs_loggers
