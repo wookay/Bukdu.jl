@@ -42,6 +42,6 @@ MYLOG Bukdu Listening on 127.0.0.1:8191
 MYLOG INFO: GET     MissingController   not_found       404 /
 MYLOG Stopped.
 """
-rm(access_log_path)
+try Base.rm(access_log_path) catch end
 
 end # module test_bukdu_plugs_loggers

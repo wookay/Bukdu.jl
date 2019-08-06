@@ -4,35 +4,14 @@ notifications:
 
 language: julia
 
+os:
+  - linux
+  - osx
+  - windows
+
 julia:
-  - 1.0
-  - nightly
-
-matrix:
-  exclude:
-    - os: osx
-      julia: nightly
-
-    - os: windows
-      julia: nightly
-      language: julia
-
-  include:
-    - os: osx
-
-    - os: windows
-      language: sh
-      before_install:
-        - choco install julia
-        - julia --color=yes -e 'using InteractiveUtils; versioninfo(verbose=true)'
-        - julia --color=yes -e 'using Pkg; pkg"add HTTP JSON2 MbedTLS URIParser Documenter Jive"'
-        - julia --color=yes -e 'using Pkg; pkg"dev ."'
-        - julia --color=yes -e 'using Pkg; pkg"precompile"'
-      script:
-        - cd test
-        -                 julia --color=yes runtests.jl
-        - JIVE_PROCS=auto julia --color=yes runtests.jl
-
+  - 1.1
+  - 1.3
 
 script:
   -                 julia --color=yes --project=. -e 'using Pkg; pkg"instantiate"; pkg"precompile"; Pkg.test()'
