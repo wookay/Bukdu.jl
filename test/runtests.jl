@@ -4,4 +4,4 @@ if isempty(ARGS)
 end
 
 using Jive
-runtests(@__DIR__)
+runtests(@__DIR__, node1=["bukdu/plugs/loggers"])

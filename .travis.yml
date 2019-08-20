@@ -10,15 +10,15 @@ os:
   - windows
 
 julia:
-  - 1.1
+  - 1.2
   - 1.3
 
 script:
-  -                 julia --color=yes --project=. -e 'using Pkg; pkg"instantiate"; pkg"precompile"; Pkg.test()'
-  - JIVE_PROCS=auto julia --color=yes --project=. -e 'using Pkg; pkg"instantiate"; pkg"precompile"; Pkg.test()'
+  -                 julia --color=yes --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"; Pkg.test(coverage=true)'
+  - JIVE_PROCS=auto julia --color=yes --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"; Pkg.test()'
 
 after_success:
-  - if [[ "$TRAVIS_OS_NAME" == linux && "$TRAVIS_JULIA_VERSION" == nightly ]] ; then julia --project=. -e 'using Pkg;
-                                                                                                           Pkg.add("Coverage");
-                                                                                                           using Coverage;
-                                                                                                           Codecov.submit(process_folder())' ; fi
+  - if [[ "$TRAVIS_OS_NAME" == linux && "$TRAVIS_JULIA_VERSION" == 1.2 ]] ; then julia --project=. -e 'using Pkg;
+                                                                                                       Pkg.add("Coverage");
+                                                                                                       using Coverage;
+                                                                                                       Codecov.submit(process_folder())' ; fi

@@ -31,7 +31,7 @@ Bukdu.stop()
 
 
 access_log_path = normpath(@__DIR__, "access.log")
-plug(MyLogger, open(access_log_path, "a"))
+plug(MyLogger, open(access_log_path, "w"))
 
 Bukdu.start(8191)
 @test_throws HTTP.ExceptionRequest.StatusError HTTP.get("http://localhost:8191/")
