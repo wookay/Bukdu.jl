@@ -136,7 +136,11 @@ function default_info_response(io, req, route::NamedTuple{(:controller, :action)
     else
         Base.printstyled(io, rpad(controller_name, config[:controller_pad]))
     end
-    Base.printstyled(io, rpad(action_name, config[:action_pad]))
+    if length(action_name) > config[:action_pad]
+        Base.printstyled(io, action_name[1:config[:action_pad]-1], ' ')
+    else
+        Base.printstyled(io, rpad(action_name, config[:action_pad]))
+    end
     Base.printstyled(io, req.response.status; resp_status_style(req.response.status)...)
     Base.printstyled(io, ' ', _unescape_req_target(req))
     Base.println(io)
