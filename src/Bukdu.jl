@@ -1,6 +1,6 @@
 module Bukdu
 
-const BUKDU_VERSION = v"0.4.6"
+const BUKDU_VERSION = v"0.4.7-DEV"
 
 include("assoc.jl")
 include("Deps.jl")
