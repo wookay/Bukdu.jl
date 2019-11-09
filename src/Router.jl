@@ -15,11 +15,11 @@ function call
 end
 
 """
-    Router.call(verb, path::String)
+    Router.call(verb, path::String, headers=[], body=UInt8[])
 """
-function call(verb, path::String)
+function call(verb, path::String, headers=[], body=UInt8[])
     method = Naming.verb_name(verb)
-    req = Deps.Request(method, path)
+    req = Deps.Request(method, path, headers, body)
     call(req)
 end
 
