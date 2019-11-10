@@ -108,10 +108,7 @@ function put_response_headers(req::Deps.Request, obj)
 end
 
 function request_handler(route::Route, dreq::DirectRequest)
-    (rou, obj) = _proc_request(route, dreq._req)
-    put_response_headers(dreq._req, obj)
-    _proc_response(rou, dreq._req)
-    (got=obj, resp=dreq._req.response, route=rou)
+    request_handler(route, dreq._req)
 end
 
 function request_handler(route::Route, req::Deps.Request)
