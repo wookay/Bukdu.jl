@@ -119,7 +119,7 @@ function request_handler(route::Route, req::Deps.Request)
     elseif obj isa Nothing
         data = Vector{UInt8}()
     else
-        data = Vector{UInt8}(string(obj))
+        data = Vector{UInt8}(repr(obj))
     end
     req.response.body = data
     _proc_response(rou, req)
