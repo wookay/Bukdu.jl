@@ -15,7 +15,11 @@ InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [compat]
-HTTP = "≥ 0.8.0"
+HTTP = "0.8"
+JSON2 = "0.3"
+MbedTLS = "0.7"
+URIParser = "0.4"
+Documenter = "0.23"
 julia = "1"
 
 [extras]
