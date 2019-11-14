@@ -107,17 +107,17 @@ function put_response_headers(req::Deps.Request, obj)
     end
 end
 
-function request_handler(route::Route, dreq::DirectRequest)
+function request_handler(route::Route, dreq::DirectRequest)::NamedTuple{(:got, :resp, :route)}
     request_handler(route, dreq._req)
 end
 
-function request_handler(route::Route, req::Deps.Request)
+function request_handler(route::Route, req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
     (rou, obj) = _proc_request(route, req)
     put_response_headers(req, obj)
     if obj isa Render
         data = obj.body
-    elseif obj isa Nothing
-        data = Vector{UInt8}()
+    elseif obj isa AbstractString
+        data = Vector{UInt8}(obj)
     else
         data = Vector{UInt8}(repr(obj))
     end

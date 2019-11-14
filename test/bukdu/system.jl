@@ -1,6 +1,5 @@
 module test_bukdu_system
 
-
 module NAStuff
 
 using Bukdu
@@ -24,6 +23,8 @@ routes() do
 end
 
 result = Router.call(get, "/na")
+@test result.got isa Bukdu.Render
+@test result.resp.status == 500
 @test result.route.action === System.not_applicable
 
 Plug.Loggers.config[:error_stackframes_range] = 1:2
@@ -53,5 +54,7 @@ routes() do
 end
 Router.call(get, "/just")
 Router.call(get, "/long")
+
+Routing.empty!()
 
 end # module test_bukdu_system
