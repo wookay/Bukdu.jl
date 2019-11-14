@@ -9,7 +9,7 @@ end
 
 f1(::ExController) = nothing
 f2(::ExController) = "a"
-f3(::ExController) = "abc"[1:2]
+f3(::ExController) = SubString("ab")
 f4(::ExController) = 0
 f5(::ExController) = 3.14
 f6(::ExController) = (1, 2)

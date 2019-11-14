@@ -24,7 +24,7 @@ script:
   - JIVE_PROCS=auto julia --color=yes --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"; Pkg.test()'
 
 after_success:
-  - if [[ "$TRAVIS_OS_NAME" == linux && "$TRAVIS_JULIA_VERSION" == 1.2 ]] ; then julia --project=. -e 'using Pkg;
+  - if [[ "$TRAVIS_OS_NAME" == linux && "$TRAVIS_JULIA_VERSION" == 1.1 ]] ; then julia --project=. -e 'using Pkg;
                                                                                                        Pkg.add("Coverage");
                                                                                                        using Coverage;
                                                                                                        Codecov.submit(process_folder())' ; fi
