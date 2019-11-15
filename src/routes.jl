@@ -57,10 +57,17 @@ function _build_conn_and_pipelines(route::Route, req::Deps.Request)
     else
         controller = route.C(conn)
         if applicable(route.action, controller)
-            obj = route.action(controller)
+            ret = route.action(controller)
             if "HEAD" === req.method
+                req.response.status = 301 # 301 Moved Permanently
+                push!(req.response.headers, Pair("Content-Length", "0"))
                 (route, nothing)
             else
+                if ret isa Render
+                    obj = ret
+                else
+                    obj = render(Julia, ret)
+                end
                 (route, obj)
             end
         else
@@ -99,11 +106,13 @@ function _proc_response(route::Route, req::Deps.Request)
     System.catch_response(route, req.response) # System
 end
 
-function put_response_headers(req::Deps.Request, obj)
+function put_response_header_and_body(req::Deps.Request, obj)
     push!(req.response.headers, Pair("Server", server_info))
     if obj isa Render
         push!(req.response.headers, Pair("Content-Type", obj.content_type))
-        push!(req.response.headers, Pair("Content-Length", string(length(obj.body))))
+        body = Vector{UInt8}(obj.writer(obj.data))
+        push!(req.response.headers, Pair("Content-Length", string(length(body))))
+        req.response.body = body
     end
 end
 
@@ -113,17 +122,9 @@ end
 
 function request_handler(route::Route, req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
     (rou, obj) = _proc_request(route, req)
-    put_response_headers(req, obj)
-    if obj isa Render
-        data = obj.body
-    elseif obj isa AbstractString
-        data = Vector{UInt8}(obj)
-    else
-        data = Vector{UInt8}(repr(obj))
-    end
-    req.response.body = data
+    put_response_header_and_body(req, obj)
     _proc_response(rou, req)
-    (got=obj, resp=req.response, route=rou)
+    (got=obj isa Render ? obj.data : obj, resp=req.response, route=rou)
 end
 
 """

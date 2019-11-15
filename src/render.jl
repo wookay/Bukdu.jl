@@ -10,28 +10,35 @@ end
     render(::Type{Text}, data)::Render
 """
 function render(::Type{Text}, data)::Render
-    Render("text/plain; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
+    Render("text/plain; charset=utf-8", string, data)
 end
 
 """
     render(::Type{HTML}, data)::Render
 """
 function render(::Type{HTML}, data)::Render
-    Render("text/html; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
+    Render("text/html; charset=utf-8", string, data)
 end
 
 """
     render(::Type{JSON}, data)::Render
 """
 function render(::Type{JSON}, data)::Render
-    Render("application/json; charset=utf-8", unsafe_wrap(Vector{UInt8}, JSON2.write(data)))
+    Render("application/json; charset=utf-8", JSON2.write, data)
+end
+
+"""
+    render(::Type{Julia}, data)::Render
+"""
+function render(::Type{Julia}, data)::Render
+    Render("application/julia; charset=utf-8", repr, data)
 end
 
 """
     render(::Type{JavaScript}, data)::Render
 """
 function render(::Type{JavaScript}, data)::Render
-    Render("application/javascript; charset=utf-8", unsafe_wrap(Vector{UInt8}, string(data)))
+    Render("application/javascript; charset=utf-8", string, data)
 end
 
 # application/wasm

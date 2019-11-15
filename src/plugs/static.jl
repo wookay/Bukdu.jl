@@ -29,7 +29,7 @@ function plug(::Type{Static}; at::String, from::String, only::Union{Vector{Strin
         filepath = joinpath(f(from, targetpath)...)
         (_, fileext) = splitext(filepath)
         ext = lowercase(fileext)
-        Render(content_type_for_file_extionsion(ext), read(filepath))
+        Render(content_type_for_file_extionsion(ext), read, filepath)
     end # function _readfile_base
 
     function readfile(c::StaticController)

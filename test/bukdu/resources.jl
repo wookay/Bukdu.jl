@@ -58,7 +58,7 @@ GET  /articles/:id  ArticleController  show"""
 
 
 result = Router.call(Bukdu.head, "/articles/1")
-@test result.resp.status == 200
+@test result.resp.status == 301
 @test result.got === nothing
 @test result.route.action === show
 @test result.route.param_types == Dict(:id=>Int)

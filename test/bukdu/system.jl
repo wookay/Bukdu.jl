@@ -23,7 +23,7 @@ routes() do
 end
 
 result = Router.call(get, "/na")
-@test result.got isa Bukdu.Render
+@test occursin("Bukdu.System.NotApplicableError", result.got)
 @test result.resp.status == 500
 @test result.route.action === System.not_applicable
 

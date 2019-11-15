@@ -8,6 +8,9 @@ end
 struct JavaScript
 end
 
+struct Julia
+end
+
 """
     ApplicationController
 """
@@ -20,7 +23,8 @@ abstract type AbstractRender end
 """
 struct Render <: AbstractRender
     content_type::String
-    body::Vector{UInt8}
+    writer::Function
+    data::Any
 end
 
 struct Route

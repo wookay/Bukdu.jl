@@ -2,6 +2,7 @@ module test_bukdu_router
 
 using Test
 using Bukdu
+using HTTP.Messages: header
 
 struct ExController <: ApplicationController
     conn::Conn
@@ -15,39 +16,32 @@ f5(::ExController) = 3.14
 f6(::ExController) = (1, 2)
 f7(::ExController) = (a=1,)
 
+g1(::ExController) = render(JSON, nothing)
+g2(::ExController) = render(JSON, "a")
+g3(::ExController) = render(JSON, SubString("ab"))
+g4(::ExController) = render(JSON, 0)
+g5(::ExController) = render(JSON, 3.14)
+g6(::ExController) = render(JSON, (1, 2))
+g7(::ExController) = render(JSON, (a=1,))
+
 routes() do
-    for func in (f1, f2, f3, f4, f5, f6, f7)
+    for func in [f1 f2 f3 f4 f5 f6 f7
+                 g1 g2 g3 g4 g5 g6 g7]
         get(string("/", nameof(func)), ExController, func)
     end
 end
 
-result = Router.call(get, "/f1")
-@test result.got === nothing
-@test result.resp.body == Vector{UInt8}("nothing")
-
 result = Router.call(get, "/f2")
 @test result.got == "a"
-@test result.resp.body == Vector{UInt8}("a")
+@test header(result.resp, "Content-Type") == "application/julia; charset=utf-8"
+@test result.resp.body == Vector{UInt8}(repr("a"))
 
-result = Router.call(get, "/f3")
-@test result.got == "ab"
-@test result.resp.body == Vector{UInt8}("ab")
-
-result = Router.call(get, "/f4")
-@test result.got == 0
-@test result.resp.body == Vector{UInt8}("0")
-
-result = Router.call(get, "/f5")
-@test result.got == 3.14
-@test result.resp.body == Vector{UInt8}("3.14")
-
-result = Router.call(get, "/f6")
-@test result.got == (1, 2)
-@test result.resp.body == Vector{UInt8}("(1, 2)")
-
-result = Router.call(get, "/f7")
-@test result.got == (a=1,)
-@test result.resp.body == Vector{UInt8}("(a = 1,)")
+for (f, g) in zip([f1 f2 f3 f4 f5 f6 f7],
+                  [g1 g2 g3 g4 g5 g6 g7])
+    result1 = Router.call(get, string("/", nameof(f)))
+    result2 = Router.call(get, string("/", nameof(g)))
+    @test result1.got == result2.got
+end
 
 Routing.empty!()
 

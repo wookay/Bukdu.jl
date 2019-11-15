@@ -14,12 +14,14 @@ routes() do
 end
 
 result = Router.call(Bukdu.head, "/")
-@test result.resp.status == 200
-@test result.got == nothing
+@test result.got === nothing
+@test result.resp.status == 301
+@test result.resp.body == Vector{UInt8}()
 
 result = Router.call(get, "/")
+@test result.got == "ok"
 @test result.resp.status == 200
-@test result.got.body == Vector{UInt8}("ok")
+@test result.resp.body == Vector{UInt8}("ok")
 
 Routing.empty!()
 
