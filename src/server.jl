@@ -12,7 +12,7 @@ function handle_request(req::HTTP.Request)::NamedTuple{(:got, :resp, :route)}
     params = merge(body_params, query_params, path_params)
     halted = false
     conn = Conn(req, req.method, Assoc.((body_params, query_params, path_params, params))..., halted)
-    for (name, pipefunc) in bukdu_env[:prequisite_plugs]
+    for pipefunc in bukdu_env[:prequisite_plugs]
         pipefunc(conn)
         conn.halted && break
     end

@@ -8,7 +8,7 @@ include("types.jl")
 
 const bukdu_env = Dict{Symbol, Any}(
     :server => nothing,
-    :prequisite_plugs => Assoc(),
+    :prequisite_plugs => Vector{Function}(),
 )
 
 include("plugs.jl")
