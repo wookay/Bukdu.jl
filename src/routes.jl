@@ -6,10 +6,6 @@ export get, post, delete, patch, put
 import Base: get
 using .System: HaltedError, NotApplicableError, InternalError, SystemController, internal_error, halted_error, not_applicable
 
-struct DirectRequest
-    _req
-end
-
 const server_info = string("Bukdu/", BUKDU_VERSION)
 const routing_verbs = [:get, :post, :delete, :patch, :put, :options]
 
@@ -37,19 +33,8 @@ function parsed_path_params(route::Route)::Vector{Pair{String,Any}}
     end
 end
 
-function _build_conn_and_pipelines(route::Route, req::Deps.Request)
-    body_params = Plug.ContentParsers.fetch_body_params(route, req)
-    query_params = fetch_query_params(req)
-    path_params = parsed_path_params(route)
-    params = merge(body_params, query_params, path_params)
-    halted = false
-    conn = Conn(req, Assoc.((body_params, query_params, path_params, params))..., halted)
-    for pipefunc in route.pipelines
-        pipefunc(conn)
-        halted = conn.halted
-        halted && break
-    end
-    if halted
+function _apply_action(route::Route, conn::Conn)::Tuple{Route, Union{Nothing,Render}}
+    if conn.halted
         err = HaltedError("halted on pipelines")
         rou = Route(SystemController, halted_error, route.param_types, route.path_params, route.pipelines)
         obj = halted_error(SystemController(conn, err))
@@ -57,19 +42,14 @@ function _build_conn_and_pipelines(route::Route, req::Deps.Request)
     else
         controller = route.C(conn)
         if applicable(route.action, controller)
+            conn.request.response.status = 200
             ret = route.action(controller)
-            if "HEAD" === req.method
-                req.response.status = 301 # 301 Moved Permanently
-                push!(req.response.headers, Pair("Content-Length", "0"))
-                (route, nothing)
+            if ret isa Render
+                obj = ret
             else
-                if ret isa Render
-                    obj = ret
-                else
-                    obj = render(Julia, ret)
-                end
-                (route, obj)
+                obj = render(Julia, ret)
             end
+            (route, obj)
         else
             err = NotApplicableError(string(route.action, "(::", route.C, ")"))
             rou = Route(SystemController, not_applicable, route.param_types, route.path_params, route.pipelines)
@@ -79,52 +59,50 @@ function _build_conn_and_pipelines(route::Route, req::Deps.Request)
     end
 end
 
-function _catch_internal_error(block, route, req)
+function _catch_internal_error(block, route, conn::Conn)::Tuple{Route, Union{Nothing,Render}}
     try
-        block(route, req)
+        block()
     catch ex
         stackframes = stacktrace(catch_backtrace())
         err = InternalError(ex, stackframes)
-        conn = Conn(req)
         rou = Route(SystemController, internal_error, route.param_types, route.path_params, route.pipelines)
         obj = internal_error(SystemController(conn, err))
         (rou, obj)
     end
 end
 
-function _proc_request(route::Route, req::Deps.Request)
-    System.catch_request(route, req)           # System
-    req.response.status = 200
-    _catch_internal_error(route, req) do route, req
-    # begin #
-        _build_conn_and_pipelines(route, req)
+function _proc_request(route::Route, conn::Conn)::Tuple{Route, Union{Nothing,Render}}
+    System.catch_request(route, conn) # System
+    _catch_internal_error(route, conn) do
+    # begin
+        _apply_action(route, conn)
     end
 end
 
-function _proc_response(route::Route, req::Deps.Request)
-    Plug.Loggers.info_response(req, (controller=route.C, action=route.action))
-    System.catch_response(route, req.response) # System
+function _proc_response(route::Route, conn::Conn)
+    Plug.Loggers.info_response(conn.request, (controller=route.C, action=route.action))
+    System.catch_response(route, conn) # System
 end
 
-function put_response_header_and_body(req::Deps.Request, obj)
+function put_response_header_and_body(req::Deps.Request, obj::Union{Nothing, Render})
     push!(req.response.headers, Pair("Server", server_info))
     if obj isa Render
         push!(req.response.headers, Pair("Content-Type", obj.content_type))
-        body = Vector{UInt8}(obj.writer(obj.data))
+        if "HEAD" == req.method
+            body = Vector{UInt8}()
+        else
+            body = Vector{UInt8}(obj.writer(obj.data))
+        end
         push!(req.response.headers, Pair("Content-Length", string(length(body))))
         req.response.body = body
     end
 end
 
-function request_handler(route::Route, dreq::DirectRequest)::NamedTuple{(:got, :resp, :route)}
-    request_handler(route, dreq._req)
-end
-
-function request_handler(route::Route, req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
-    (rou, obj) = _proc_request(route, req)
-    put_response_header_and_body(req, obj)
-    _proc_response(rou, req)
-    (got=obj isa Render ? obj.data : obj, resp=req.response, route=rou)
+function request_handler(route::Route, conn::Conn)::NamedTuple{(:got, :resp, :route)}
+    (rou, obj) = _proc_request(route, conn)
+    put_response_header_and_body(conn.request, obj)
+    _proc_response(rou, conn)
+    (got=obj isa Render ? obj.data : obj, resp=conn.request.response, route=rou)
 end
 
 """
@@ -181,6 +159,9 @@ end
     options(url::String, C::Type{<:ApplicationController}, action, param_types::Pair{Symbol,DataType}...)
 """
 function options
+end
+
+function trace
 end
 
 for verb in routing_verbs

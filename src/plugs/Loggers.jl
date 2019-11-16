@@ -21,11 +21,17 @@ using Logging: AbstractLogger
 
 struct DefaultLogger <: AbstractLogger
     stream
+    DefaultLogger() = new(IOContext(Core.stdout, :color => have_color()))
+end
+
+struct NullLogger <: AbstractLogger
+    stream
+    NullLogger() = new(IOContext(Core.stdout, :color => have_color()))
 end
 
 @generated have_color() = :(2 != Base.JLOptions().color)
 
-current = Dict{Symbol, Union{<:AbstractLogger}}(:logger => DefaultLogger(IOContext(Core.stdout, :color => have_color())))
+current = Dict{Symbol, Union{<:AbstractLogger}}(:logger => NullLogger())
 
 const style_request_action_others  = :red
 const style_request_action = Dict{String,Symbol}(
@@ -36,6 +42,7 @@ const style_request_action = Dict{String,Symbol}(
     "PUT"     => :green,
     "HEAD"    => :light_cyan,
     "OPTIONS" => :cyan,
+    "TRACE"   => :light_cyan,
 )
 
 const style_response_status_others = :red
@@ -160,6 +167,10 @@ end
 function info_response(logger::DefaultLogger, req, route::NamedTuple{(:controller, :action)})
     io = logger.stream
     default_info_response(io, req, route)
+end
+
+
+function info_response(logger::NullLogger, req, route::NamedTuple{(:controller, :action)})
 end
 
 

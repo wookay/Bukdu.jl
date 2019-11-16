@@ -1,6 +1,6 @@
 module Routing # Bukdu
 
-using ..Bukdu: ApplicationController, Route
+using ..Bukdu: ApplicationController, Route, Conn
 using ..Bukdu.Deps
 using ..Bukdu.Naming
 using ..Bukdu.System
@@ -13,12 +13,11 @@ store = Dict{Symbol, Any}(
 )
 routing_pipelines = Dict{Symbol, Vector{Function}}()
 
-function handle(req::Deps.Request)
+function handle_conn(req::Deps.Request, method::String)
     uri = Deps.HTTP.URIs.URI(req.target)
     segments = split(uri.path, '/'; keepempty=false)
     vals = [Val(Symbol(seg)) for seg in segments]
-    meth = Symbol(req.method)
-    verb = Val(meth === :HEAD ? :GET : meth)
+    verb = Val(Symbol(method))
     route(verb, vals...)
 end
 

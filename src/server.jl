@@ -3,14 +3,27 @@
 using .Deps.HTTP
 using .HTTP.Sockets
 
-const env = Dict{Symbol, Any}(
-    :server => nothing,
-)
-
-function routing_handle(request::HTTP.Request)
-    route = Routing.handle(request)
-    result = request_handler(route, request)
-    result.resp
+function handle_request(req::HTTP.Request)::NamedTuple{(:got, :resp, :route)}
+    body_params = Plug.ContentParsers.fetch_body_params(req)
+    query_params = fetch_query_params(req)
+    prev_method = req.method
+    route = Routing.handle_conn(req, prev_method)
+    path_params = parsed_path_params(route)
+    params = merge(body_params, query_params, path_params)
+    halted = false
+    conn = Conn(req, req.method, Assoc.((body_params, query_params, path_params, params))..., halted)
+    for (name, pipefunc) in bukdu_env[:prequisite_plugs]
+        pipefunc(conn)
+        conn.halted && break
+    end
+    if prev_method != conn.method
+        route = Routing.handle_conn(conn.request, conn.method)
+    end
+    for pipefunc in route.pipelines
+        pipefunc(conn)
+        conn.halted && break
+    end
+    request_handler(route, conn)
 end
 
 """
@@ -22,15 +35,15 @@ function start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kw
     ipaddr = host isa Sockets.IPAddr ? host : Sockets.getaddrinfo(host)
     inetaddr = Sockets.InetAddr(ipaddr, port)
     server = Sockets.listen(inetaddr)
-    env[:server] = server
+    bukdu_env[:server] = server
     task = @async HTTP.serve(ipaddr, port; server=server, verbose=false, kwargs...) do req
-        if env[:server] === nothing
+        if bukdu_env[:server] === nothing
             req.response.status = 503
             Plug.Loggers.print_message("503 Error", req)
             throw(ErrorException("503"))
             req.response
         else
-            routing_handle(req)
+            handle_request(req).resp
         end
     end
     print_listening_on(inetaddr)
@@ -43,11 +56,11 @@ end
 stop the Bukdu server.
 """
 function stop()
-    server = env[:server]
+    server = bukdu_env[:server]
     if server !== nothing
         close(server)
-        env[:server] = nothing
-        Plug.Loggers.print_message("Stopped.")
+        bukdu_env[:server] = nothing
+        Plug.Loggers.print_message("Bukdu has stopped.")
     end
     nothing
 end

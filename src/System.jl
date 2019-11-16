@@ -82,13 +82,13 @@ function not_found(c::MissingController)
 end
 
 """
-    Bukdu.System.catch_request(route::Bukdu.Route, req)
+    Bukdu.System.catch_request(route::Bukdu.Route, conn)
 """
 function catch_request
 end
 
 """
-    Bukdu.System.catch_response(route::Bukdu.Route, resp)
+    Bukdu.System.catch_response(route::Bukdu.Route, conn)
 """
 function catch_response
 end
@@ -96,10 +96,10 @@ end
 end # module Bukdu.System
 
 
-function Bukdu.System.catch_request(route::Bukdu.Route, req)
-#    @debug "REQ " req.headers
+function Bukdu.System.catch_request(route::Bukdu.Route, conn)
+#    @debug "REQ " conn.request.headers
 end
 
-function Bukdu.System.catch_response(route::Bukdu.Route, resp)
-#    @debug "RESP" resp.headers resp.status
+function Bukdu.System.catch_response(route::Bukdu.Route, conn)
+#    @debug "RESP" conn.request.response.headers resp.status
 end

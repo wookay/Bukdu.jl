@@ -40,7 +40,7 @@ Bukdu.stop()
 @test read(access_log_path, String) == """
 MYLOG Bukdu Listening on 127.0.0.1:8191
 MYLOG INFO: GET     MissingController   not_found       404 /
-MYLOG Stopped.
+MYLOG Bukdu has stopped.
 """
 try Base.rm(access_log_path) catch end
 

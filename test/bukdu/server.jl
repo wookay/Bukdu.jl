@@ -25,8 +25,8 @@ sleep(0)
 @test r.body == Vector{UInt8}("3")
 
 Plug.Loggers.config[:error_stackframes_range] = 1:2
-@test_throws HTTP.ExceptionRequest.StatusError HTTP.post("http://127.0.0.1:8190/"; body=JSON2.write((k=2,)))
-@test_throws HTTP.ExceptionRequest.StatusError HTTP.post("http://127.0.0.1:8190/", ["Content-Type"=>"application/json"]; body=JSON2.write(2))
+@test_throws HTTP.ExceptionRequest.StatusError HTTP.post("http://127.0.0.1:8190/"; body=JSON2.write((k=3,)))
+@test_throws HTTP.ExceptionRequest.StatusError HTTP.post("http://127.0.0.1:8190/", ["Content-Type"=>"application/json"]; body=JSON2.write(3))
 
 Bukdu.stop()
 

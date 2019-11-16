@@ -2,8 +2,7 @@ module Router # Bukdu
 
 using ..Bukdu.Naming
 using ..Bukdu.Deps
-using ..Bukdu.Routing
-using ..Bukdu: DirectRequest, request_handler
+using ..Bukdu: handle_request
 
 """
     Router.call
@@ -27,9 +26,7 @@ end
     Router.call(req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
 """
 function call(req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
-    route = Routing.handle(req)
-    dreq = DirectRequest(req)
-    request_handler(route, dreq)
+    handle_request(req)
 end
 
 

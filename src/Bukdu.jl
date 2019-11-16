@@ -5,6 +5,12 @@ const BUKDU_VERSION = v"0.4.9-DEV"
 include("assoc.jl")
 include("Deps.jl")
 include("types.jl")
+
+const bukdu_env = Dict{Symbol, Any}(
+    :server => nothing,
+    :prequisite_plugs => Assoc(),
+)
+
 include("plugs.jl")
 include("Naming.jl")
 include("render.jl")
@@ -24,7 +30,6 @@ include("pipelines.jl")
 include("Actions.jl")
 include("resources.jl")
 
-
 include("changeset.jl")
 include("HTML5.jl")
 
@@ -34,5 +39,10 @@ include("Utils.jl")
 export CLI
 include("CLI.jl")
 # include("Assembly.jl")
+
+function __init__()
+    plug(Plug.Loggers.DefaultLogger)
+    plug(Plug.Head)
+end
 
 end # module Bukdu

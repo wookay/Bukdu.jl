@@ -1,7 +1,7 @@
 module Plug # module Bukdu
 
 using ..Deps
-using ..Bukdu: Assoc, AbstractPlug, ApplicationController, AbstractRender, Render
+using ..Bukdu: Assoc, AbstractPlug, ApplicationController, AbstractRender, Render, bukdu_env
 
 function plug
 end
@@ -15,6 +15,8 @@ include("plugs/ContentParsers.jl")
 include("plugs/parsers.jl")
 
 include("plugs/static.jl")
+
+include("plugs/head.jl")
 
 end # module Bukdu.Plug
 

@@ -42,4 +42,9 @@ assoc = Assoc("a" => 2, "b" => [1,2])
 assoc = Assoc("z" => SubString("2", 1:1))
 @test get(assoc, :z, 0) == 2
 
+for (k, v) in assoc
+    @test k == "z"
+    @test v == "2"
+end
+
 end # module test_bukdu_assoc

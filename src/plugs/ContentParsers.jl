@@ -125,10 +125,10 @@ end
 
 function parse(::Type{MergedJSON}, buf::IOBuffer)::Vector{Pair{String,Any}}
     nt = JSON2.read(buf)
-    return [Pair(String(k),v) for (k,v) in pairs(nt)]
+    return [Pair(string(k),v) for (k,v) in pairs(nt)]
 end
 
-function fetch_body_params(route::Route, req::Request)::Vector{Pair{String,Any}}
+function fetch_body_params(req::Request)::Vector{Pair{String,Any}}
     if hasheader(req.headers, "Content-Type")
         content_type = header(req.headers, "Content-Type")
         request_decoders = env[:decoders]

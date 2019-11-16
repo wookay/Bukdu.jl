@@ -7,6 +7,7 @@
 """
 mutable struct Conn <: AbstractPlug
     request::Deps.Request
+    method::String
 
     # Fetchable fields
     # cookies           # the request cookies with the response cookies  FIXME
@@ -18,6 +19,6 @@ mutable struct Conn <: AbstractPlug
     # Connection fields
     halted::Bool        # the boolean status on whether the pipeline was halted
 end
-Conn(request::Deps.Request) = Conn(request, Assoc(), Assoc(), Assoc(), Assoc(), false)
+Conn(request::Deps.Request) = Conn(request, request.method, Assoc(), Assoc(), Assoc(), Assoc(), false)
 
 # module Bukdu.Plug
