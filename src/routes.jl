@@ -80,7 +80,7 @@ function _proc_request(route::Route, conn::Conn)::Tuple{Route, Union{Nothing,Ren
 end
 
 function _proc_response(route::Route, conn::Conn)
-    Plug.Loggers.info_response(conn.request, (controller=route.C, action=route.action))
+    Plug.Loggers.info_response(conn, (controller=route.C, action=route.action))
     System.catch_response(route, conn) # System
 end
 

@@ -3,7 +3,7 @@
 using .Deps.HTTP
 using .HTTP.Sockets
 
-function handle_request(req::HTTP.Request)::NamedTuple{(:got, :resp, :route)}
+function handle_request(req::HTTP.Request, stream::Union{Nothing,<:IO})::NamedTuple{(:got, :resp, :route)}
     body_params = Plug.ContentParsers.fetch_body_params(req)
     query_params = fetch_query_params(req)
     prev_method = req.method
@@ -11,7 +11,12 @@ function handle_request(req::HTTP.Request)::NamedTuple{(:got, :resp, :route)}
     path_params = parsed_path_params(route)
     params = merge(body_params, query_params, path_params)
     halted = false
-    conn = Conn(req, req.method, Assoc.((body_params, query_params, path_params, params))..., halted)
+    if nothing === stream
+        remote_ip = nothing
+    else
+        (remote_ip, _remote_port) = getpeername(stream.c.io)
+    end
+    conn = Conn(req, req.method, Assoc.((body_params, query_params, path_params, params))..., halted, remote_ip)
     for pipefunc in bukdu_env[:prequisite_plugs]
         pipefunc(conn)
         conn.halted && break
@@ -26,6 +31,18 @@ function handle_request(req::HTTP.Request)::NamedTuple{(:got, :resp, :route)}
     request_handler(route, conn)
 end
 
+# code from HTTP.jl/src/Handlers.jl
+function handle_stream(http::HTTP.Stream)
+    request::HTTP.Request = http.message
+    request.body = read(http)
+    closeread(http)
+    request.response::HTTP.Response = handle_request(request, http.stream).resp
+    request.response.request = request
+    startwrite(http)
+    write(http, request.response.body)
+    return
+end
+
 """
     Bukdu.start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kwargs...)
 
@@ -36,16 +53,7 @@ function start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kw
     inetaddr = Sockets.InetAddr(ipaddr, port)
     server = Sockets.listen(inetaddr)
     bukdu_env[:server] = server
-    task = @async HTTP.serve(ipaddr, port; server=server, verbose=false, kwargs...) do req
-        if bukdu_env[:server] === nothing
-            req.response.status = 503
-            Plug.Loggers.print_message("503 Error", req)
-            throw(ErrorException("503"))
-            req.response
-        else
-            handle_request(req).resp
-        end
-    end
+    task = @async HTTP.Servers.listen(handle_stream, ipaddr, port; server=server, verbose=false, kwargs...)
     print_listening_on(inetaddr)
     task
 end
