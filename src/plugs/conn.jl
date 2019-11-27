@@ -2,6 +2,8 @@
 
 # follow the https://github.com/elixir-plug/plug/blob/master/lib/plug/conn.ex
 
+using Sockets
+
 """
     Conn
 """
@@ -18,7 +20,9 @@ mutable struct Conn <: AbstractPlug
 
     # Connection fields
     halted::Bool        # the boolean status on whether the pipeline was halted
+
+    remote_ip::Union{Nothing,Sockets.IPAddr}
 end
-Conn(request::Deps.Request) = Conn(request, request.method, Assoc(), Assoc(), Assoc(), Assoc(), false)
+Conn(request::Deps.Request) = Conn(request, request.method, Assoc(), Assoc(), Assoc(), Assoc(), false, nothing)
 
 # module Bukdu.Plug

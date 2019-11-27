@@ -26,7 +26,7 @@ end
     Router.call(req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
 """
 function call(req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
-    handle_request(req)
+    handle_request(req, nothing)
 end
 
 

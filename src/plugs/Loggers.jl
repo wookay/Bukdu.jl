@@ -100,10 +100,10 @@ function _regularize_text(str::String, padding::Int)::String
     news
 end
 
-function _unescape_req_target(req)
-    str = req.target
+function _unescape_request_target(target)
+    str = target
     try
-        str = Deps.HTTP.URIs.unescapeuri(req.target)
+        str = Deps.HTTP.URIs.unescapeuri(target)
     catch
     end
     _regularize_text(str, config[:path_pad])
@@ -121,12 +121,12 @@ function default_print_internal_error(io, name::Symbol, err)
     Base.println(io, " ", err.exception, "\n    ", join(stackframes, "\n    "))
 end
 
-function default_info_response(io, req, route::NamedTuple{(:controller, :action)})
+function default_info_response(io, conn, route::NamedTuple{(:controller, :action)})
     controller_name = route.controller === nothing ? "" : String(nameof(route.controller))
     action_name = route.action === nothing ? "" : String(nameof(route.action))
     Base.printstyled(io, "INFO:", color=:cyan)
     Base.printstyled(io, ' ')
-    Base.printstyled(io, rpad(req.method, 7); req_method_style(req.method)...)
+    Base.printstyled(io, rpad(conn.request.method, 7); req_method_style(conn.request.method)...)
     Base.printstyled(io, ' ')
     controller_color = Sys.iswindows() ? :normal : 248
     if endswith(controller_name, "Controller")
@@ -148,8 +148,8 @@ function default_info_response(io, req, route::NamedTuple{(:controller, :action)
     else
         Base.printstyled(io, rpad(action_name, config[:action_pad]))
     end
-    Base.printstyled(io, req.response.status; resp_status_style(req.response.status)...)
-    Base.printstyled(io, ' ', _unescape_req_target(req))
+    Base.printstyled(io, conn.request.response.status; resp_status_style(conn.request.response.status)...)
+    Base.printstyled(io, ' ', _unescape_request_target(conn.request.target))
     Base.println(io)
 end
 
@@ -164,13 +164,13 @@ function print_internal_error(logger::DefaultLogger, name::Symbol, err)
     default_print_internal_error(io, name, err)
 end
 
-function info_response(logger::DefaultLogger, req, route::NamedTuple{(:controller, :action)})
+function info_response(logger::DefaultLogger, conn, route::NamedTuple{(:controller, :action)})
     io = logger.stream
-    default_info_response(io, req, route)
+    default_info_response(io, conn, route)
 end
 
 
-function info_response(logger::NullLogger, req, route::NamedTuple{(:controller, :action)})
+function info_response(logger::NullLogger, conn, route::NamedTuple{(:controller, :action)})
 end
 
 
@@ -184,9 +184,9 @@ function print_internal_error(::T, name::Symbol, err) where {T <: AbstractLogger
     default_print_internal_error(io, name, err)
 end
 
-function info_response(::T, req, route::NamedTuple{(:controller, :action)}) where {T <: AbstractLogger}
+function info_response(::T, conn, route::NamedTuple{(:controller, :action)}) where {T <: AbstractLogger}
     io = IOContext(Core.stdout, :color => have_color())
-    default_info_response(io, req, route)
+    default_info_response(io, conn, route)
 end
 
 
@@ -200,9 +200,9 @@ function print_internal_error(name::Symbol, err)
     print_internal_error(logger, name, err)
 end
 
-function info_response(req, route::NamedTuple{(:controller, :action)})
+function info_response(conn, route::NamedTuple{(:controller, :action)})
     logger = current[:logger]
-    info_response(logger, req, route)
+    info_response(logger, conn, route)
 end
 
 end # module Bukdu.Plug.Loggers

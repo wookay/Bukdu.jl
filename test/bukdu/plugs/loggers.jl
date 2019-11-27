@@ -16,10 +16,11 @@ function Plug.Loggers.print_message(logger::MyLogger, args...; kwargs...)
     Base.flush(io)
 end
 
-function Plug.Loggers.info_response(logger::MyLogger, req, route::NamedTuple{(:controller, :action)})
+function Plug.Loggers.info_response(logger::MyLogger, conn, route::NamedTuple{(:controller, :action)})
     io = logger.stream
     Base.printstyled(io, "MYLOG ", color=:yellow)
-    Plug.Loggers.default_info_response(io, req, route)
+    print(io, conn.remote_ip, ' ')
+    Plug.Loggers.default_info_response(io, conn, route)
     Base.flush(io)
 end
 
@@ -39,7 +40,7 @@ Bukdu.stop()
 
 @test read(access_log_path, String) == """
 MYLOG Bukdu Listening on 127.0.0.1:8191
-MYLOG INFO: GET     MissingController   not_found       404 /
+MYLOG 127.0.0.1 INFO: GET     MissingController   not_found       404 /
 MYLOG Bukdu has stopped.
 """
 try Base.rm(access_log_path) catch end
