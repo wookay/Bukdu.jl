@@ -19,7 +19,7 @@ end
 function Plug.Loggers.info_response(logger::MyLogger, conn, route::NamedTuple{(:controller, :action)})
     io = logger.stream
     Base.printstyled(io, "MYLOG ", color=:yellow)
-    print(io, conn.remote_ip, ' ')
+    print(io, something(conn.remote_ip, ""), ' ')
     Plug.Loggers.default_info_response(io, conn, route)
     Base.flush(io)
 end
@@ -44,5 +44,7 @@ MYLOG 127.0.0.1 INFO: GET     MissingController   not_found       404 /
 MYLOG Bukdu has stopped.
 """
 try Base.rm(access_log_path) catch end
+
+plug(Plug.Loggers.DefaultLogger)
 
 end # module test_bukdu_plugs_loggers
