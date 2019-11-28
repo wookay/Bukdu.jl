@@ -32,7 +32,6 @@ struct Route
     action
     param_types::Dict{Symbol,DataType}
     path_params::Vector{Pair{String,Any}}
-    pipelines::Vector{Function}
 end
 
 # module Bukdu
