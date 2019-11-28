@@ -3,9 +3,9 @@
 import Base: pipeline
 
 """
-    pipeline(block::Function, routers...)
+    pipeline(block::Function, pipes::Symbol...)
 """
-function pipeline(block::Function, pipes...)
+function pipeline(block::Function, pipes::Symbol...)
     for pipe::Symbol in pipes
         pipelines = get(Routing.routing_pipelines, pipe, [])
         push!(pipelines, block)
