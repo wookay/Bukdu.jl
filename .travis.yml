@@ -20,8 +20,9 @@ matrix:
       julia: nightly
 
 script:
-  -                 julia --color=yes --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"; Pkg.test(coverage=true)'
-  - JIVE_PROCS=auto julia --color=yes --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"; Pkg.test()'
+  - if [[ "$TRAVIS_JULIA_VERSION" == nightly ]] ; then julia -e 'using Pkg; pkg"add Jive"' ; fi
+  -                 julia --color=yes --project -e 'using Pkg; Pkg.test(coverage=true)'
+  - JIVE_PROCS=auto julia --color=yes --project -e 'using Pkg; Pkg.test()'
 
 after_success:
   - if [[ "$TRAVIS_OS_NAME" == linux && "$TRAVIS_JULIA_VERSION" == 1.1 ]] ; then julia --project=. -e 'using Pkg;

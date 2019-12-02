@@ -1,11 +1,11 @@
-# Bukdu 🌌
+# Bukdu.jl 🌌
 
 |  **Documentation**                        |  **Build Status**                                                |
 |:-----------------------------------------:|:----------------------------------------------------------------:|
 |  [![][docs-latest-img]][docs-latest-url]  |  [![][travis-img]][travis-url]  [![][codecov-img]][codecov-url]  |
 
 
-Bukdu 🌌 is a web development framework for [Julia](https://julialang.org).
+`Bukdu.jl` is a web development framework for [Julia](https://julialang.org).
 
 It's influenced by [Phoenix framework](https://phoenixframework.org).
 
