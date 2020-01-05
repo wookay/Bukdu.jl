@@ -3,21 +3,21 @@ module test_bukdu_plugs_static
 using Test
 using Bukdu
 
-routes(:a) do
+routes() do
     plug(Plug.Static, at="/hello", from=normpath(@__DIR__, "."))
 end
 result = Router.call(get, "/hello/static.jl")
 @test startswith(String(result.resp.body), "module test_bukdu_plugs_static")
 Routing.empty!()
 
-routes(:b) do
+routes() do
     plug(Plug.Static, at="/", from=normpath(@__DIR__, "."))
 end
 result = Router.call(get, "/static.jl")
 @test startswith(String(result.resp.body), "module test_bukdu_plugs_static")
 Routing.empty!()
 
-routes(:c) do
+routes() do
     plug(Plug.Static, at="/", from=normpath(@__DIR__, "."), only=["static.jl"])
 end
 result = Router.call(get, "/static.jl")
@@ -25,7 +25,7 @@ result = Router.call(get, "/static.jl")
 @test Router.call(get, "/csrf_protection.jl").resp.status == 404
 Routing.empty!()
 
-routes(:d) do
+routes() do
     plug(Plug.Static, at="/", from=normpath(@__DIR__, "public"))
 end
 @test Router.call(get, "/a.html").resp.status == 200

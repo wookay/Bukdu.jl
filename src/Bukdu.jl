@@ -26,7 +26,6 @@ include("routes.jl")
 
 export Router
 include("Router.jl")
-include("pipelines.jl")
 include("Actions.jl")
 include("resources.jl")
 
