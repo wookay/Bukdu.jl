@@ -7,7 +7,7 @@ using .HTTP.Messages: hasheader, header
 using .HTTP: Multipart
 using ...Bukdu: Route
 using ..Plug
-using JSON2
+using JSON
 
 abstract type AbstractDecoder end
 
@@ -119,12 +119,12 @@ function scan(s::FormScanner)::Vector{Pair{String,Any}}
 end
 
 function parse(::Type{JSONDecoder}, buf::IOBuffer)::Vector{Pair{String,Any}}
-    nt = JSON2.read(buf)
+    nt = JSON.parse(buf)
     return [Pair("json", nt)]
 end
 
 function parse(::Type{MergedJSON}, buf::IOBuffer)::Vector{Pair{String,Any}}
-    nt = JSON2.read(buf)
+    nt = JSON.parse(buf)
     return [Pair(string(k),v) for (k,v) in pairs(nt)]
 end
 

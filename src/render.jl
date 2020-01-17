@@ -23,8 +23,8 @@ end
 """
     render(::Type{JSON}, data)::Render
 """
-function render(::Type{JSON}, data)::Render
-    Render("application/json; charset=utf-8", JSON2.write, data)
+function render(::Type{asJSON}, data)::Render
+    Render("application/json; charset=utf-8", JSON.json, data)
 end
 
 """
@@ -44,8 +44,8 @@ end
 # application/wasm
 
 function render(m::Module, data)::AbstractRender # throw UnknownModuleError
-    if nameof(m) === :JSON
-        render(JSON, data)
+    if nameof(m) === :asJSON
+        render(asJSON, data)
     elseif nameof(m) === :HTML5
         render(HTML, data)
     else

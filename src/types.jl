@@ -1,8 +1,8 @@
 # module Bukdu
 
-export JSON, JavaScript
+export asJSON, JavaScript
 
-struct JSON
+struct asJSON
 end
 
 struct JavaScript

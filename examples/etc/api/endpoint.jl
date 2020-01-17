@@ -26,14 +26,14 @@ function index(c::CustomerController) # GET
     customers = [(firstName="John", lastName="Doe"),
                  (firstName="Russ", lastName="Smith"),
                  (firstName="Kate", lastName="Williams")]
-    render(JSON, customers)
+    render(asJSON, customers)
 end
 
 function show(c::CustomerController) # GET
     customer_id = c.params.id
     # customer = Repo.get(Customer, customer_id)
     customer = (firstName="John", lastName="Doe")
-    render(JSON, customer)
+    render(asJSON, customer)
 end
 
 function new(c::CustomerController) # GET

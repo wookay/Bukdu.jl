@@ -7,7 +7,7 @@ end
 
 function index(c::RESTController)
     setheader(c.conn.request.response, "Access-Control-Allow-Origin" => "*")
-    render(JSON, 42)
+    render(asJSON, 42)
 end
 
 routes() do

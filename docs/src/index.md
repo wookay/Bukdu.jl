@@ -14,7 +14,7 @@ struct WelcomeController <: ApplicationController
 end
 
 function index(c::WelcomeController)
-    render(JSON, "Hello World")
+    render(asJSON, "Hello World")
 end
 
 routes() do
@@ -55,7 +55,7 @@ Visit http://127.0.0.1:8080 on your web browser.
 
 ``` julia
 julia> function index(c::WelcomeController)
-           render(JSON, "Love")
+           render(asJSON, "Love")
        end
 index (generic function with 1 method)
 ```

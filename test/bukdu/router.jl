@@ -16,13 +16,13 @@ f5(::ExController) = 3.14
 f6(::ExController) = (1, 2)
 f7(::ExController) = (a=1,)
 
-g1(::ExController) = render(JSON, nothing)
-g2(::ExController) = render(JSON, "a")
-g3(::ExController) = render(JSON, SubString("ab"))
-g4(::ExController) = render(JSON, 0)
-g5(::ExController) = render(JSON, 3.14)
-g6(::ExController) = render(JSON, (1, 2))
-g7(::ExController) = render(JSON, (a=1,))
+g1(::ExController) = render(asJSON, nothing)
+g2(::ExController) = render(asJSON, "a")
+g3(::ExController) = render(asJSON, SubString("ab"))
+g4(::ExController) = render(asJSON, 0)
+g5(::ExController) = render(asJSON, 3.14)
+g6(::ExController) = render(asJSON, (1, 2))
+g7(::ExController) = render(asJSON, (a=1,))
 
 routes() do
     for func in [f1 f2 f3 f4 f5 f6 f7

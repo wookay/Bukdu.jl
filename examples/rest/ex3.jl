@@ -25,7 +25,7 @@ end
 function run_simulation(c::SimulationController)
     json = c.params.json
     output = run_simulation(json)
-    render(JSON, output)
+    render(asJSON, output)
 end
 
 routes() do
