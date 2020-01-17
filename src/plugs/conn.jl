@@ -21,8 +21,12 @@ mutable struct Conn <: AbstractPlug
     # Connection fields
     halted::Bool        # the boolean status on whether the pipeline was halted
 
-    remote_ip::Union{Nothing,Sockets.IPAddr}
+    # Request fields
+    remote_ip::Union{Nothing,Sockets.IPAddr} # the IP of the client
+
+    # Private fields
+    private::Assoc      # shared library data as a map
 end
-Conn(request::Deps.Request) = Conn(request, request.method, Assoc(), Assoc(), Assoc(), Assoc(), false, nothing)
+Conn(request::Deps.Request) = Conn(request, request.method, Assoc(), Assoc(), Assoc(), Assoc(), false, nothing, Assoc())
 
 # module Bukdu.Plug
