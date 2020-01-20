@@ -15,7 +15,7 @@ end
 
 function index(c::RESTController)
     @info c.conn.request.response.headers
-    render(asJSON, 42)
+    render(JSON, 42)
 end
 
 pipeline(:rest) do conn::Conn

@@ -8,11 +8,11 @@ struct RestController <: ApplicationController
 end
 
 function init(c::RestController)
-    render(asJSON, (:init, c.params.region, c.params.site_id, c.params.channel_id))
+    render(JSON, (:init, c.params.region, c.params.site_id, c.params.channel_id))
 end
 
 function update(c::RestController)
-    render(asJSON, (:update, c.params.region, c.params.site_id, c.params.channel_id))
+    render(JSON, (:update, c.params.region, c.params.site_id, c.params.channel_id))
 end
 
 routes() do

@@ -9,7 +9,7 @@ end
 
 function create(c::RESTController)
     @info :payload (c.params.message, c.params.x, c.params.y)
-    render(asJSON, "OK")
+    render(JSON, "OK")
 end
 
 routes() do

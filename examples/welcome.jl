@@ -5,7 +5,7 @@ struct WelcomeController <: ApplicationController
 end
 
 function index(c::WelcomeController)
-    render(asJSON, "Hello World")
+    render(JSON, "Hello World")
 end
 
 routes() do

@@ -21,9 +21,9 @@ function render(::Type{HTML}, data)::Render
 end
 
 """
-    render(::Type{JSON}, data)::Render
+    render_json(data)::Render
 """
-function render(::Type{asJSON}, data)::Render
+function render_json(data)::Render
     Render("application/json; charset=utf-8", JSON.json, data)
 end
 
@@ -44,8 +44,8 @@ end
 # application/wasm
 
 function render(m::Module, data)::AbstractRender # throw UnknownModuleError
-    if nameof(m) === :asJSON
-        render(asJSON, data)
+    if nameof(m) === :JSON
+        render_json(data)
     elseif nameof(m) === :HTML5
         render(HTML, data)
     else
