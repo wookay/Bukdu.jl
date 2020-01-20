@@ -7,14 +7,14 @@ struct CSRF <: Plug.AbstractPlug
 end
 
 function plug(::Type{CSRF}, conn::Conn)
-    conn.private[:csrf] = "1"
+    conn.private[:csrf] = 1
 end
 
 struct Auth <: Plug.AbstractPlug
 end
 
 function plug(::Type{Auth}, conn::Conn)
-    conn.private[:auth] = "1"
+    conn.private[:auth] = 2
 end
 
 pipeline(:web, :auth) do conn::Conn
@@ -28,7 +28,7 @@ end
 struct W <: ApplicationController; conn::Conn end
 struct A <: ApplicationController; conn::Conn end
 index(w::W) = keys(w.conn.private)
-index(a::A) = keys(a.conn.private)
+index(a::A) = values(a.conn.private)
 
 routes(:web) do
     get("/w", W, index)
@@ -38,8 +38,8 @@ routes(:auth) do
     get("/a", A, index)
 end
 
-@test Router.call(get, "/a").got == ["csrf", "auth"]
 @test Router.call(get, "/w").got == ["csrf"]
+@test Router.call(get, "/a").got == [1, 2]
 
 @test Utils.read_stdout(CLI.routes) == """
 GET  /w  W  index  :web
