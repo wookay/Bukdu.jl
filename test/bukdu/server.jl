@@ -26,7 +26,7 @@ sleep(0)
 
 Plug.Loggers.config[:error_stackframes_range] = 1:2
 @test_throws HTTP.ExceptionRequest.StatusError HTTP.post("http://127.0.0.1:8190/"; body=JSON.json((k=3,)))
-@test_throws HTTP.IOExtras.IOError HTTP.post("http://127.0.0.1:8190/", ["Content-Type"=>"application/json"]; body=JSON.json(3))
+@test_throws HTTP.ExceptionRequest.StatusError HTTP.post("http://127.0.0.1:8190/", ["Content-Type"=>"application/json"]; body=JSON.json(3))
 
 Bukdu.stop()
 

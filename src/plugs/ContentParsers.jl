@@ -119,12 +119,12 @@ function scan(s::FormScanner)::Vector{Pair{String,Any}}
 end
 
 function parse(::Type{JSONDecoder}, buf::IOBuffer)::Vector{Pair{String,Any}}
-    nt = JSON.parse(buf)
+    nt = JSON.parse(read(buf, String))
     return [Pair("json", nt)]
 end
 
 function parse(::Type{MergedJSON}, buf::IOBuffer)::Vector{Pair{String,Any}}
-    nt = JSON.parse(buf)
+    nt = JSON.parse(read(buf, String))
     return [Pair(string(k),v) for (k,v) in pairs(nt)]
 end
 
