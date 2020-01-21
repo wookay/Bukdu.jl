@@ -2,8 +2,8 @@
 
 export JSON, JavaScript
 
-struct JSON
-end
+# struct JSON
+# end
 
 struct JavaScript
 end

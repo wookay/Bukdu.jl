@@ -1,15 +1,15 @@
 module test_bukdu_plugs_contentparsers_json
 
 using Test
-using JSON2
+using JSON
 using Bukdu
 using .Bukdu.Plug.ContentParsers
 
-buf = IOBuffer(JSON2.write((k=1,)))
+buf = IOBuffer(JSON.json((k=1,)))
 @test ContentParsers.parse(ContentParsers.MergedJSON, buf) == Pair{String,Any}["k"=>1]
 
-buf = IOBuffer(JSON2.write((k=1,)))
-@test ContentParsers.parse(ContentParsers.JSONDecoder, buf) == Pair{String,Any}["json"=>(k=1,)]
+buf = IOBuffer(JSON.json((k=1,)))
+@test ContentParsers.parse(ContentParsers.JSONDecoder, buf) == Pair{String,Any}["json"=>Dict{String,Any}("k" => 1)]
 
 end
 
