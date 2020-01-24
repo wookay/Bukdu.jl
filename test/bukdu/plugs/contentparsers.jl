@@ -1,15 +1,36 @@
 module test_bukdu_plugs_contentparsers_json
 
 using Test
-using JSON
 using Bukdu
 using .Bukdu.Plug.ContentParsers
 
-buf = IOBuffer(JSON.json((k=1,)))
+using JSON
+json_encode = JSON.json
+
+buf = IOBuffer()
+@test ContentParsers.parse(ContentParsers.MergedJSON, buf) == Pair{String,Any}[]
+
+buf = IOBuffer("3")
+@test ContentParsers.parse(ContentParsers.MergedJSON, buf) == Pair{String,Any}["1"=>3]
+
+buf = IOBuffer(json_encode((k=1,)))
 @test ContentParsers.parse(ContentParsers.MergedJSON, buf) == Pair{String,Any}["k"=>1]
 
-buf = IOBuffer(JSON.json((k=1,)))
+buf = IOBuffer(json_encode((k=1.0,)))
+@test ContentParsers.parse(ContentParsers.MergedJSON, buf)[1].second isa Float64
+
+
+buf = IOBuffer()
+@test ContentParsers.parse(ContentParsers.JSONDecoder, buf) == Pair{String,Any}["json"=>Dict{String,Any}()]
+
+buf = IOBuffer("3")
+@test ContentParsers.parse(ContentParsers.JSONDecoder, buf) == Pair{String,Any}["json"=>3]
+
+buf = IOBuffer(json_encode((k=1,)))
 @test ContentParsers.parse(ContentParsers.JSONDecoder, buf) == Pair{String,Any}["json"=>Dict{String,Any}("k" => 1)]
+
+buf = IOBuffer(json_encode((k=1.0,)))
+@test ContentParsers.parse(ContentParsers.JSONDecoder, buf)[1].second.k isa Float64
 
 end
 

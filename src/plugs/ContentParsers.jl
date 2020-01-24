@@ -7,7 +7,6 @@ using .HTTP.Messages: hasheader, header
 using .HTTP: Multipart
 using ...Bukdu: Route
 using ..Plug
-using JSON
 
 abstract type AbstractDecoder end
 
@@ -119,12 +118,12 @@ function scan(s::FormScanner)::Vector{Pair{String,Any}}
 end
 
 function parse(::Type{JSONDecoder}, buf::IOBuffer)::Vector{Pair{String,Any}}
-    nt = JSON.parse(read(buf, String))
+    nt = json_decode(buf)
     return [Pair("json", nt)]
 end
 
 function parse(::Type{MergedJSON}, buf::IOBuffer)::Vector{Pair{String,Any}}
-    nt = JSON.parse(read(buf, String))
+    nt = json_decode(buf)
     return [Pair(string(k),v) for (k,v) in pairs(nt)]
 end
 
@@ -149,6 +148,17 @@ function fetch_body_params(req::Request)::Vector{Pair{String,Any}}
         end
     end
     Vector{Pair{String,Any}}()
+end
+
+using JSON
+
+function Base.getproperty(dict::T, key::Symbol) where {T <: Dict{String}}
+    key in fieldnames(T) ? getfield(dict, key) : getindex(dict, String(key))
+end
+
+function json_decode(buf::IOBuffer)
+    eof(buf) && return Dict{String,Any}()
+    JSON.parse(read(buf, String))
 end
 
 end # module Bukdu.Plug.ContentParsers
