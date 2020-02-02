@@ -26,6 +26,6 @@ result = Router.call(get, "/")
 @test header(result.resp, "Content-Length") == "2"
 @test result.resp.body == Vector{UInt8}("ok")
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_head

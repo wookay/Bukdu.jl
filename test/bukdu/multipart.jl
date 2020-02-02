@@ -31,6 +31,6 @@ r = HTTP.post("http://127.0.0.1:8191/upload", Form(["user_file1" => Multipart(""
 
 Bukdu.stop()
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_multipart

@@ -16,5 +16,5 @@ resources
 ```
 
 ```@docs
-Routing.empty!
+Routing.reset!
 ```

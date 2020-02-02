@@ -37,7 +37,7 @@ Router.call(delete, "/articles/1")
 Router.call(patch, "/articles/1")
 Router.call(put, "/articles/1")
 
-Routing.empty!()
+Routing.reset!()
 
 
 routes() do
@@ -46,7 +46,7 @@ end
 @test Utils.read_stdout(CLI.routes) == """
 GET  /articles      ArticleController  index
 GET  /articles/:id  ArticleController  show"""
-Routing.empty!()
+Routing.reset!()
 
 
 routes() do
@@ -64,6 +64,6 @@ result = Router.call(Bukdu.head, "/articles/1")
 @test result.route.param_types == Dict(:id=>Int)
 @test result.route.path_params == ["id"=>"1"]
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_resources

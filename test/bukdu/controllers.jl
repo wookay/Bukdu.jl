@@ -17,6 +17,6 @@ result = Router.call(get, "/")
 @test result.resp.status == 302
 @test result.route.action === index
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_controllers

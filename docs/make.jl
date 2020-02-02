@@ -21,7 +21,7 @@ makedocs(
                                            # render
         "routes" => "routes.md",           # routes pipeline
                                            # get post delete patch put resources
-                                           # Routing.empty!
+                                           # Routing.reset!
         "plugs" => "plugs.md",             # Plug plug
         "Actions" => "Actions.md",         # Actions
         "HTML5.Form" => "HTML5/Form.md",   # change
