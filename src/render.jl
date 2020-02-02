@@ -20,9 +20,6 @@ function render(::Type{HTML}, data)::Render
     Render("text/html; charset=utf-8", string, data)
 end
 
-"""
-    render_json(data)::Render
-"""
 function render_json(data)::Render
     Render("application/json; charset=utf-8", JSON.json, data)
 end

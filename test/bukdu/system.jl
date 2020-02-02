@@ -31,7 +31,7 @@ Plug.Loggers.config[:error_stackframes_range] = 1:2
 result = Router.call(post, "/hello")
 @test result.route.action === System.internal_error
 
-Routing.empty!()
+Routing.reset!()
 
 @test Plug.Loggers._regularize_text("가1", 1) == "가"
 
@@ -55,6 +55,6 @@ end
 Router.call(get, "/just")
 Router.call(get, "/long")
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_system

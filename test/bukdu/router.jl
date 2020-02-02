@@ -43,7 +43,7 @@ for (f, g) in zip([f1 f2 f3 f4 f5 f6 f7],
     @test result1.got == result2.got
 end
 
-Routing.empty!()
+Routing.reset!()
 
 
 # issue 87
@@ -75,6 +75,6 @@ function test_something()
 end
 test_something()
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_router

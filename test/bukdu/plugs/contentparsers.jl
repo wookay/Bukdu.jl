@@ -147,7 +147,7 @@ req = Deps.HTTP.Request(
 )
 @test Router.call(req).got == Assoc("user_name"=>"", "user_famous"=>"false")
 
-Routing.empty!()
+Routing.reset!()
 
 @test  ContentParsers.rstripcrlf([0x0d, 0x0a]) == []      # CR LF
 @test  ContentParsers.rstripcrlf([0x0d])       == [0x0d]  # CR

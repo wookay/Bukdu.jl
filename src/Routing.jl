@@ -67,13 +67,13 @@ function route_path(verb, C::Type{<:ApplicationController}, action)::Union{Strin
 end
 
 """
-    Routing.empty!()
+    Routing.reset!()
 """
-function empty!()
+function reset!()
     store[:pipe] = nothing
     store[:routing_tables] = Vector{Any}()
     store[:routing_path] = Dict{Tuple{Symbol,Symbol,Symbol},String}()
-    Base.empty!(routing_pipelines)
+    empty!(routing_pipelines)
     Plug.ContentParsers.env[:decoders] = Plug.ContentParsers.default_content_decoders
     Plug.ContentParsers.env[:parsers] = Plug.ContentParsers.default_content_parsers
     ms = methods(route)

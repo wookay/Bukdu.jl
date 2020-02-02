@@ -33,6 +33,6 @@ result = Router.call(post, "/42")
 @test result.route.C === Bukdu.System.AnonymousController
 
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_anonymous

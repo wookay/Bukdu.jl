@@ -32,7 +32,7 @@ Plug.Loggers.config[:error_stackframes_range] = 1:2
 
 Bukdu.stop()
 
-Routing.empty!()
+Routing.reset!()
 
 version_line = first(filter(line -> startswith(line, "version"), readlines(normpath(pathof(Bukdu), "..", "..", "Project.toml"))))
 @test occursin(string(Bukdu.BUKDU_VERSION), version_line)

@@ -26,6 +26,6 @@ result = Router.call(options, "/")
 result = Router.call(get, "/")
 @test result.resp.status == 404
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_options

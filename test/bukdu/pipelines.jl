@@ -45,7 +45,7 @@ end
 GET  /w  W  index  :web
 GET  /a  A  index  :auth"""
 
-Routing.empty!()
+Routing.reset!()
 
 
 ### halted
@@ -68,6 +68,6 @@ result = Router.call(get, "/ha")
 @test result.route.action === Bukdu.System.halted_error
 @test result.resp.status == 401
 
-Routing.empty!()
+Routing.reset!()
 
 end # module test_bukdu_pipelines
