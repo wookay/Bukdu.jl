@@ -19,7 +19,7 @@ end
 function call(verb, path::String, headers=[], body=UInt8[])::NamedTuple{(:got, :resp, :route)}
     method = Naming.verb_name(verb)
     req = Deps.Request(method, path, headers, body)
-    call(req)
+    Base.invokelatest(call, req)
 end
 
 """

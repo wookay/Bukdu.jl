@@ -45,4 +45,36 @@ end
 
 Routing.empty!()
 
+
+# issue 87
+
+using  JSON
+
+struct IndexController <: ApplicationController
+    conn::Conn
+end
+
+function something(c::IndexController)
+    data = c.conn.params[:data]
+    return render(JSON,  Dict("status"=>data=="data"))
+end
+
+function config_routes()
+    routes() do
+        post("/something", IndexController, something)
+    end
+end
+
+function test_something()
+    config_routes()
+    response = Router.call(post,
+                           "/something",
+                           ["Content-Type" => "application/json"],
+                           JSON.json(Dict("data"=>"data")))
+    @test response.got.status == true
+end
+test_something()
+
+Routing.empty!()
+
 end # module test_bukdu_router
