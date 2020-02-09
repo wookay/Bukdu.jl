@@ -14,7 +14,9 @@ function handle_request(req::HTTP.Request, stream::Union{Nothing,<:IO})::NamedTu
     if nothing === stream
         remote_ip = nothing
     else
-        (remote_ip, _remote_port) = getpeername(stream.c.io)
+        rawstream = HTTP.Streams.getrawstream(stream)
+        sock = HTTP.tcpsocket(rawstream)
+        (remote_ip, _remote_port) = Sockets.getpeername(sock)::Tuple{Sockets.IPAddr, UInt16}
     end
     conn = Conn(req, req.method, Assoc.((body_params, query_params, path_params, params))..., halted, remote_ip, Assoc())
     for pipefunc in bukdu_env[:prequisite_plugs]
