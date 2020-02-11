@@ -3,7 +3,7 @@
 using .Deps.HTTP
 using .HTTP.Sockets
 
-function handle_request(req::HTTP.Request, stream::Union{Nothing,<:IO})::NamedTuple{(:got, :resp, :route)}
+function handle_request(req::HTTP.Request, remote_ip::Union{Nothing,Sockets.IPAddr})::NamedTuple{(:got, :resp, :route)}
     body_params = Plug.ContentParsers.fetch_body_params(req)
     query_params = fetch_query_params(req)
     prev_method = req.method
@@ -11,13 +11,6 @@ function handle_request(req::HTTP.Request, stream::Union{Nothing,<:IO})::NamedTu
     path_params = parsed_path_params(route)
     params = merge(body_params, query_params, path_params)
     halted = false
-    if nothing === stream
-        remote_ip = nothing
-    else
-        rawstream = HTTP.Streams.getrawstream(stream)
-        sock = HTTP.tcpsocket(rawstream)
-        (remote_ip, _remote_port) = Sockets.getpeername(sock)::Tuple{Sockets.IPAddr, UInt16}
-    end
     conn = Conn(req, req.method, Assoc.((body_params, query_params, path_params, params))..., halted, remote_ip, Assoc())
     for pipefunc in bukdu_env[:prequisite_plugs]
         pipefunc(conn)
@@ -35,10 +28,13 @@ end
 
 # code from HTTP.jl/src/Handlers.jl
 function handle_stream(http::HTTP.Stream)
+    rawstream = HTTP.Streams.getrawstream(http)
+    sock = HTTP.tcpsocket(rawstream)
+    (remote_ip, _remote_port) = Sockets.getpeername(sock)::Tuple{Sockets.IPAddr, UInt16}
     request::HTTP.Request = http.message
     request.body = read(http)
     closeread(http)
-    request.response::HTTP.Response = handle_request(request, http.stream).resp
+    request.response::HTTP.Response = handle_request(request, remote_ip).resp
     request.response.request = request
     startwrite(http)
     write(http, request.response.body)
