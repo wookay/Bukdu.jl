@@ -25,21 +25,17 @@ function Plug.Loggers.info_response(logger::MyLogger, conn, route::NamedTuple{(:
 end
 
 plug(MyLogger, IOContext(Core.stdout, :color => Plug.Loggers.have_color()))
-
-Bukdu.start(8191)
-@test_throws HTTP.StatusError HTTP.get("http://127.0.0.1:8191/")
+Bukdu.start(8192, enable_remote_ip=true)
+@test_throws HTTP.StatusError HTTP.get("http://127.0.0.1:8192/")
 Bukdu.stop()
-
 
 access_log_path = normpath(@__DIR__, "access.log")
 plug(MyLogger, open(access_log_path, "w"))
-
-Bukdu.start(8191)
-@test_throws HTTP.StatusError HTTP.get("http://127.0.0.1:8191/")
+Bukdu.start(8193, enable_remote_ip=true)
+@test_throws HTTP.StatusError HTTP.get("http://127.0.0.1:8193/")
 Bukdu.stop()
-
 @test read(access_log_path, String) == """
-MYLOG Bukdu Listening on 127.0.0.1:8191
+MYLOG Bukdu Listening on 127.0.0.1:8193
 MYLOG 127.0.0.1 INFO: GET     MissingController   not_found       404 /
 MYLOG Bukdu has stopped.
 """

@@ -27,10 +27,7 @@ function handle_request(req::HTTP.Request, remote_ip::Union{Nothing,Sockets.IPAd
 end
 
 # code from HTTP.jl/src/Handlers.jl
-function handle_stream(http::HTTP.Stream)
-    rawstream = HTTP.Streams.getrawstream(http)
-    sock = HTTP.tcpsocket(rawstream)
-    (remote_ip, _remote_port) = Sockets.getpeername(sock)::Tuple{Sockets.IPAddr, UInt16}
+function handle_stream(http::HTTP.Stream, remote_ip::Union{Nothing,Sockets.IPAddr})
     request::HTTP.Request = http.message
     request.body = read(http)
     closeread(http)
@@ -41,17 +38,33 @@ function handle_stream(http::HTTP.Stream)
     return
 end
 
+function get_remote_ip(http::HTTP.Stream)::Sockets.IPAddr
+    rawstream = HTTP.Streams.getrawstream(http)
+    sock = HTTP.tcpsocket(rawstream)
+    (remote_ip, _remote_port) = Sockets.getpeername(sock)::Tuple{Sockets.IPAddr, UInt16}
+    remote_ip
+end
+
+function handle_stream_with_remote_ip(http::HTTP.Stream)
+    remote_ip = get_remote_ip(http)
+    handle_stream(http, remote_ip)
+end
+
+function handle_stream_without_remote_ip(http::HTTP.Stream)
+    handle_stream(http, nothing)
+end
+
 """
-    Bukdu.start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kwargs...)
+    Bukdu.start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", enable_remote_ip::Bool=false, kwargs...)
 
 start the Bukdu server.
 """
-function start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", kwargs...)
+function start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", enable_remote_ip::Bool=false, kwargs...)
     ipaddr = host isa Sockets.IPAddr ? host : Sockets.getaddrinfo(host)
     inetaddr = Sockets.InetAddr(ipaddr, port)
     server = Sockets.listen(inetaddr)
     bukdu_env[:server] = server
-    task = @async HTTP.Servers.listen(handle_stream, ipaddr, port; server=server, verbose=false, kwargs...)
+    task = @async HTTP.Servers.listen(enable_remote_ip ? handle_stream_with_remote_ip : handle_stream_without_remote_ip, ipaddr, port; server=server, verbose=false, kwargs...)
     print_listening_on(inetaddr)
     task
 end
