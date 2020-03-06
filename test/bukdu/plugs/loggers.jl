@@ -43,4 +43,8 @@ try Base.rm(access_log_path) catch end
 
 plug(Plug.Loggers.DefaultLogger)
 
+# Sockets: fix return value of getpeername/getsockname (Julia PR #34986)
+Bukdu.start(8193, enable_remote_ip=VERSION >= v"1.5.0-DEV.404")
+Bukdu.stop()
+
 end # module test_bukdu_plugs_loggers
