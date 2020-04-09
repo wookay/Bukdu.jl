@@ -20,7 +20,6 @@ end
 
 struct SystemController <: ApplicationController
     conn::Conn
-    err
 end
 
 struct MissingController <: ApplicationController
@@ -34,38 +33,38 @@ end
 """
     halted_error(c::SystemController)
 """
-function halted_error(c::SystemController)
+function halted_error(c::SystemController, err::HaltedError)
     @tags h3 p
     # set the status code when halted on Plug
     render(HTML, string(
         h3(string(HaltedError)),
-        p(string(c.err.msg)),
+        p(string(err.msg)),
     ))
 end
 
 """
     not_applicable(c::SystemController)
 """
-function not_applicable(c::SystemController)
+function not_applicable(c::SystemController, err::NotApplicableError)
     @tags h3 p
     c.conn.request.response.status = 500 # 500 Internal Server Error
     render(HTML, string(
         h3(string(NotApplicableError)),
-        p(string(c.err.msg)),
+        p(string(err.msg)),
     ))
 end
 
 """
     internal_error(c::SystemController)
 """
-function internal_error(c::SystemController)
+function internal_error(c::SystemController, err::InternalError)
     @tags h3 p
     c.conn.request.response.status = 500 # 500 Internal Server Error
-    Plug.Loggers.print_internal_error(Symbol(:System_, :internal_error), c.err)
+    Plug.Loggers.print_internal_error(Symbol(:System_, :internal_error), err)
     render(HTML, string(
         h3(string(InternalError)),
-        p(string(c.err.exception)),
-        (p ∘ string).(c.err.stackframes)...
+        p(string(err.exception)),
+        (p ∘ string).(err.stackframes)...
     ))
 end
 

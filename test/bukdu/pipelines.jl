@@ -29,6 +29,8 @@ struct W <: ApplicationController; conn::Conn end
 struct A <: ApplicationController; conn::Conn end
 index(w::W) = keys(w.conn.private)
 index(a::A) = values(a.conn.private)
+import Bukdu.System: halted_error, HaltedError
+halted_error(c::W, err::HaltedError) = Bukdu.Render(Bukdu.JSON, "Custom Halted Error")
 
 routes(:web) do
     get("/w", W, index)
@@ -63,8 +65,13 @@ end
 
 routes(:halted_auth) do
     get("/ha", A, index)
+    get("/hw", W, index)
 end
 result = Router.call(get, "/ha")
+@test result.route.action === Bukdu.System.halted_error
+@test result.resp.status == 401
+
+result = Router.call(get, "/hw")
 @test result.route.action === Bukdu.System.halted_error
 @test result.resp.status == 401
 
