@@ -33,13 +33,18 @@ function parsed_path_params(route::Route)::Vector{Pair{String,Any}}
     end
 end
 
+function _error_controller(method::Function, route::Route, err::Exception)
+    if hasmethod(method, (route.C, typeof(err)))
+        return route.C
+    else
+        return SystemController
+    end
+end
+
 function _apply_action(route::Route, conn::Conn)::Tuple{Route, Union{Nothing,Render}}
     if conn.halted
         err = HaltedError("halted on pipelines")
-        ErrorController = SystemController
-        if hasmethod(halted_error, (route.C, typeof(err)))
-            ErrorController = route.C
-        end
+        ErrorController = _error_controller(halted_error, route, err)
         rou = Route(ErrorController, halted_error, route.param_types, route.path_params, route.pipelines)
         obj = halted_error(ErrorController(conn), err)
         (rou, obj)
@@ -56,10 +61,7 @@ function _apply_action(route::Route, conn::Conn)::Tuple{Route, Union{Nothing,Ren
             (route, obj)
         else
             err = NotApplicableError(string(route.action, "(::", route.C, ")"))
-            ErrorController = SystemController
-            if applicable(route.C, not_applicable, err)
-                ErrorController = route.C
-            end
+            ErrorController = _error_controller(not_applicable, route, err)
             rou = Route(ErrorController, not_applicable, route.param_types, route.path_params, route.pipelines)
             obj = not_applicable(ErrorController(conn), err)
             (rou, obj)
@@ -73,10 +75,7 @@ function _catch_internal_error(block, route, conn::Conn)::Tuple{Route, Union{Not
     catch ex
         stackframes = stacktrace(catch_backtrace())
         err = InternalError(ex, stackframes)
-        ErrorController = SystemController
-        if applicable(route.C, internal_error, err)
-            ErrorController = route.C
-        end
+        ErrorController = _error_controller(internal_error, route, err)
         rou = Route(ErrorController, internal_error, route.param_types, route.path_params, route.pipelines)
         obj = internal_error(ErrorController(conn), err)
         (rou, obj)
