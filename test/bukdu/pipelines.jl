@@ -30,7 +30,7 @@ struct A <: ApplicationController; conn::Conn end
 index(w::W) = keys(w.conn.private)
 index(a::A) = values(a.conn.private)
 import Bukdu.System: halted_error, HaltedError
-halted_error(c::W, err::HaltedError) = Bukdu.render(Bukdu.HTML, "Custom Halted Error")
+halted_error(c::W, err::HaltedError) = Bukdu.render(Bukdu.JSON, "Custom Halted Error")
 
 routes(:web) do
     get("/w", W, index)
@@ -72,7 +72,6 @@ result = Router.call(get, "/ha")
 @test result.resp.status == 401
 
 result = Router.call(get, "/hw")
-
 @test result.route.action === Bukdu.System.halted_error
 @test result.resp.status == 401
 @test result.got == "Custom Halted Error"
