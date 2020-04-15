@@ -17,7 +17,7 @@ URIParser = "30578b45-9adc-5946-b283-645ec420af67"
 [compat]
 Documenter = "0.24"
 HTTP = "0.8"
-JSON = "0.21"
+JSON = "0.21, 1.0"
 MbedTLS = "0.6, 0.7, 1.0"
 URIParser = "0.4"
 julia = "1"
