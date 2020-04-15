@@ -1,7 +1,7 @@
 name = "Bukdu"
 uuid = "3e78a19a-cc83-51d8-955b-515f39fd7955"
 authors = ["WooKyoung Noh <wookay.noh@gmail.com>"]
-version = "0.4.13"
+version = "0.4.14-DEV"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
