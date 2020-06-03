@@ -1,0 +1,7 @@
+name = "Hello"
+uuid = "024dd1db-5aec-4b99-8cb3-7fdf8c131cda"
+authors = [""]
+version = "0.1.0"
+
+[deps]
+Bukdu = "3e78a19a-cc83-51d8-955b-515f39fd7955"

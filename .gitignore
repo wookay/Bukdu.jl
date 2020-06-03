@@ -6,3 +6,5 @@ tmp/
 *.jl.*.cov
 *.jl.mem
 access.log
+
+examples/app/compiled
