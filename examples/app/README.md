@@ -18,25 +18,25 @@ PackageCompiler.create_app(DIR_PATH, APP_PATH; force=true)
 #### Run App
 - `Windows`
 
-Open command windows in `examples\app\compiled\bin` and run
-```cmd
-...\bin>start Hello
-```
+   Open command windows in `examples\app\compiled\bin` and run
+   ```cmd
+   ...\bin>start Hello
+   ```
 
-`Linux`
-```sh
-$ nohup ./builddir/hello &
-[1] 1488
-appending output to nohup.out
+- `Linux`
+   ```sh
+   $ nohup ./bin/Hello &
+   [1] 1488
+   appending output to nohup.out
 
-$ tail nohup.out
-Bukdu Listening on 127.0.0.1:8080
+   $ tail nohup.out
+   Bukdu Listening on 127.0.0.1:8080
 
-$ jobs -l
-[1]  + 1488 running    nohup ./builddir/hello
+   $ jobs -l
+   [1]  + 1488 running    nohup ./builddir/hello
 
-$ kill -9 1488
-```
+   $ kill -9 1488
+   ```
 
 #### Communication with Server
 ```julia
