@@ -7,7 +7,7 @@
 (v1.1) pkg> add PackageCompiler
 ```
 
-#### Create the App (executable)
+#### Create App (executable)
 ```julia
 using PackageCompiler
 DIR_PATH = @__DIR__
@@ -15,8 +15,9 @@ APP_PATH = joinpath(DIR_PATH; "compiled")
 PackageCompiler.create_app(DIR_PATH, APP_PATH; force=true)
 ```
 
-#### Run the App
-`Windows`
+#### Run App
+- `Windows`
+
 Open command windows in `examples\app\compiled\bin` and run
 ```cmd
 ...\bin>start Hello
