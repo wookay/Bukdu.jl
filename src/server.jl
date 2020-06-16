@@ -55,11 +55,11 @@ function handle_stream_without_remote_ip(http::HTTP.Stream)
 end
 
 """
-    Bukdu.start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", enable_remote_ip::Bool=false, kwargs...)
+    Bukdu.start(port::Integer; host::Union{String,Sockets.IPAddr}=Sockets.localhost, enable_remote_ip::Bool=false, kwargs...)
 
 start the Bukdu server.
 """
-function start(port::Integer; host::Union{String,Sockets.IPAddr}="localhost", enable_remote_ip::Bool=false, kwargs...)
+function start(port::Integer; host::Union{String,Sockets.IPAddr}=Sockets.localhost, enable_remote_ip::Bool=false, kwargs...)
     ipaddr = host isa Sockets.IPAddr ? host : Sockets.getaddrinfo(host)
     inetaddr = Sockets.InetAddr(ipaddr, port)
     server = Sockets.listen(inetaddr)
