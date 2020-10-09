@@ -7,6 +7,7 @@ import Base: get
 using .System: HaltedError, NotApplicableError, InternalError, SystemController, internal_error, halted_error, not_applicable
 
 const server_info = string("Bukdu/", BUKDU_VERSION)
+import .Actions: delete
 const routing_verbs = [:get, :post, :delete, :patch, :put, :options]
 
 # HTTP.URIs: queryparams
@@ -98,7 +99,7 @@ function put_response_header_and_body(req::Deps.Request, obj::Union{Nothing, Ren
     end
 end
 
-function request_handler(route::Route, conn::Conn)::NamedTuple{(:got, :resp, :route)}
+function request_handler(route::Route, conn::Conn)::RouteResponse
     (rou, obj) = _proc_request(route, conn)
     put_response_header_and_body(conn.request, obj)
     _proc_response(rou, conn)

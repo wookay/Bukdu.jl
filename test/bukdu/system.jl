@@ -58,3 +58,39 @@ Router.call(get, "/long")
 Routing.reset!()
 
 end # module test_bukdu_system
+
+
+module test_bukdu_system_proc_time
+
+using Bukdu
+
+function Bukdu.System.catch_request(route::Bukdu.Route, conn)
+    conn.private[:req_time_ns] = time_ns()
+end
+
+using Logging: AbstractLogger
+
+struct MyLogger <: AbstractLogger
+    stream
+end
+
+function Plug.Loggers.info_response(logger::MyLogger, conn::Conn, route::Bukdu.RouteAction)
+    io = logger.stream
+    proc_time = (time_ns() - conn.private[:req_time_ns]) / 1e9
+    print(io, proc_time, ' ')
+    Plug.Loggers.default_info_response(io, conn, route)
+end
+
+plug(MyLogger, IOContext(Core.stdout, :color => Plug.Loggers.have_color()))
+
+
+get("/") do conn::Conn
+    42
+end
+
+Router.call(get, "/")
+
+plug(Plug.Loggers.DefaultLogger)
+Routing.reset!()
+
+end # module test_bukdu_system_proc_time

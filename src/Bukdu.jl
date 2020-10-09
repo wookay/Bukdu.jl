@@ -1,9 +1,10 @@
 module Bukdu
 
-const BUKDU_VERSION = v"0.4.15"
+const BUKDU_VERSION = v"0.4.16-DEV"
 
 include("assoc.jl")
 include("Deps.jl")
+include("Actions.jl")
 include("types.jl")
 
 const bukdu_env = Dict{Symbol, Any}(
@@ -27,7 +28,6 @@ include("routes.jl")
 export Router
 include("Router.jl")
 include("pipelines.jl")
-include("Actions.jl")
 include("resources.jl")
 
 include("changeset.jl")
