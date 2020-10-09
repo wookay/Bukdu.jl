@@ -16,7 +16,9 @@ config = Dict{Symbol, Any}(
     :error_stackframes_range => :,
 )
 
-using ..Deps
+using ..Deps: Deps
+using ..Plug: Conn
+using ...Bukdu: RouteAction
 using Logging: AbstractLogger
 
 struct DefaultLogger <: AbstractLogger
@@ -110,18 +112,18 @@ function _unescape_request_target(target)
 end
 
 
-function default_print_message(io, args...; kwargs...)
+function default_print_message(io::IO, args...; kwargs...)
     Base.println(io, args...; kwargs...)
 end
 
-function default_print_internal_error(io, name::Symbol, err)
+function default_print_internal_error(io::IO, name::Symbol, err)
     Base.printstyled(io, name, color=:red)
     r = config[:error_stackframes_range]
     stackframes = err.stackframes[r]
     Base.println(io, " ", err.exception, "\n    ", join(stackframes, "\n    "))
 end
 
-function default_info_response(io, conn, route::NamedTuple{(:controller, :action)})
+function default_info_response(io::IO, conn::Conn, route::RouteAction)
     controller_name = route.controller === nothing ? "" : String(nameof(route.controller))
     action_name = route.action === nothing ? "" : String(nameof(route.action))
     Base.printstyled(io, "INFO:", color=:cyan)
@@ -164,13 +166,13 @@ function print_internal_error(logger::DefaultLogger, name::Symbol, err)
     default_print_internal_error(io, name, err)
 end
 
-function info_response(logger::DefaultLogger, conn, route::NamedTuple{(:controller, :action)})
+function info_response(logger::DefaultLogger, conn::Conn, route::RouteAction)
     io = logger.stream
     default_info_response(io, conn, route)
 end
 
 
-function info_response(logger::NullLogger, conn, route::NamedTuple{(:controller, :action)})
+function info_response(logger::NullLogger, conn::Conn, route::RouteAction)
 end
 
 
@@ -184,7 +186,7 @@ function print_internal_error(::T, name::Symbol, err) where {T <: AbstractLogger
     default_print_internal_error(io, name, err)
 end
 
-function info_response(::T, conn, route::NamedTuple{(:controller, :action)}) where {T <: AbstractLogger}
+function info_response(::T, conn::Conn, route::RouteAction) where {T <: AbstractLogger}
     io = IOContext(Core.stdout, :color => have_color())
     default_info_response(io, conn, route)
 end
@@ -200,7 +202,7 @@ function print_internal_error(name::Symbol, err)
     print_internal_error(logger, name, err)
 end
 
-function info_response(conn, route::NamedTuple{(:controller, :action)})
+function info_response(conn::Conn, route::RouteAction)
     logger = current[:logger]
     info_response(logger, conn, route)
 end

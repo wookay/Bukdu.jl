@@ -3,7 +3,7 @@
 using .Deps.HTTP
 using .HTTP.Sockets
 
-function handle_request(req::HTTP.Request, remote_ip::Union{Nothing,Sockets.IPAddr})::NamedTuple{(:got, :resp, :route)}
+function handle_request(req::HTTP.Request, remote_ip::Union{Nothing,Sockets.IPAddr})::RouteResponse
     body_params = Plug.ContentParsers.fetch_body_params(req)
     query_params = fetch_query_params(req)
     prev_method = req.method

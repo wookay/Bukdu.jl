@@ -2,7 +2,7 @@ module Router # Bukdu
 
 using ..Bukdu.Naming
 using ..Bukdu.Deps
-using ..Bukdu: handle_request
+using ..Bukdu: RouteResponse, handle_request
 
 """
     Router.call
@@ -14,18 +14,18 @@ function call
 end
 
 """
-    Router.call(verb, path::String, headers=[], body=UInt8[])::NamedTuple{(:got, :resp, :route)}
+    Router.call(verb, path::String, headers=[], body=UInt8[])::RouteResponse
 """
-function call(verb, path::String, headers=[], body=UInt8[])::NamedTuple{(:got, :resp, :route)}
+function call(verb, path::String, headers=[], body=UInt8[])::RouteResponse
     method = Naming.verb_name(verb)
     req = Deps.Request(method, path, headers, body)
     Base.invokelatest(call, req)
 end
 
 """
-    Router.call(req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
+    Router.call(req::Deps.Request)::RouteResponse
 """
-function call(req::Deps.Request)::NamedTuple{(:got, :resp, :route)}
+function call(req::Deps.Request)::RouteResponse
     handle_request(req, nothing)
 end
 

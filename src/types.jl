@@ -35,4 +35,7 @@ struct Route
     pipelines::Vector{Function}
 end
 
+const RouteResponse = NamedTuple{(:got, :resp, :route), Tuple{Any, Any, Route}}
+const RouteAction   = NamedTuple{(:controller, :action)}
+
 # module Bukdu

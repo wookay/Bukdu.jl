@@ -6,10 +6,10 @@ using ..Bukdu: Assoc, AbstractPlug, ApplicationController, AbstractRender, Rende
 function plug
 end
 
+include("plugs/conn.jl")
+
 using Logging: AbstractLogger
 include("plugs/Loggers.jl")
-
-include("plugs/conn.jl")
 
 include("plugs/ContentParsers.jl")
 include("plugs/parsers.jl")

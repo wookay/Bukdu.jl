@@ -16,7 +16,7 @@ function Plug.Loggers.print_message(logger::MyLogger, args...; kwargs...)
     Base.flush(io)
 end
 
-function Plug.Loggers.info_response(logger::MyLogger, conn, route::NamedTuple{(:controller, :action)})
+function Plug.Loggers.info_response(logger::MyLogger, conn::Conn, route::Bukdu.RouteAction)
     io = logger.stream
     Base.printstyled(io, "MYLOG ", color=:yellow)
     print(io, something(conn.remote_ip, ""), ' ')
