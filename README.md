@@ -1,8 +1,8 @@
 # Bukdu.jl 🌌
 
-|  **Documentation**                        |  **Build Status**                                                |
-|:-----------------------------------------:|:----------------------------------------------------------------:|
-|  [![][docs-latest-img]][docs-latest-url]  |  [![][travis-img]][travis-url]  [![][codecov-img]][codecov-url]  |
+|  **Documentation**                        |  **Build Status**                                                  |
+|:-----------------------------------------:|:------------------------------------------------------------------:|
+|  [![][docs-latest-img]][docs-latest-url]  |  [![][actions-img]][actions-url]  [![][codecov-img]][codecov-url]  |
 
 
 `Bukdu.jl` is a web development framework for [Julia](https://julialang.org).
@@ -71,7 +71,7 @@ That's it! Refresh your page of the web browser.
 
 ### Requirements
 
-The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl) in [Julia 1.0](https://julialang.org/downloads/).
+The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl) in [Julia](https://julialang.org/downloads/).
 
 `julia>` type `]` key
 
@@ -84,8 +84,8 @@ The project has reworked based on [HTTP.jl](https://github.com/JuliaWeb/HTTP.jl)
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
 [docs-latest-url]: https://wookay.github.io/docs/Bukdu.jl/
 
-[travis-img]: https://api.travis-ci.org/wookay/Bukdu.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/wookay/Bukdu.jl
+[actions-img]: https://github.com/wookay/Bukdu.jl/workflows/CI/badge.svg
+[actions-url]: https://github.com/wookay/Bukdu.jl/actions
 
 [codecov-img]: https://codecov.io/gh/wookay/Bukdu.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/wookay/Bukdu.jl/branch/master
