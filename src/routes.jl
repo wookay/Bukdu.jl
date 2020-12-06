@@ -4,6 +4,9 @@ export routes
 
 export get, post, delete, patch, put
 import Base: get
+if isdefined(Deps.HTTP, :post)
+    import .Deps.HTTP: post
+end
 using .System: HaltedError, NotApplicableError, InternalError, SystemController, internal_error, halted_error, not_applicable
 
 const server_info = string("Bukdu/", BUKDU_VERSION)
