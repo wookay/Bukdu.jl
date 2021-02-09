@@ -4,17 +4,18 @@ using ..Bukdu.Routing
 using ..Bukdu.Naming
 
 """
-    CLI.routes()
+    CLI.routes(io::IO = stdout)
 
 Showing the routing table.
 """
-function routes()
+function routes(io::IO = stdout)
     A = Routing.store[:routing_tables]
     isempty(A) && return
-    ncols = 5 # verb url C action pipe
-    nrows = Int(length(A)/ncols)
-    rt = reshape(A, ncols, nrows)
-    paddings = maximum((length ∘ string).(rt), dims=2) .+ 2
+    ncols = length(first(A)) # (verb, url, C, action, pipe)
+    nrows = length(A)
+    paddings = map(1:ncols) do col
+        maximum([(length ∘ string)(row[col]) for row in A]) .+ 2
+    end
     function f(idx, el, lastcolumn)
         if idx == lastcolumn
             el
@@ -22,11 +23,10 @@ function routes()
             rpad(el, paddings[idx])
         end
     end
-    for rowidx in 1:nrows
-        row = rt[:, rowidx]
+    for row in A
         lastcolumn = isempty(row[ncols]) ? ncols-1 : ncols
-        print.([f(idx, el, lastcolumn) for (idx, el) in enumerate(row[1:lastcolumn])])
-        println()
+        print.(Ref(io), [f(idx, el, lastcolumn) for (idx, el) in enumerate(row[1:lastcolumn])])
+        println(io)
     end
 end
 
