@@ -56,9 +56,8 @@ function add_route(verb, url::String, C::Type{<:ApplicationController}, action, 
     (vals, path_params) = penetrate_segments(segments) 
     method = Naming.verb_name(verb)
     @eval route(::Val{Symbol($method)}, $(vals...)) = Route($C, $action, $param_types, Vector{Pair{String,Any}}($(path_params...)), $pipelines)
-    routing_tables = vcat(store[:routing_tables],
-        Naming.verb_name(verb), url, nameof(C), nameof(action), (pipe isa Nothing ? "" : repr(pipe)))
-    store[:routing_tables] = routing_tables
+    row = (Naming.verb_name(verb), url, nameof(C), nameof(action), (pipe isa Nothing ? "" : repr(pipe)))
+    !(row in store[:routing_tables]) && push!(store[:routing_tables], row)
     store[:routing_path][Naming.routing_path_key(verb,C,action)] = url
 end
 

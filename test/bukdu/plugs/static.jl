@@ -32,4 +32,17 @@ end
 @test Router.call(get, "/b.wasm").resp.status == 200
 Routing.reset!()
 
+routes(:e) do
+    plug(Plug.Static, at="/", from=normpath(@__DIR__, "public"))
+end
+buf1 = IOBuffer()
+CLI.routes(buf1)
+routes(:e) do
+    plug(Plug.Static, at="/", from=normpath(@__DIR__, "public"))
+end
+buf2 = IOBuffer()
+CLI.routes(buf2)
+@test take!(buf1) == take!(buf2)
+Routing.reset!()
+
 end # module test_bukdu_plugs_static
