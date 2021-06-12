@@ -14,7 +14,7 @@ MbedTLS = "739be429-bea8-5141-9913-cc70e7f3736d"
 URIParser = "30578b45-9adc-5946-b283-645ec420af67"
 
 [compat]
-Documenter = "0.24, 0.25, 0.26"
+Documenter = "0.24, 0.25, 0.26, 0.27"
 HTTP = "0.8, 0.9"
 JSON = "0.21"
 MbedTLS = "0.7, 1.0"
