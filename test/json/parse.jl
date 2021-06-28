@@ -44,3 +44,27 @@ json_encode = JSON2.write
 @test (json_encode ∘ json_decode)("[1.0]") == "[1]"   #
 
 end # module test_json2_parse
+
+
+module test_json3_parse
+
+using Test
+using JSON3
+
+json_decode = JSON3.read
+json_encode = JSON3.write
+
+@test_throws ArgumentError json_decode(IOBuffer()) #
+@test json_decode(IOBuffer("1")) == 1
+@test json_decode(String(take!(IOBuffer("1")))) == 1
+@test json_decode(read(IOBuffer("1"), String)) == 1
+@test (json_encode ∘ json_decode)(IOBuffer("[1]"))   == "[1]"
+@test (json_encode ∘ json_decode)(IOBuffer("[1.0]")) == "[1]"  #
+
+@test_throws ArgumentError json_decode("") #
+@test json_decode("1")   isa Int
+@test json_decode("1.0") isa Int  #
+@test (json_encode ∘ json_decode)("[1]")   == "[1]"
+@test (json_encode ∘ json_decode)("[1.0]") == "[1]"   #
+
+end # module test_json3_parse
