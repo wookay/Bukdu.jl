@@ -77,4 +77,32 @@ test_something()
 
 Routing.reset!()
 
+function error_function(c::IndexController)
+    throw("Some error")
+end
+function something_not_applicable() end
+
+function Bukdu.System.internal_error(c::IndexController, err::Bukdu.System.InternalError)
+    return Bukdu.render(HTML, "Custom Internal Error")
+end
+function Bukdu.System.not_applicable(c::IndexController, err::Bukdu.System.NotApplicableError)
+    return Bukdu.render(HTML, "Custom Not Applicable Error")
+end
+
+
+function test_custom_errors()
+    routes() do
+        get("/error", IndexController, error_function)
+        get("/not_a", IndexController, something_not_applicable)
+    end
+    response = Router.call(get,
+                           "/error")
+    @test response.got == "Custom Internal Error"
+    response = Router.call(get,
+                           "/not_a")
+    @test response.got == "Custom Not Applicable Error"
+end
+test_custom_errors()
+Routing.reset!()
+
 end # module test_bukdu_router
