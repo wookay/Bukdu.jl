@@ -47,6 +47,7 @@ mutable struct FormScanner
     data::Vector{UInt8}
     boundary::String
     FormScanner(data::Vector{UInt8}, boundary::String) = new(data, boundary)
+    FormScanner(data::Base.CodeUnits{UInt8, String}, boundary::String) = new(Vector{UInt8}(data), boundary)
 end
 
 const CR = 0x0d
@@ -133,7 +134,7 @@ function fetch_body_params(req::Request)::Vector{Pair{String,Any}}
         request_decoders = env[:decoders]
         request_parsers = env[:parsers]
         if :json in request_parsers && "application/json" == content_type
-            return parse(request_decoders[:json], IOBuffer(req.body))
+            return parse(request_decoders[:json], IOBuffer(Vector{UInt8}(req.body)))
         elseif :urlencoded in request_parsers && "application/x-www-form-urlencoded" == content_type
             scanner = UrlEncodedScanner(req.body)
             return scan(scanner)
