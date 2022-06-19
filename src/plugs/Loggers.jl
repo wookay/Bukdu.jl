@@ -126,32 +126,29 @@ end
 function default_info_response(io::IO, conn::Conn, route::RouteAction)
     controller_name = route.controller === nothing ? "" : String(nameof(route.controller))
     action_name = route.action === nothing ? "" : String(nameof(route.action))
-    Base.printstyled(io, "INFO:", color=:cyan)
-    Base.printstyled(io, ' ')
+    Base.printstyled(io, "INFO: ", color=:cyan)
     Base.printstyled(io, rpad(conn.request.method, 7); req_method_style(conn.request.method)...)
-    Base.printstyled(io, ' ')
+    Base.printstyled(io, " ")
     controller_color = Sys.iswindows() ? :normal : 248
     if endswith(controller_name, "Controller")
         Base.printstyled(io, controller_name[1:end-10])
         pad_length = config[:controller_pad] - length(controller_name)
         if pad_length > 0
-            Base.printstyled(io, "Controller", color=controller_color)
-            Base.printstyled(io, repeat(' ', pad_length))
+            Base.printstyled(io, "Controller", repeat(' ', pad_length), color=controller_color)
         elseif pad_length < -10
         else
-            Base.printstyled(io, "Controller"[1:10+pad_length-1], color=controller_color)
-            Base.printstyled(io, ' ')
+            Base.printstyled(io, "Controller"[1:10+pad_length-1], " ", color=controller_color)
         end
     else
         Base.printstyled(io, rpad(controller_name, config[:controller_pad]))
     end
     if length(action_name) > config[:action_pad]
-        Base.printstyled(io, action_name[1:config[:action_pad]-1], ' ')
+        Base.printstyled(io, action_name[1:config[:action_pad]-1], " ")
     else
         Base.printstyled(io, rpad(action_name, config[:action_pad]))
     end
     Base.printstyled(io, conn.request.response.status; resp_status_style(conn.request.response.status)...)
-    Base.printstyled(io, ' ', _unescape_request_target(conn.request.target))
+    Base.printstyled(io, " ", _unescape_request_target(conn.request.target))
     Base.println(io)
 end
 
