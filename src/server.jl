@@ -60,11 +60,24 @@ end
 start the Bukdu server.
 """
 function start(port::Integer; host::Union{String,Sockets.IPAddr}=Sockets.localhost, enable_remote_ip::Bool=false, kwargs...)
+    f = enable_remote_ip ? handle_stream_with_remote_ip : handle_stream_without_remote_ip
+    if isdefined(HTTP.Servers, :Listener) # HTTP.jl 1.0
+        listener = HTTP.Servers.Listener(host, port)
+        bukdu_env[:server] = listener
+        task = @async HTTP.Servers.listen(f, listener; verbose=false, kwargs...)
+        print_listening_on(listener.addr)
+        task
+    else
+        _start_legacy_httpjl(f, host, port, kwargs)
+    end
+end
+
+function _start_legacy_httpjl(f, host, port, kwargs)
     ipaddr = host isa Sockets.IPAddr ? host : Sockets.getaddrinfo(host)
     inetaddr = Sockets.InetAddr(ipaddr, port)
     server = Sockets.listen(inetaddr)
     bukdu_env[:server] = server
-    task = @async HTTP.Servers.listen(enable_remote_ip ? handle_stream_with_remote_ip : handle_stream_without_remote_ip, ipaddr, port; server=server, verbose=false, kwargs...)
+    task = @async HTTP.Servers.listen(f, ipaddr, port; server=server, verbose=false, kwargs...)
     print_listening_on(inetaddr)
     task
 end
