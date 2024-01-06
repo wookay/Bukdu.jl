@@ -1,6 +1,12 @@
+# https://github.com/julia-actions/cache#usage
 name: CI
 
-on: [pull_request, push]
+on: [push, pull_request]
+
+# needed to allow julia-actions/cache to delete old caches that it has created
+permissions:
+  actions: write
+  contents: read
 
 jobs:
   Test:
@@ -16,22 +22,25 @@ jobs:
           - julia-version: 1.6.7
             os: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: julia-actions/setup-julia@latest
-        with:
-          version: ${{ matrix.julia-version }}
-      - name: runtests
-        run: |
-             julia --project=. -e 'using Pkg; Pkg.test()'
+    - uses: actions/checkout@v4
+    - uses: julia-actions/setup-julia@v1
+      with:
+        version: ${{ matrix.julia-version }}
+    - uses: julia-actions/cache@v1
+    - uses: julia-actions/julia-buildpkg@v1
+    - uses: julia-actions/julia-runtest@v1
 
   Coverage:
     needs: Test
     if: github.event.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: coverage
-        run: |
-             julia --project=. -e 'using Pkg; Pkg.test(coverage=true)'
-             julia --project=. -e 'using Pkg; Pkg.add("Coverage"); using Coverage; cov = Coverage.process_folder(); mkdir("coverage"); Coverage.LCOV.writefile("coverage/lcov.info", cov)'
-      - uses: codecov/codecov-action@v1
+    - uses: actions/checkout@v4
+    - uses: julia-actions/setup-julia@v1
+    - uses: julia-actions/cache@v1
+    - uses: julia-actions/julia-buildpkg@v1
+    - name: coverage
+      run: |
+           julia --project=. -e 'using Pkg; Pkg.test(coverage=true)'
+           julia --project=. -e 'using Pkg; Pkg.add("Coverage"); using Coverage; cov = Coverage.process_folder(); mkdir("coverage"); Coverage.LCOV.writefile("coverage/lcov.info", cov)'
+    - uses: codecov/codecov-action@v1
