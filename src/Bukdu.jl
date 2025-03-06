@@ -1,7 +1,7 @@
 module Bukdu
 
-const _version_line = "version = \""
-const BUKDU_VERSION = VersionNumber(strip(in(_version_line), first(filter(startswith(_version_line), readlines(normpath(@__DIR__, "../Project.toml"))))))
+using TOML
+const BUKDU_VERSION = VersionNumber(TOML.parsefile(normpath(@__DIR__, "../Project.toml"))["version"])
 
 include("assoc.jl")
 include("Deps.jl")

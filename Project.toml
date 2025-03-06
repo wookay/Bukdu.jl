@@ -6,6 +6,7 @@ version = "0.4.19"
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
@@ -14,6 +15,7 @@ MbedTLS = "739be429-bea8-5141-9913-cc70e7f3736d"
 URIParser = "30578b45-9adc-5946-b283-645ec420af67"
 
 [compat]
+TOML = "1.0"
 Documenter = "0.24, 0.25, 0.26, 0.27"
 HTTP = "0.8, 0.9, 1.0, 1.10"
 MbedTLS = "0.7, 1.0"
