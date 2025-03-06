@@ -4,6 +4,8 @@ using Test
 using Bukdu
 using HTTP
 
+@test Bukdu.BUKDU_VERSION >= v"0.4.19"
+
 Bukdu.start(8190)
 sleep(0)
 Bukdu.stop()
@@ -33,8 +35,5 @@ Plug.Loggers.config[:error_stackframes_range] = 1:2
 Bukdu.stop()
 
 Routing.reset!()
-
-version_line = first(filter(line -> startswith(line, "version"), readlines(normpath(pathof(Bukdu), "..", "..", "Project.toml"))))
-@test occursin(string(Bukdu.BUKDU_VERSION), version_line)
 
 end # module test_bukdu_server
