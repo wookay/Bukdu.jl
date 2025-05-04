@@ -9,7 +9,7 @@ using ...Bukdu.Router
 using ...Bukdu.Naming
 using ...Bukdu.Deps.HTTP: Multipart
 using ...Bukdu: ApplicationController, Assoc, Changeset, post
-using Documenter.Utilities.DOM: @tags, Node
+using Documenter.DOM: @tags, Node
 
 """
     change(M::Type, params::Assoc)::Changeset
@@ -229,7 +229,7 @@ function submit(block_option; kwargs...)::Node
 end
 
 
-using Documenter.Utilities.DOM: TEXT
+using Documenter.DOM: TEXT
 
 function _flatten(a, n::Node)::Vector
     if n.name === TEXT

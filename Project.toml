@@ -1,7 +1,7 @@
 name = "Bukdu"
 uuid = "3e78a19a-cc83-51d8-955b-515f39fd7955"
 authors = ["WooKyoung Noh <wookay.noh@gmail.com>"]
-version = "0.4.19"
+version = "0.4.20-DEV"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -16,14 +16,14 @@ URIParser = "30578b45-9adc-5946-b283-645ec420af67"
 
 [compat]
 TOML = "1.0"
-Documenter = "0.24, 0.25, 0.26, 0.27"
-HTTP = "0.8, 0.9, 1.0, 1.10"
-MbedTLS = "0.7, 1.0"
+Documenter = "1.10, 1.11"
+HTTP = "1.10"
+MbedTLS = "1.0, 1.1"
 URIParser = "0.4"
 JSON = "0.21"
 JSON2 = "0.3"
-JSON3 = "1.8"
-julia = "1.3"
+JSON3 = "1.13, 1.14"
+julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -3,7 +3,7 @@ module System # Bukdu
 using ..Bukdu: ApplicationController, Conn, Route, render
 using ..Bukdu.Deps
 using ..Bukdu.Plug
-using Documenter.Utilities.DOM: @tags
+using Documenter.DOM: @tags
 
 struct HaltedError <: Exception
     msg
