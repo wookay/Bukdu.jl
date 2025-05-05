@@ -12,6 +12,7 @@ function content_type_for_file_extionsion(ext)::String
         ".html" => "text/html; charset=utf-8",
         ".htm"  => "text/html; charset=utf-8",
         ".js"   => "text/javascript",
+        ".mjs"  => "text/javascript",
         ".wasm" => "application/wasm",
         ".css"  => "text/css",
     )
