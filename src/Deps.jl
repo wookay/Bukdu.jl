@@ -1,7 +1,6 @@
 module Deps # Bukdu
 
 using HTTP
-using MbedTLS
 using URIParser
 
 const Request = HTTP.Messages.Request
