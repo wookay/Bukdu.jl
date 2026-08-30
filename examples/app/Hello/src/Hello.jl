@@ -27,4 +27,4 @@ function julia_main()::Cint
     end
 end
 
-end
+end # module Hello
