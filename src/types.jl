@@ -1,7 +1,7 @@
 # module Bukdu
 
 struct Conn
-    req::HT.Request
+    request::HT.Request
 end
 
 """
@@ -18,6 +18,7 @@ end
 using Base.Docs: Text
 
 end # module Bukdu.ContentTypes
+
 using .ContentTypes: JSON, Text
 
 # module Bukdu

@@ -5,15 +5,18 @@ using HTTP: HTTP as HT
 
 const BUKDU_VERSION = VersionNumber(TOML.parsefile(normpath(@__DIR__, "../Project.toml"))["version"])
 
-export ApplicationController
+export Conn, ApplicationController
 export JSON, Text
-export routes
-export render
-export get, post
-export Conn
-include("Actions.jl")
 include("types.jl")
-include("server.jl")
+
+export render
 include("render.jl")
+
+export get, post, delete, patch, put, options
+export routes
+include("routes.jl")
+
+include("server.jl")
+include("Actions.jl")
 
 end # module Bukdu

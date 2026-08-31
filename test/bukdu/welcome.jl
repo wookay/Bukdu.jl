@@ -18,9 +18,7 @@ end
 
 Bukdu.start(8080)
 
-router = Bukdu.bukdu_router[]
-req = HT.Request("GET", "/")
-resp = router(req)
+resp = HT.get("http://localhost:8080/")
 @test HT.header(resp, "Content-Type") == "application/json"
 @test String(resp.body) == repr("Hello World")
 
