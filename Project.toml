@@ -4,20 +4,13 @@ authors = ["WooKyoung Noh <wookay.noh@gmail.com>"]
 version = "0.5.0-DEV"
 
 [deps]
-Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
-Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
-Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-URIParser = "30578b45-9adc-5946-b283-645ec420af67"
 
 [compat]
 TOML = "1.0"
-Documenter = "1.17"
 HTTP = "2.6"
-URIParser = "0.4"
 JSON = "1.4"
 JSON2 = "0.3"
 JSON3 = "1.14"
@@ -26,9 +19,9 @@ julia = "1.6"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-Jive = "ba5e3d4b-8524-549f-bc71-e76ad9e9deed"
 JSON2 = "2535ab7d-5cd8-5a07-80ac-9b1792aadce3"
 JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+Jive = "ba5e3d4b-8524-549f-bc71-e76ad9e9deed"
 
 [targets]
-test = ["Test", "Jive", "JSON2", "JSON3"]
+test = ["Test", "JSON2", "JSON3", "Jive"]

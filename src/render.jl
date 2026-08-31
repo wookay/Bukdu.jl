@@ -1,53 +1,14 @@
 # module Bukdu
 
-export render
+using JSON: JSON as JSON1
+json_encode = JSON1.json
 
-struct UnknownModuleError <: Exception
-    msg::String
+function render(::Type{JSON}, obj)
+    HT.Response(200, ["Content-Type" => "application/json"]; body = json_encode(obj))
 end
 
-"""
-    render(::Type{Text}, data)::Render
-"""
-function render(::Type{Text}, data)::Render
-    Render("text/plain; charset=utf-8", string, data)
-end
-
-"""
-    render(::Type{HTML}, data)::Render
-"""
-function render(::Type{HTML}, data)::Render
-    Render("text/html; charset=utf-8", string, data)
-end
-
-function render_json(data)::Render
-    Render("application/json; charset=utf-8", JSON.json, data)
-end
-
-"""
-    render(::Type{Julia}, data)::Render
-"""
-function render(::Type{Julia}, data)::Render
-    Render("application/julia; charset=utf-8", repr, data)
-end
-
-"""
-    render(::Type{JavaScript}, data)::Render
-"""
-function render(::Type{JavaScript}, data)::Render
-    Render("application/javascript; charset=utf-8", string, data)
-end
-
-# application/wasm
-
-function render(m::Module, data)::AbstractRender # throw UnknownModuleError
-    if nameof(m) === :JSON
-        render_json(data)
-    elseif nameof(m) === :HTML5
-        render(HTML, data)
-    else
-        throw(UnknownModuleError(string(m)))
-    end
+function render(::Type{Text}, text)
+    HT.Response(200, ["Content-Type" => "text/plain"]; body = text)
 end
 
 # module Bukdu

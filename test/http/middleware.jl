@@ -52,7 +52,10 @@ end
 
 @test isassigned(bukdu_router)
 
-resp = bukdu_router[](HT.Request("GET", "/"))
+req = HT.Request("GET", "/")
+@test isempty(req.context)
+resp = bukdu_router[](req)
+@test req.context[:route] == "/"
 @test String(resp.body.data) == "hello"
 
 end # module test_http_middleware
