@@ -12,7 +12,7 @@ include("types.jl")
 export render
 include("render.jl")
 
-export get, post, delete, patch, put, options
+export get, post
 export routes
 include("routes.jl")
 

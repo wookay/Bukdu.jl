@@ -1,9 +1,9 @@
 # module Bukdu
 
-import .HT: get, post, delete, patch, put, options
+import .HT: get, post, delete, patch, put, options, query
 using .HT: head
 
-const routing_verbs = [get, post, delete, patch, put, options]
+const routing_verbs = [get, post, delete, patch, put, options, query]
 
 struct AnonymousController <: ApplicationController
     conn::Conn

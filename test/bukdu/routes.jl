@@ -17,10 +17,11 @@ end
 routes() do
     get("/", VerbController, index)
     post("/create", VerbController, index)
-    delete("/", VerbController, index)
-    patch("/", VerbController, index)
-    put("/", VerbController, index)
-    options("/", VerbController, index)
+    HT.delete("/", VerbController, index)
+    HT.patch("/", VerbController, index)
+    HT.put("/", VerbController, index)
+    HT.options("/", VerbController, index)
+    HT.query("/", VerbController, index)
 end
 
 router = Bukdu.bukdu_router[]
@@ -30,6 +31,7 @@ router = Bukdu.bukdu_router[]
 @test router(HT.Request("PATCH", "/"))      == (method = "PATCH", target = "/")
 @test router(HT.Request("PUT", "/"))        == (method = "PUT", target = "/")
 @test router(HT.Request("OPTIONS", "/"))    == (method = "OPTIONS", target = "/")
+@test router(HT.Request("QUERY", "/"))      == (method = "QUERY", target = "/")
 
 resp = router(HT.Request("HEAD", "/"))
 @test resp.status == 405
