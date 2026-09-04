@@ -4,4 +4,5 @@ if isempty(ARGS)
 end
 
 using Jive
-runtests(@__DIR__, node1=["bukdu/plugs/loggers"])
+skip = ["json"]
+runtests(@__DIR__, skip=skip)

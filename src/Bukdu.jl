@@ -1,49 +1,22 @@
 module Bukdu
 
 using TOML
+using HTTP: HTTP as HT
+
 const BUKDU_VERSION = VersionNumber(TOML.parsefile(normpath(@__DIR__, "../Project.toml"))["version"])
 
-include("assoc.jl")
-include("Deps.jl")
-include("Actions.jl")
+export Conn, ApplicationController
+export JSON, Text
 include("types.jl")
 
-const bukdu_env = Dict{Symbol, Any}(
-    :server => nothing,
-    :prequisite_plugs => Vector{Function}(),
-)
-
-include("plugs.jl")
-include("Naming.jl")
+export render
 include("render.jl")
-include("System.jl")
 
-export Routing
-include("Routing.jl")
-include("server.jl")
-
-export redirect_to
-include("controller.jl")
+export get, post
+export routes
 include("routes.jl")
 
-export Router
-include("Router.jl")
-include("pipelines.jl")
-include("resources.jl")
-
-include("changeset.jl")
-include("HTML5.jl")
-
-export Utils
-include("Utils.jl")
-
-export CLI
-include("CLI.jl")
-# include("Assembly.jl")
-
-function __init__()
-    plug(Plug.Loggers.DefaultLogger)
-    plug(Plug.Head)
-end
+include("server.jl")
+include("Actions.jl")
 
 end # module Bukdu

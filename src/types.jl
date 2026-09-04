@@ -1,41 +1,24 @@
 # module Bukdu
 
-export JSON, JavaScript
-
-# struct JSON
-# end
-
-struct JavaScript
-end
-
-struct Julia
+struct Conn
+    request::HT.Request
 end
 
 """
     ApplicationController
 """
 abstract type ApplicationController end
-abstract type AbstractPlug end
-abstract type AbstractRender end
 
-"""
-    Render <: AbstractRender
-"""
-struct Render <: AbstractRender
-    content_type::String
-    writer::Function
-    data::Any
+
+module ContentTypes # Bukdu
+
+struct JSON
 end
 
-struct Route
-    C::Type{<:ApplicationController}
-    action
-    param_types::Dict{Symbol,DataType}
-    path_params::Vector{Pair{String,Any}}
-    pipelines::Vector{Function}
-end
+using Base.Docs: Text
 
-const RouteResponse = NamedTuple{(:got, :resp, :route), Tuple{Any, Any, Route}}
-const RouteAction   = NamedTuple{(:controller, :action)}
+end # module Bukdu.ContentTypes
+
+using .ContentTypes: JSON, Text
 
 # module Bukdu
