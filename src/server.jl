@@ -16,13 +16,22 @@ function (::Middleware)(tup::Tuple)
 end
 
 """
-    Bukdu.start(port::Integer; host::String="localhost", listenany::Bool = false)
-
+    Bukdu.start(port::Integer ;
+                host::String = "127.0.0.1",
+                listenany::Bool = false,
+                reuseaddr::Bool = true)
 start the Bukdu server.
 """
-function start(port::Integer; host::String="localhost", listenany::Bool = false)
+function start(port::Integer ;
+               host::String = "127.0.0.1",
+               listenany::Bool = false,
+               reuseaddr::Bool = true)
     if isassigned(bukdu_router)
-        bukdu_server[] = HT.serve!(bukdu_router[], host, port; listenany)
+        bukdu_server[] = HT.serve!(bukdu_router[], host, port; listenany, reuseaddr)
+        io = stdout
+        print(io, "Bukdu Listening on: ")
+        printstyled(io, bukdu_server[].bound_address; color = :cyan)
+        println(io)
     else
     end
 end
@@ -33,7 +42,11 @@ end
 stop the Bukdu server.
 """
 function stop()
-    isassigned(bukdu_server) && HT.forceclose(bukdu_server[])
+    if isassigned(bukdu_server)
+        HT.close(bukdu_server[])
+        io = stdout
+        println(io, "Bukdu has stopped.")
+    end
     nothing
 end
 

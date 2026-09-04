@@ -15,7 +15,6 @@ end
 Bukdu.start(8190, host="127.0.0.1")
 
 resp = HT.post("http://127.0.0.1:8190/", body="hello")
-yield()
 # @info HT.header(resp, "Server")
 @test HT.header(resp, "Content-Type") == "text/plain"
 @test HT.header(resp, "Content-Length") == "5"

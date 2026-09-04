@@ -15,8 +15,8 @@ function index(c::VerbController)
 end
 
 routes() do
-    get("/", VerbController, index)
-    post("/create", VerbController, index)
+    HT.get("/", VerbController, index)
+    HT.post("/create", VerbController, index)
     HT.delete("/", VerbController, index)
     HT.patch("/", VerbController, index)
     HT.put("/", VerbController, index)
