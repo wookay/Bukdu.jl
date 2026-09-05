@@ -28,10 +28,11 @@ function start(port::Integer ;
                reuseaddr::Bool = true)
     if isassigned(bukdu_router)
         bukdu_server[] = HT.serve!(bukdu_router[], host, port; listenany, reuseaddr)
-        io = stdout
-        print(io, "Bukdu Listening on: ")
-        printstyled(io, bukdu_server[].bound_address; color = :cyan)
-        println(io)
+        log_info(stdout) do io
+            print(io, "Bukdu Listening on: ")
+            printstyled(io, bukdu_server[].bound_address; color = :green)
+            println(io)
+        end
     else
     end
 end
@@ -44,8 +45,9 @@ stop the Bukdu server.
 function stop()
     if isassigned(bukdu_server)
         HT.close(bukdu_server[])
-        io = stdout
-        println(io, "Bukdu has stopped.")
+        log_info(stdout) do io
+            println(io, "Bukdu has stopped.")
+        end
     end
     nothing
 end

@@ -16,6 +16,7 @@ export get, post
 export routes
 include("routes.jl")
 
+include("logger.jl")
 include("server.jl")
 include("Actions.jl")
 

@@ -12,6 +12,9 @@ routes() do
     end
 end
 
+using Base: CoreLogging as Logging
+Logging.disable_logging(Logging.Info)
+
 Bukdu.start(8190, host="127.0.0.1")
 
 resp = HT.post("http://127.0.0.1:8190/", body="hello")
@@ -21,5 +24,7 @@ resp = HT.post("http://127.0.0.1:8190/", body="hello")
 @test String(resp.body) == "hello"
 
 Bukdu.stop()
+
+Logging.disable_logging(Logging.BelowMinLevel)
 
 end # module test_bukdu_server
