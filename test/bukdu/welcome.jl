@@ -19,7 +19,7 @@ end
 Bukdu.start(8080)
 
 resp = HT.get("http://localhost:8080/")
-@test HT.header(resp, "Content-Type") == "application/json"
+@test HT.header(resp, "Content-Type") == "application/json; charset=utf-8"
 @test String(resp.body) == repr("Hello World")
 
 Bukdu.stop()

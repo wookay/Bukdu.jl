@@ -6,7 +6,7 @@ using HTTP: HTTP as HT
 const BUKDU_VERSION = VersionNumber(TOML.parsefile(normpath(@__DIR__, "../Project.toml"))["version"])
 
 export Conn, ApplicationController
-export JSON, Text
+export JSON, Text, HTML
 include("types.jl")
 
 export render

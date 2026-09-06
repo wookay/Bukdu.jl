@@ -13,18 +13,18 @@ routes() do
 end
 
 using Base: CoreLogging as Logging
-Logging.disable_logging(Logging.Info)
+Logging.disable_logging(Bukdu.Logging.Info) # -2000
 
 Bukdu.start(8190, host="127.0.0.1")
 
 resp = HT.post("http://127.0.0.1:8190/", body="hello")
-# @info HT.header(resp, "Server")
-@test HT.header(resp, "Content-Type") == "text/plain"
+@test HT.header(resp, "Server") == string("Bukdu/", Bukdu.BUKDU_VERSION)
+@test HT.header(resp, "Content-Type") == "text/plain; charset=utf-8"
 @test HT.header(resp, "Content-Length") == "5"
 @test String(resp.body) == "hello"
 
 Bukdu.stop()
 
-Logging.disable_logging(Logging.BelowMinLevel)
+Logging.disable_logging(Logging.BelowMinLevel) # -1_000_001
 
 end # module test_bukdu_server

@@ -17,8 +17,10 @@ end
 
 using Base.Docs: Text
 
+using Base.Docs: HTML
+
 end # module Bukdu.ContentTypes
 
-using .ContentTypes: JSON, Text
+using .ContentTypes: JSON, Text, HTML
 
 # module Bukdu
