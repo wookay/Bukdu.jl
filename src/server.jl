@@ -33,7 +33,6 @@ function start(port::Integer ;
             printstyled(io, bukdu_server[].bound_address; color = :green)
             println(io)
         end
-    else
     end
 end
 

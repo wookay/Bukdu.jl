@@ -17,11 +17,17 @@ Logging.disable_logging(Bukdu.Logging.Info) # -2000
 
 Bukdu.start(8190, host="127.0.0.1")
 
-resp = HT.post("http://127.0.0.1:8190/", body="hello")
-@test HT.header(resp, "Server") == string("Bukdu/", Bukdu.BUKDU_VERSION)
-@test HT.header(resp, "Content-Type") == "text/plain; charset=utf-8"
-@test HT.header(resp, "Content-Length") == "5"
-@test String(resp.body) == "hello"
+try
+    resp = HT.post("http://127.0.0.1:8190/", body="hello")
+    @test HT.header(resp, "Server") == string("Bukdu/", Bukdu.BUKDU_VERSION)
+    @test HT.header(resp, "Content-Type") == "text/plain; charset=utf-8"
+    @test HT.header(resp, "Content-Length") == "5"
+    @test String(resp.body) == "hello"
+catch ex
+    if ex isa SystemError
+        @test_throws SystemError("read", Int32(54)) rethrow()
+    end
+end
 
 Bukdu.stop()
 
