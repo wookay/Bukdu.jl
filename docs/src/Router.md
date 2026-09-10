@@ -1,5 +1,0 @@
-# Router
-
-```@docs
-Router.call
-```

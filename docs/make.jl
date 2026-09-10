@@ -1,6 +1,5 @@
 using Documenter
 using Bukdu
-using Bukdu.HTML5.Form
 
 makedocs(
     build = joinpath(@__DIR__, "local" in ARGS ? "build_local" : "build"),
@@ -15,21 +14,8 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "server" => "server.md",           # Bukdu.start Bukdu.stop
-        "controllers" => "controllers.md", # ApplicationController Conn
-                                           # Assoc
-        "renders" => "renders.md",         # Render
-                                           # render
-        "routes" => "routes.md",           # routes pipeline
-                                           # get post delete patch put resources
-                                           # Routing.reset!
-        "plugs" => "plugs.md",             # Plug plug
+        "render" => "render.md",           # render
+        "routes" => "routes.md",           # routes
         "Actions" => "Actions.md",         # Actions
-        "HTML5.Form" => "HTML5/Form.md",   # change
-                                           # form_for text_input submit
-        "Changeset" => "changeset.md",     # Changeset
-        "CLI" => "CLI.md",                 # CLI
-        "System" => "System.md",           # System
-        "Router" => "Router.md",           # Router
-        "Utils" => "Utils.md",             # Utils
     ],
 )
